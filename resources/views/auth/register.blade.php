@@ -4,7 +4,6 @@
 @section('content')
 <div class="container">
   <div class="login-card">
-    {{-- on recentre le contenu à l’intérieur de la carte --}}
     <div class="login-inner d-flex justify-content-center">
       <div class="login-left mx-auto" style="max-width:560px;">
         <h1 class="mb-2 text-center">Register</h1>
@@ -21,7 +20,48 @@
         <form method="POST" action="{{ route('register.submit') }}" novalidate>
           @csrf
 
-          {{-- Name --}}
+          {{-- Choix du rôle --}}
+          <div class="mb-3 text-white">
+            <label class="form-label d-block mb-2">Je m’inscris en tant que :</label>
+
+            <div class="btn-group w-100" role="group" aria-label="Choix du type de compte">
+              <input type="radio" class="btn-check" name="role" id="role_user" value="user"
+                     {{ old('role','user') === 'user' ? 'checked' : '' }}>
+              <label class="btn btn-outline-light" for="role_user">Utilisateur</label>
+
+              <input type="radio" class="btn-check" name="role" id="role_asso" value="association"
+                     {{ old('role') === 'association' ? 'checked' : '' }}>
+              <label class="btn btn-outline-light" for="role_asso">Association</label>
+            </div>
+
+            @error('role')
+              <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+          </div>
+
+          {{-- Si association : Matricule RNE --}}
+          <div id="matriculeWrap" class="mb-3 form-pill" style="display:none;">
+            <span class="input-icon" aria-hidden="true">
+              {{-- icône badge --}}
+              <svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 012 2v2H5V5a2 2 0 012-2zm-2 6h14v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9zm7 2a3 3 0 100 6 3 3 0 000-6z"/></svg>
+            </span>
+            <input
+              type="text"
+              name="matricule"
+              class="form-control @error('matricule') is-invalid @enderror"
+              placeholder="Matricule RNE (ex : 1234567A)"
+              value="{{ old('matricule') }}"
+              maxlength="8"
+            >
+            @error('matricule')
+              <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+            <small class="text-white-75 d-block mt-1">
+              Format attendu : <strong>7 chiffres + 1 lettre majuscule</strong> (RNE).
+            </small>
+          </div>
+
+          {{-- Nom --}}
           <div class="mb-3 form-pill">
             <span class="input-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-5 0-9 2.69-9 6v1h18v-1c0-3.31-4-6-9-6Z"/></svg>
@@ -53,11 +93,9 @@
             <input type="password" name="password_confirmation" class="form-control" placeholder="Confirmer le mot de passe" required>
           </div>
 
-          {{-- Terms (cocher obligatoire) --}}
+          {{-- Terms --}}
           <div class="form-check text-white-75 mb-3">
-            {{-- valeur par défaut quand non cochée --}}
             <input type="hidden" name="terms" value="0">
-
             <input
               class="form-check-input @error('terms') is-invalid @enderror"
               type="checkbox"
@@ -67,10 +105,7 @@
               {{ old('terms') ? 'checked' : '' }}
               required
             >
-            <label class="form-check-label" for="terms">
-              J’accepte les conditions d’utilisation
-            </label>
-
+            <label class="form-check-label" for="terms">J’accepte les conditions d’utilisation</label>
             @error('terms')
               <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
@@ -84,8 +119,26 @@
           </p>
         </form>
       </div>
-      {{-- (plus de colonne droite) --}}
     </div>
   </div>
 </div>
+
+{{-- Petit JS pour afficher/masquer le champ matricule --}}
+@push('scripts')
+<script>
+  (function() {
+    const rUser = document.getElementById('role_user');
+    const rAsso = document.getElementById('role_asso');
+    const wrap = document.getElementById('matriculeWrap');
+
+    function toggleMatricule() {
+      wrap.style.display = rAsso.checked ? 'block' : 'none';
+    }
+    rUser?.addEventListener('change', toggleMatricule);
+    rAsso?.addEventListener('change', toggleMatricule);
+    // Etat initial (selon old('role'))
+    toggleMatricule();
+  })();
+</script>
+@endpush
 @endsection

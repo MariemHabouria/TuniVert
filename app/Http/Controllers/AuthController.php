@@ -26,27 +26,43 @@ class AuthController extends Controller
     }
 
     // ====== Inscription ======
-    public function register(Request $request)
-    {
-        $data = $request->validate([
-            'name'     => ['required','string','max:255'],
-            'email'    => ['required','email','max:255','unique:users,email'],
-            'password' => ['required','string','min:8','confirmed'], // nécessite password_confirmation
-            'terms'    => ['nullable','accepted'],
-        ]);
+    // ====== Inscription ======
+public function register(Request $request)
+{
+    // 1) Règles de base
+    $rules = [
+        'name'     => ['required','string','max:255'],
+        'email'    => ['required','email','max:255','unique:users,email'],
+        'password' => ['required','string','min:8','confirmed'],
+        'terms'    => ['nullable','accepted'],
+        'role'     => ['required','in:user,association'],
+    ];
 
-        $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
-
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        return redirect()->intended(route('home'))
-            ->with('status', 'Bienvenue, '.$user->name.' !');
+    // 2) Si association, le matricule est requis + format + unique
+    // Matricule RNE Tunisie : 7 chiffres + 1 lettre majuscule
+    if ($request->input('role') === 'association') {
+        $rules['matricule'] = ['required','regex:/^\d{7}[A-Z]$/','unique:users,matricule'];
+    } else {
+        $rules['matricule'] = ['nullable'];
     }
+
+    $data = $request->validate($rules);
+
+    $user = User::create([
+        'name'      => $data['name'],
+        'email'     => $data['email'],
+        'password'  => Hash::make($data['password']),
+        'role'      => $data['role'],
+        'matricule' => $data['role'] === 'association' ? $data['matricule'] : null,
+    ]);
+
+    Auth::login($user);
+    $request->session()->regenerate();
+
+    return redirect()->intended(route('home'))
+        ->with('status', 'Bienvenue, '.$user->name.' !');
+}
+
 
     // ====== Connexion ======
     public function login(Request $request)
