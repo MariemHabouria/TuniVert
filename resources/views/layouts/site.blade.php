@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>@yield('title', 'Tunivert')</title>
+
+  {{-- Police + Icônes --}}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600&family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  {{-- Bootstrap (CDN) --}}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  {{-- Tes styles locaux (optionnels) --}}
+  <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
+
+  @stack('styles')
+</head>
+<body>
+
+  {{-- ========= TOPBAR + NAVBAR ========= --}}
+  <div class="container-fluid fixed-top px-0">
+    <div class="container px-0">
+      <div class="topbar">
+        <div class="row align-items-center justify-content-center">
+          <div class="col-md-8">
+            <div class="topbar-info d-flex flex-wrap">
+              <a href="#" class="text-light me-4"><i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn</a>
+              <a href="#" class="text-light"><i class="fas fa-phone-alt text-white me-2"></i>+01234567890</a>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="topbar-icon d-flex align-items-center justify-content-end">
+              <a href="#" class="btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
+              <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
+              <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="navbar navbar-light bg-light navbar-expand-xl">
+        <a href="{{ route('home') }}" class="navbar-brand ms-3">
+          <h1 class="text-primary display-5">Tunivert</h1>
+        </a>
+        <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+          <span class="fa fa-bars text-primary"></span>
+        </button>
+
+        <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a href="{{ route('home') }}" class="nav-link">Home</a></li>
+            <li class="nav-item"><a href="{{ route('about') }}" class="nav-link">About</a></li>
+            <li class="nav-item"><a href="{{ route('service') }}" class="nav-link">Services</a></li>
+            <li class="nav-item"><a href="{{ route('causes') }}" class="nav-link">Causes</a></li>
+            <li class="nav-item"><a href="{{ route('events') }}" class="nav-link">Events</a></li>
+
+            {{-- ====== Nouveau : Formation (catalogue) ====== --}}
+            <li class="nav-item">
+              <a href="{{ route('formations.index') }}" class="nav-link">Formation</a>
+            </li>
+
+            {{-- Si association connectée : lien de création --}}
+            @auth
+              @if(auth()->user()->role === 'association')
+                <li class="nav-item">
+                  <a href="{{ route('formations.create') }}" class="nav-link">Créer une formation</a>
+                </li>
+              @endif
+            @endauth
+
+            <li class="nav-item"><a href="{{ route('contact') }}" class="nav-link">Contact</a></li>
+          </ul>
+
+          <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">
+            @guest
+              <a href="{{ route('login') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4 me-2">Log In</a>
+              <a href="{{ route('register') }}" class="btn btn-outline-primary py-2 px-4">Sign Up</a>
+            @endguest
+
+            @auth
+              <div class="dropdown">
+                <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
+                  <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width:38px;height:38px;">
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                  </span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
+                  <li class="px-3 py-2">
+                    <div class="fw-semibold">{{ Auth::user()->name }}</div>
+                    <div class="small text-muted">{{ Auth::user()->email }}</div>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
+                      <i class="bi bi-person-circle"></i> Profil
+                    </a>
+                  </li>
+                  <li>
+                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                      @csrf
+                      <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                        <i class="bi bi-power"></i> Se déconnecter
+                      </button>
+                    </form>
+                  </li>
+                </ul>
+              </div>
+            @endauth
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+  {{-- ========= /NAVBAR ========= --}}
+
+  {{-- Espace sous la navbar fixe --}}
+  <div style="height:120px"></div>
+
+  {{-- ===== Contenu des pages ===== --}}
+  @yield('content')
+
+  {{-- ===== Footer ===== --}}
+  <div class="container-fluid footer bg-dark text-body py-5 mt-5">
+    <div class="container py-5">
+      <div class="row g-5">
+        <div class="col-md-6 col-lg-6 col-xl-3">
+          <div class="footer-item">
+            <h4 class="mb-4 text-white">Newsletter</h4>
+            <p class="mb-4">Recevez nos actualités.</p>
+            <div class="position-relative mx-auto">
+              <input class="form-control border-0 bg-secondary w-100 py-3 ps-4 pe-5" type="text" placeholder="Votre email">
+              <button type="button" class="btn-hover-bg btn btn-primary position-absolute top-0 end-0 py-2 mt-2 me-2">SignUp</button>
+            </div>
+          </div>
+        </div>
+        {{-- … tu peux garder/adapter les autres colonnes du footer si tu veux … --}}
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid copyright py-4">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-md-4 text-center text-md-start mb-md-0">
+          <span class="text-body"><i class="fas fa-copyright text-light me-2"></i>Tunivert, tous droits réservés.</span>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="d-flex align-items-center justify-content-center">
+            <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
+            <a href="#" class="btn-hover-color btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        <div class="col-md-4 text-center text-md-end text-body">
+          Designed by Tunivert
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{-- JS --}}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  @stack('scripts')
+</body>
+</html>

@@ -10,7 +10,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name','email','password'];
+    protected $fillable = ['name','email','password','role','matricule'];
 
     protected $hidden = ['password','remember_token'];
 
@@ -21,4 +21,15 @@ class User extends Authenticatable
             'password' => 'hashed', // <-- auto-hash du mot de passe
         ];
     }
+    public function formationsOrganisees()
+{
+    return $this->hasMany(\App\Models\Formation::class, 'organisateur_id');
+}
+
+public function formationsInscrites() {
+    return $this->belongsToMany(\App\Models\Formation::class, 'formation_user')
+                ->withPivot('inscrit_at');
+                
+}
+
 }
