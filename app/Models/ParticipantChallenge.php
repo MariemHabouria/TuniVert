@@ -10,12 +10,16 @@ class ParticipantChallenge extends Model
 
     public function challenge()
     {
-        return $this->belongsTo(Challenge::class);
+        return $this->belongsTo(\App\Models\Challenge::class);
     }
 
     public function utilisateur()
     {
-        return $this->belongsTo(Utilisateur::class);
+        return $this->belongsTo(\App\Models\User::class, 'utilisateur_id');
+    }
+
+    public function score()
+    {
+        return $this->hasOne(\App\Models\ScoreChallenge::class, 'participant_challenge_id');
     }
 }
-

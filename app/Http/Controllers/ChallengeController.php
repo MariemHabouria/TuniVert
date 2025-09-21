@@ -4,119 +4,154 @@ namespace App\Http\Controllers;
 
 use App\Models\Challenge;
 use App\Models\ParticipantChallenge;
+use App\Models\ScoreChallenge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChallengeController extends Controller
 {
-    // Liste des challenges pour affichage
+    // Liste des challenges pour les participants
     public function index()
     {
         $challenges = Challenge::with('organisateur')->get();
-        return view('challenges.index', compact('challenges'));
+        return view('challenges.participant.index', compact('challenges'));
     }
 
-    // Affichage d'un challenge spécifique
+    // Détails d’un challenge
     public function show($id)
     {
-        $challenge = Challenge::with('participants.utilisateur')->findOrFail($id);
-        return view('challenges.show', compact('challenge'));
+        $challenge = Challenge::with(['participants.utilisateur', 'participants.score'])->findOrFail($id);
+
+        $participantChallenge = null;
+        if (Auth::check()) {
+            $participantChallenge = ParticipantChallenge::where('challenge_id', $id)
+                                    ->where('utilisateur_id', Auth::id())
+                                    ->first();
+        }
+
+        return view('challenges.participant.show', compact('challenge', 'participantChallenge'));
     }
 
-    // Création d’un challenge (formulaire)
-    public function create()
+    // Participer à un challenge
+    public function participer($id)
     {
-        return view('challenges.create');
-    }
+        $challenge = Challenge::findOrFail($id);
 
-    // Enregistrement d’un nouveau challenge
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'titre' => 'required|string|max:255',
-            'description' => 'required|string',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after:date_debut',
-            'categorie' => 'nullable|string|max:255',
-            'difficulte' => 'nullable|in:facile,moyen,difficile',
-            'objectif' => 'nullable|integer',
-        ]);
+        $exists = ParticipantChallenge::where('challenge_id', $id)
+                    ->where('utilisateur_id', Auth::id())
+                    ->exists();
 
-        // Récupérer l'utilisateur authentifié comme organisateur
-        $validated['organisateur_id'] = Auth::id();
-
-        $challenge = Challenge::create($validated);
-
-        return redirect()->route('challenges.show', $challenge->id)
-                         ->with('success', 'Challenge créé avec succès !');
-    }
-
-    // Inscription d'un utilisateur à un challenge
-    public function participer($challenge_id)
-    {
-        $user_id = Auth::id();
-
-        // Vérifier si déjà inscrit
-        $exist = ParticipantChallenge::where('challenge_id', $challenge_id)
-                    ->where('utilisateur_id', $user_id)
-                    ->first();
-
-        if ($exist) {
-            return redirect()->back()->with('error', 'Vous êtes déjà inscrit à ce challenge.');
+        if ($exists) {
+            return redirect()->route('challenges.show', $id)
+                             ->with('error', 'Vous participez déjà à ce challenge.');
         }
 
         ParticipantChallenge::create([
-            'challenge_id' => $challenge_id,
-            'utilisateur_id' => $user_id,
-            'statut' => 'inscrit',
+            'challenge_id'   => $id,
+            'utilisateur_id' => Auth::id(),
+            'statut'         => 'en_cours', // doit correspondre à la valeur autorisée dans la BDD
+            'score'          => 0,
         ]);
 
-        return redirect()->back()->with('success', 'Inscription réussie !');
+        return redirect()->route('challenges.show', $id)
+                         ->with('success', 'Vous participez maintenant à ce challenge !');
     }
 
-    // Soumettre une preuve (photo/vidéo)
-    public function soumettrePreuve(Request $request, $participant_id)
+    // Soumettre une preuve
+    public function soumettrePreuve(Request $request, $id)
     {
-        $validated = $request->validate([
-            'preuve' => 'required|file|mimes:jpg,png,mp4,mov|max:20480', // 20MB
+        $request->validate([
+            'preuve' => 'required|file|mimes:jpg,png,pdf|max:2048',
         ]);
 
-        $participant = ParticipantChallenge::findOrFail($participant_id);
+        $participant = ParticipantChallenge::findOrFail($id);
 
-        $path = $request->file('preuve')->store('preuves', 'public');
-        $participant->update(['preuve' => $path]);
+        // Vérifie que l'utilisateur est bien le participant
+        if ($participant->utilisateur_id != Auth::id()) {
+            abort(403, "Accès refusé");
+        }
+
+        $participant->preuve = $request->file('preuve')->store('preuves', 'public');
+        $participant->statut = 'termine'; // doit correspondre aux valeurs BDD
+        $participant->save();
 
         return redirect()->back()->with('success', 'Preuve soumise avec succès !');
     }
 
-    // Classement d’un challenge
-    public function classement($challenge_id)
+    // Classement général d’un challenge
+    public function classement($id)
     {
-        $challenge = Challenge::findOrFail($challenge_id);
-        $participants = ParticipantChallenge::where('challenge_id', $challenge_id)
-                        ->orderByDesc('score')
-                        ->with('utilisateur')
-                        ->get();
+        $challenge = Challenge::with(['participants.utilisateur', 'participants.score'])
+                              ->findOrFail($id);
 
-        return view('challenges.classement', compact('challenge', 'participants'));
+        $participants = $challenge->participants->sortByDesc(function($p) {
+            return $p->score ?? 0;
+        });
+
+        // On réutilise la vue profil si tu n’as pas de vue classement séparée
+        return view('challenges.participant.profil', [
+            'participations' => $participants,
+            'badges' => [], // tu peux adapter si nécessaire
+            'classement' => $participants,
+        ]);
     }
 
-    // Valider ou rejeter une preuve (organisateur)
-    public function validerPreuve(Request $request, $participant_id)
+    // CRUD pour association
+    public function create()
     {
-        $participant = ParticipantChallenge::findOrFail($participant_id);
+        return view('challenges.association.create');
+    }
 
-        $decision = $request->input('decision'); // "accepter" ou "rejeter"
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'titre'       => 'required|string|max:255',
+            'description' => 'required|string',
+            'date_debut'  => 'required|date',
+            'date_fin'    => 'required|date|after:date_debut',
+            'categorie'   => 'nullable|string|max:255',
+            'difficulte'  => 'nullable|in:facile,moyen,difficile',
+            'objectif'    => 'nullable|integer',
+        ]);
 
-        if ($decision === 'accepter') {
-            $participant->statut = 'terminé';
-            $participant->score += 10; // points par défaut
-        } else {
-            $participant->preuve = null;
-        }
+        $validated['organisateur_id'] = Auth::id();
+        Challenge::create($validated);
 
-        $participant->save();
+        return redirect()->route('challenges.crud')->with('success', 'Challenge créé avec succès !');
+    }
 
-        return redirect()->back()->with('success', 'Preuve traitée avec succès !');
+    public function crud()
+    {
+        $challenges = Challenge::where('organisateur_id', Auth::id())->get();
+        return view('challenges.association.index', compact('challenges'));
+    }
+
+    public function participants($id)
+    {
+        $challenge = Challenge::findOrFail($id);
+        $participants = ParticipantChallenge::with(['utilisateur', 'score'])
+                            ->where('challenge_id', $id)
+                            ->get();
+
+        return view('challenges.association.participants', compact('challenge', 'participants'));
+    }
+
+    // Profil utilisateur avec badges et classement
+    public function profil()
+    {
+        $userId = Auth::id();
+
+        $participations = ParticipantChallenge::with('challenge')
+                            ->where('utilisateur_id', $userId)
+                            ->get();
+
+        $badges = ScoreChallenge::whereHas('participant', function($q) use ($userId) {
+                        $q->where('utilisateur_id', $userId);
+                    })->get();
+
+        $classement = ParticipantChallenge::with(['utilisateur', 'score'])->get()
+                        ->sortByDesc(function($p){ return $p->score ? $p->score->points : 0; });
+
+        return view('challenges.participant.profil', compact('participations', 'badges', 'classement'));
     }
 }

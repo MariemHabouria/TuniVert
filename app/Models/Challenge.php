@@ -12,18 +12,18 @@ class Challenge extends Model
         'organisateur_id', 
         'date_debut', 
         'date_fin', 
-        'categorie',        // Nouveau champ
-        'difficulte',       // Nouveau champ
-        'objectif'         // Nouveau champ
+        'categorie', 
+        'difficulte', 
+        'objectif'
     ];
 
     public function organisateur()
     {
-        return $this->belongsTo(User::class, 'organisateur_id'); // Vérifie que le modèle utilisateur est User
+        return $this->belongsTo(\App\Models\User::class, 'organisateur_id'); 
     }
 
     public function participants()
     {
-        return $this->hasMany(ParticipantChallenge::class);
+        return $this->hasMany(\App\Models\ParticipantChallenge::class);
     }
 }
