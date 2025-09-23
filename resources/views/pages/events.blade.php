@@ -167,7 +167,10 @@
                             </div>
                             <h4 class="mb-4">How To Build A Cleaning Plan</h4>
                             <p class="mb-4">Lorem ipsum dolor sit amet consectur adip sed eiusmod amet consectur adip sed eiusmod tempor.</p>
-                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Read More</a>
+                                                        <div class="d-flex gap-2">
+                                                            <a class="btn-hover-bg btn btn-outline-primary text-primary py-2 px-4 bg-white" href="#">Read More</a>
+                                                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="{{ url('donation.html?event=1#donate') }}">Donate</a>
+                                                        </div>
                         </div>
                     </div>
                     <div class="event-item">
@@ -179,7 +182,10 @@
                             </div>
                             <h4 class="mb-4">How To Build A Cleaning Plan</h4>
                             <p class="mb-4">Lorem ipsum dolor sit amet consectur adip sed eiusmod amet consectur adip sed eiusmod tempor.</p>
-                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Read More</a>
+                                                        <div class="d-flex gap-2">
+                                                            <a class="btn-hover-bg btn btn-outline-primary text-primary py-2 px-4 bg-white" href="#">Read More</a>
+                                                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="{{ url('donation.html?event=2#donate') }}">Donate</a>
+                                                        </div>
                         </div>
                     </div>
                     <div class="event-item">
@@ -191,7 +197,10 @@
                             </div>
                             <h4 class="mb-4">How To Build A Cleaning Plan</h4>
                             <p class="mb-4">Lorem ipsum dolor sit amet consectur adip sed eiusmod amet consectur adip sed eiusmod tempor.</p>
-                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Read More</a>
+                                                        <div class="d-flex gap-2">
+                                                            <a class="btn-hover-bg btn btn-outline-primary text-primary py-2 px-4 bg-white" href="#">Read More</a>
+                                                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="{{ url('donation.html?event=3#donate') }}">Donate</a>
+                                                        </div>
                         </div>
                     </div>
                     <div class="event-item">
@@ -203,7 +212,10 @@
                             </div>
                             <h4 class="mb-4">How To Build A Cleaning Plan</h4>
                             <p class="mb-4">Lorem ipsum dolor sit amet consectur adip sed eiusmod amet consectur adip sed eiusmod tempor.</p>
-                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Read More</a>
+                                                        <div class="d-flex gap-2">
+                                                            <a class="btn-hover-bg btn btn-outline-primary text-primary py-2 px-4 bg-white" href="#">Read More</a>
+                                                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="{{ url('donation.html?event=4#donate') }}">Donate</a>
+                                                        </div>
                         </div>
                     </div>
                 </div>

@@ -21,4 +21,9 @@ class User extends Authenticatable
             'password' => 'hashed', // <-- auto-hash du mot de passe
         ];
     }
+
+    public function donations()
+    {
+        return $this->hasMany(Donation::class, 'utilisateur_id');
+    }
 }

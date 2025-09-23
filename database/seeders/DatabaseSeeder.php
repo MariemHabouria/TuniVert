@@ -13,11 +13,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Base users
+        if (!User::where('email','test@example.com')->exists()) {
+            User::factory()->create([
+                'name' => 'Test User',
+                'email' => 'test@example.com',
+            ]);
+        }
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Additional random users
+        if (User::count() < 5) {
+            User::factory(4)->create();
+        }
+
+        // Donations
+        $this->call([
+            DonationSeeder::class,
+            GamificationSeeder::class,
         ]);
     }
 }

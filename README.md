@@ -115,3 +115,22 @@ Elle soutient les initiatives citoyennes et associatives en facilitant la partic
 ---
 
 >>>>>>> e47c87b72b377f06869d6135b4be310ec57ec3cb
+
+## Payments: Paymee (e‑DINAR), Stripe, PayPal
+
+This app supports multiple payment methods for donations. To enable Paymee (e‑DINAR), add the following to your `.env`:
+
+```
+PAYMEE_API_KEY=your_sandbox_or_live_key
+PAYMEE_MODE=sandbox
+PAYMEE_CURRENCY=TND
+```
+
+Then clear the config cache and restart the server.
+
+Sandbox testing:
+- The flow uses Paymee “redirection” integration. We create a payment via `POST /api/v2/payments/create` and redirect the donor to Paymee.
+- Configure a public tunnel (e.g., ngrok) so the webhook `/webhooks/paymee` is reachable.
+- After payment, Paymee calls the webhook with `payment_status` and `check_sum`. We verify and record the donation (idempotent by transaction_id).
+
+Stripe and PayPal are also integrated. Set their keys in `.env` if you want to test those methods too.

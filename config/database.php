@@ -16,7 +16,14 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    // Choose default connection; if sqlite driver isn't available, fall back to MySQL
+    'default' => (function () {
+        $conn = env('DB_CONNECTION', 'sqlite');
+        if ($conn === 'sqlite' && !extension_loaded('pdo_sqlite')) {
+            return 'mysql';
+        }
+        return $conn;
+    })(),
 
     /*
     |--------------------------------------------------------------------------
@@ -48,7 +55,18 @@ return [
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'laravel'),
+            // Prefer MYSQL_DATABASE if set; if DB_DATABASE looks like an sqlite path, ignore it
+            'database' => (function () {
+                $db = env('MYSQL_DATABASE', env('DB_DATABASE', 'laravel'));
+                if (is_string($db) && str_ends_with(strtolower($db), '.sqlite')) {
+                    return env('MYSQL_DATABASE', 'laravel');
+                }
+                // Also handle Windows-style full paths accidentally set into DB_DATABASE
+                if (is_string($db) && (str_contains($db, ':\\') || str_contains($db, '/'))) {
+                    return env('MYSQL_DATABASE', 'laravel');
+                }
+                return $db;
+            })(),
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
