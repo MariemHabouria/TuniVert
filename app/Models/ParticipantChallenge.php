@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory; // <- Ajouté
 
 class ParticipantChallenge extends Model
 {
+    use HasFactory; // <- Ajouté
+
     protected $fillable = ['challenge_id', 'utilisateur_id', 'statut', 'preuve'];
 
     public function challenge()

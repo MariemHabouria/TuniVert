@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,9 +11,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Crée quelques utilisateurs basiques
+        \App\Models\User::factory(10)->create();
 
-        User::factory()->create([
+        // Appelle le seeder de challenges
+        $this->call(ChallengeSeeder::class);
+
+        // ⚡ Si tu veux toujours ton utilisateur test
+        \App\Models\User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);

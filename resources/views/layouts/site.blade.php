@@ -15,7 +15,7 @@
   {{-- Bootstrap (CDN) --}}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  {{-- Tes styles locaux (optionnels) --}}
+  {{-- Styles locaux --}}
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 
@@ -46,77 +46,77 @@
         </div>
       </div>
 
-      <nav class="navbar navbar-light bg-light navbar-expand-xl">
-        <a href="{{ route('home') }}" class="navbar-brand ms-3">
-          <h1 class="text-primary display-5">Tunivert</h1>
-        </a>
-        <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-          <span class="fa fa-bars text-primary"></span>
-        </button>
+<nav class="navbar navbar-light bg-light navbar-expand-xl">
+    <a href="{{ route('home') }}" class="navbar-brand ms-3">
+        <h1 class="text-primary display-5 m-0">Tunivert</h1>
+    </a>
+    <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+        <span class="fa fa-bars text-primary"></span>
+    </button>
 
-        <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
-          <ul class="navbar-nav ms-auto">
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav ms-auto">
             <li class="nav-item"><a href="{{ route('home') }}" class="nav-link">Home</a></li>
             <li class="nav-item"><a href="{{ route('about') }}" class="nav-link">About</a></li>
             <li class="nav-item"><a href="{{ route('service') }}" class="nav-link">Services</a></li>
             <li class="nav-item"><a href="{{ route('causes') }}" class="nav-link">Causes</a></li>
             <li class="nav-item"><a href="{{ route('events') }}" class="nav-link">Events</a></li>
 
-            {{-- ====== Nouveau : Formation (catalogue) ====== --}}
-            <li class="nav-item">
-              <a href="{{ route('formations.index') }}" class="nav-link">Formation</a>
+            {{-- Pages dropdown --}}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Pages
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="pagesDropdown">
+                    <li><a class="dropdown-item" href="{{ route('challenges.index') }}">Challenges</a></li>
+                    <li><a class="dropdown-item" href="{{ route('about') }}">About</a></li>
+                    <li><a class="dropdown-item" href="{{ route('contact') }}">Contact</a></li>
+                </ul>
             </li>
 
-            {{-- Si association connectée : lien de création --}}
-            @auth
-              @if(auth()->user()->role === 'association')
-                <li class="nav-item">
-                  <a href="{{ route('formations.create') }}" class="nav-link">Créer une formation</a>
-                </li>
-              @endif
-            @endauth
-
             <li class="nav-item"><a href="{{ route('contact') }}" class="nav-link">Contact</a></li>
-          </ul>
+        </ul>
 
-          <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">
+        {{-- Auth --}}
+        <div class="d-flex align-items-center ms-3">
             @guest
-              <a href="{{ route('login') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4 me-2">Log In</a>
-              <a href="{{ route('register') }}" class="btn btn-outline-primary py-2 px-4">Sign Up</a>
+                <a href="{{ route('login') }}" class="btn btn-primary text-white py-2 px-4 me-2">Log In</a>
+                <a href="{{ route('register') }}" class="btn btn-outline-primary py-2 px-4">Sign Up</a>
             @endguest
 
             @auth
-              <div class="dropdown">
-                <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
-                  <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width:38px;height:38px;">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                  </span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
-                  <li class="px-3 py-2">
-                    <div class="fw-semibold">{{ Auth::user()->name }}</div>
-                    <div class="small text-muted">{{ Auth::user()->email }}</div>
-                  </li>
-                  <li><hr class="dropdown-divider"></li>
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
-                      <i class="bi bi-person-circle"></i> Profil
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width:38px;height:38px;">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </span>
                     </a>
-                  </li>
-                  <li>
-                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                      @csrf
-                      <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
-                        <i class="bi bi-power"></i> Se déconnecter
-                      </button>
-                    </form>
-                  </li>
-                </ul>
-              </div>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 220px;">
+                        <li class="px-3 py-2">
+                            <div class="fw-semibold">{{ Auth::user()->name }}</div>
+                            <div class="small text-muted">{{ Auth::user()->email }}</div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
+                                <i class="bi bi-person-circle"></i> Profil
+                            </a>
+                        </li>
+                        <li>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                    <i class="bi bi-power"></i> Se déconnecter
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
             @endauth
-          </div>
         </div>
-      </nav>
+    </div>
+</nav>
+
     </div>
   </div>
   {{-- ========= /NAVBAR ========= --}}
@@ -141,7 +141,7 @@
             </div>
           </div>
         </div>
-        {{-- … tu peux garder/adapter les autres colonnes du footer si tu veux … --}}
+        {{-- … autres colonnes si nécessaire … --}}
       </div>
     </div>
   </div>
