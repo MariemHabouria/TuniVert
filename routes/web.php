@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ScoreChallengeController;
+use App\Http\Controllers\AdminController;
 
 // Pages publiques
 Route::view('/', 'pages.index')->name('home');
@@ -35,21 +36,13 @@ Route::middleware('auth')->group(function () {
 
 // Routes Challenges
 Route::prefix('challenges')->group(function () {
-
-    // Liste des challenges
     Route::get('/', [ChallengeController::class, 'index'])->name('challenges.index');
-
-    // Routes protégées par authentification
+    
     Route::middleware('auth')->group(function () {
-
-        // Route statique profil → doit être avant la route dynamique /{id}
         Route::get('/profil', [ChallengeController::class, 'profil'])->name('challenges.profil');
-
-        // Participant
         Route::post('/{id}/participate', [ChallengeController::class, 'participer'])->name('challenges.participate');
         Route::post('/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
 
-        // CRUD association
         Route::prefix('association')->group(function () {
             Route::get('/create', [ChallengeController::class, 'create'])->name('challenges.create');
             Route::post('/', [ChallengeController::class, 'store'])->name('challenges.store');
@@ -57,18 +50,11 @@ Route::prefix('challenges')->group(function () {
             Route::get('/{id}/edit', [ChallengeController::class, 'edit'])->name('challenges.edit');
             Route::put('/{id}', [ChallengeController::class, 'update'])->name('challenges.update');
             Route::delete('/{id}', [ChallengeController::class, 'destroy'])->name('challenges.destroy');
-
-            // Actions sur les participants
-            Route::post('/participants/{participant}/action', [ChallengeController::class, 'actionParticipant'])
-                ->name('challenges.participants.action');
-
-            // Liste des participants
-            Route::get('/participants/{id}', [ChallengeController::class, 'participants'])
-                ->name('challenges.participants');
+            Route::post('/participants/{participant}/action', [ChallengeController::class, 'actionParticipant'])->name('challenges.participants.action');
+            Route::get('/participants/{id}', [ChallengeController::class, 'participants'])->name('challenges.participants');
         });
     });
 
-    // Route dynamique show → toujours à la fin
     Route::get('/{id}', [ChallengeController::class, 'show'])->name('challenges.show');
 });
 
@@ -77,4 +63,68 @@ Route::prefix('scores')->name('scores.')->middleware('auth')->group(function () 
     Route::post('/{participant}', [ScoreChallengeController::class, 'storeOrUpdate'])->name('update');
     Route::delete('/{score}', [ScoreChallengeController::class, 'destroy'])->name('destroy');
     Route::get('/classement/{challenge}', [ScoreChallengeController::class, 'classement'])->name('classement');
+});
+
+// ===== ROUTES ADMIN =====
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Login Admin accessible sans auth
+    Route::get('/login', [AuthController::class, 'showAdminLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'adminLogin'])->name('login.submit'); 
+    Route::post('/logout', [AuthController::class, 'adminLogout'])->name('logout');
+
+    // Routes admin protégées
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    
+    Route::prefix('utilisateurs')->name('utilisateurs.')->group(function () {
+        Route::get('/', [AdminController::class, 'utilisateursIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'utilisateursCreate'])->name('create');
+        Route::get('/roles', [AdminController::class, 'utilisateursRoles'])->name('roles');
+    });
+
+    Route::prefix('evenements')->name('evenements.')->group(function () {
+        Route::get('/', [AdminController::class, 'evenementsIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'evenementsCreate'])->name('create');
+        Route::get('/categories', [AdminController::class, 'evenementsCategories'])->name('categories');
+    });
+
+    Route::prefix('challenges')->name('challenges.')->group(function () {
+        Route::get('/', [AdminController::class, 'challengesIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'challengesCreate'])->name('create');
+        Route::get('/participations', [AdminController::class, 'challengesParticipations'])->name('participations');
+    });
+
+    Route::prefix('forums')->name('forums.')->group(function () {
+        Route::get('/', [AdminController::class, 'forumsIndex'])->name('index');
+        Route::get('/categories', [AdminController::class, 'forumsCategories'])->name('categories');
+        Route::get('/moderations', [AdminController::class, 'forumsModerations'])->name('moderations');
+    });
+
+    Route::prefix('formations')->name('formations.')->group(function () {
+        Route::get('/', [AdminController::class, 'formationsIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'formationsCreate'])->name('create');
+        Route::get('/inscriptions', [AdminController::class, 'formationsInscriptions'])->name('inscriptions');
+    });
+
+    Route::prefix('donations')->name('donations.')->group(function () {
+        Route::get('/', [AdminController::class, 'donationsIndex'])->name('index');
+        Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
+        Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
+    });
+
+    Route::prefix('ui-features')->name('ui-features.')->group(function () {
+        Route::get('/buttons', [AdminController::class, 'uiButtons'])->name('buttons');
+        Route::get('/typography', [AdminController::class, 'uiTypography'])->name('typography');
+    });
+
+    Route::prefix('forms')->name('forms.')->group(function () {
+        Route::get('/basic', [AdminController::class, 'formsBasic'])->name('basic');
+    });
+
+    Route::prefix('charts')->name('charts.')->group(function () {
+        Route::get('/chartjs', [AdminController::class, 'chartsChartjs'])->name('chartjs');
+    });
+
+    Route::prefix('tables')->name('tables.')->group(function () {
+        Route::get('/basic', [AdminController::class, 'tablesBasic'])->name('basic');
+    });
 });

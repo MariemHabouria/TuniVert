@@ -74,4 +74,8 @@ class User extends Authenticatable
             'id'                           // clé locale dans participant_challenges
         );
     }
+    public function isAdmin(): bool
+{
+    return $this->role === 'admin';
+}
 }
