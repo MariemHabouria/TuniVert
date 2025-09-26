@@ -8,17 +8,27 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // "user" par défaut (utilisateur classique)
-            $table->string('role', 30)->default('user')->after('password');
-            // matricule RNE unique, nullable (pour les comptes non-associations)
-            $table->string('matricule', 10)->nullable()->unique()->after('role');
+            // Ne crée que si ça n'existe pas déjà
+            if (!Schema::hasColumn('users', 'role')) {
+                $table->string('role', 30)->default('user')->after('password');
+            }
+
+            if (!Schema::hasColumn('users', 'matricule')) {
+                $table->string('matricule', 8)->nullable()->unique()->after('role');
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'matricule']);
+            if (Schema::hasColumn('users', 'matricule')) {
+                try { $table->dropUnique('users_matricule_unique'); } catch (\Throwable $e) {}
+                $table->dropColumn('matricule');
+            }
+            if (Schema::hasColumn('users', 'role')) {
+                $table->dropColumn('role');
+            }
         });
     }
 };

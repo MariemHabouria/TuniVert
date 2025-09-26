@@ -97,6 +97,12 @@
         </li>
       @endif
     @endauth
+    @auth
+  @if(Auth::user()->role === 'association')
+    <a href="{{ route('formations.dashboard') }}" class="nav-item nav-link">Statistiques</a>
+  @endif
+@endauth
+
 </div>
 
                         <div class="d-flex align-items-center flex-nowrap pt-xl-0" style="margin-left: 15px;">

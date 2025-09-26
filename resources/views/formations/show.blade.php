@@ -5,6 +5,20 @@
 <div class="container py-5">
   <div class="row g-4">
     <div class="col-lg-7">
+
+      {{-- Bloc modifier/supprimer pour l'organisateur connecté --}}
+      @auth
+        @if(Auth::id() === $formation->organisateur_id)
+          <div class="mb-3 d-flex gap-2">
+            <a class="btn btn-outline-primary" href="{{ route('formations.edit', $formation) }}">Modifier</a>
+            <form action="{{ route('formations.destroy', $formation) }}" method="POST" onsubmit="return confirm('Supprimer cette formation ?');" class="d-inline">
+              @csrf @method('DELETE')
+              <button class="btn btn-outline-danger">Supprimer</button>
+            </form>
+          </div>
+        @endif
+      @endauth
+
       <h2 class="mb-3">{{ $formation->titre }}</h2>
       <p class="text-muted mb-1">Organisée par <strong>{{ $formation->organisateur->name }}</strong></p>
       <p class="text-muted">Type : <span class="badge bg-success text-uppercase">{{ $formation->type }}</span>

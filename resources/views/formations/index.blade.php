@@ -63,6 +63,21 @@
             <p class="text-muted small mb-2">par {{ $f->organisateur->name }}</p>
             <p class="card-text">{{ Str::limit($f->description, 140) }}</p>
             <a class="btn btn-primary" href="{{ route('formations.show', $f) }}">Détails</a>
+
+            {{-- Ajout : Boutons Modifier / Supprimer pour l'organisateur --}}
+            @auth
+              @if(Auth::id() === $f->organisateur_id)
+                <div class="mt-2 d-flex gap-2">
+                  <a class="btn btn-sm btn-outline-primary" href="{{ route('formations.edit', $f) }}">Modifier</a>
+                  <form action="{{ route('formations.destroy', $f) }}" method="POST" onsubmit="return confirm('Supprimer cette formation ?');">
+                    @csrf @method('DELETE')
+                    <button class="btn btn-sm btn-outline-danger">Supprimer</button>
+                  </form>
+                </div>
+              @endif
+            @endauth
+            {{-- Fin ajout --}}
+
           </div>
         </div>
       </div>

@@ -69,6 +69,18 @@ Route::post('/formations/{formation}/ressources', [RessourceFormationController:
     ->middleware('auth')
     ->name('formations.ressources.store');
 
+
+
+      // NOUVEAU : edit / update / destroy
+    Route::get('organisateur/formations/{formation}/edit', [FormationController::class, 'edit'])->name('formations.edit');
+    Route::put('organisateur/formations/{formation}', [FormationController::class, 'update'])->name('formations.update');
+    Route::delete('organisateur/formations/{formation}', [FormationController::class, 'destroy'])->name('formations.destroy');
+
+
+Route::middleware(['auth'])->get('/mes-formations/stats', [FormationController::class, 'dashboard'])
+    ->name('formations.dashboard');
+
+
     // Déconnexion
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
