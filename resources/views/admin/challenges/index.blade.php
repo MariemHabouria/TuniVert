@@ -27,21 +27,40 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Challenge Coding 2024</td>
-                                <td>01/01/2024</td>
-                                <td>31/12/2024</td>
-                                <td>150</td>
-                                <td><span class="badge badge-success">Actif</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info">Voir</button>
-                                    <button class="btn btn-sm btn-warning">Modifier</button>
-                                    <button class="btn btn-sm btn-danger">Supprimer</button>
-                                </td>
-                            </tr>
-                        </tbody>
+                       <tbody>
+    @forelse($challenges as $challenge)
+        <tr>
+            <td>{{ $challenge->id }}</td>
+            <td>{{ $challenge->titre }}</td>
+            <td>{{ $challenge->date_debut }}</td>
+            <td>{{ $challenge->date_fin }}</td>
+            <td>{{ $challenge->participants_count }}</td>
+            <td>
+                @php
+                    $statut = now()->between($challenge->date_debut, $challenge->date_fin) ? 'actif' : 'inactif';
+                @endphp
+                <span class="badge badge-{{ $statut === 'actif' ? 'success' : 'secondary' }}">
+                    {{ ucfirst($statut) }}
+                </span>
+            </td>
+            <td>
+                <a href="{{ route('challenges.show', $challenge->id) }}" class="btn btn-sm btn-info">Voir</a>
+<a href="{{ route('challenges.edit', $challenge->id) }}" class="btn btn-sm btn-warning">Modifier</a>
+<form action="{{ route('challenges.destroy', $challenge->id) }}" method="POST">
+
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer ce challenge ?')">Supprimer</button>
+                </form>
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="7" class="text-center">Aucun challenge trouvé</td>
+        </tr>
+    @endforelse
+</tbody>
+
                     </table>
                 </div>
             </div>

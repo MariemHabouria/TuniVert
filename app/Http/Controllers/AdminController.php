@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Challenge;
 
 class AdminController extends Controller
 {
@@ -92,12 +93,16 @@ class AdminController extends Controller
     /**
      * Challenges
      */
-    public function challengesIndex()
+public function challengesIndex()
     {
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        return view('admin.challenges.index');
+        // ✅ Récupérer tous les challenges avec le nombre de participants
+        $challenges = Challenge::withCount('participants')->get();
+
+        // ✅ Envoyer à la vue
+        return view('admin.challenges.index', compact('challenges'));
     }
 
     public function challengesCreate()
@@ -108,12 +113,15 @@ class AdminController extends Controller
         return view('admin.challenges.create');
     }
 
-    public function challengesParticipations()
+    public function challengesParticipations($id)
     {
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        return view('admin.challenges.participations');
+        // ✅ Charger un challenge avec ses participants
+        $challenge = Challenge::with('participants')->findOrFail($id);
+
+        return view('admin.challenges.participations', compact('challenge'));
     }
 
     /**

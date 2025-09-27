@@ -23,4 +23,14 @@ class Challenge extends Model
     {
         return $this->hasMany(ParticipantChallenge::class);
     }
+    
+public function challengesIndex()
+{
+    $check = $this->checkAdmin();
+    if ($check !== true) return $check;
+
+    $challenges = Challenge::withCount('participants')->get();
+
+    return view('admin.challenges.index', compact('challenges'));
+}
 }
