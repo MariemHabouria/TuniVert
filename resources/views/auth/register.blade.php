@@ -42,7 +42,6 @@
           {{-- Si association : Matricule RNE --}}
           <div id="matriculeWrap" class="mb-3 form-pill" style="display:none;">
             <span class="input-icon" aria-hidden="true">
-              {{-- icône badge --}}
               <svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 012 2v2H5V5a2 2 0 012-2zm-2 6h14v10a2 2 0 01-2 2H7a2 2 0 01-2-2V9zm7 2a3 3 0 100 6 3 3 0 000-6z"/></svg>
             </span>
             <input
@@ -136,7 +135,6 @@
     }
     rUser?.addEventListener('change', toggleMatricule);
     rAsso?.addEventListener('change', toggleMatricule);
-    // Etat initial (selon old('role'))
     toggleMatricule();
   })();
 </script>
