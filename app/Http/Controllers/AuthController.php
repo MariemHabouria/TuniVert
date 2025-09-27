@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class AuthController extends Controller
 {
     // ====== AUTHENTIFICATION STANDARD (UTILISATEURS/ASSOCIATIONS) ======
-    
+
     /**
      * Affichage des formulaires
      */
@@ -41,7 +41,7 @@ class AuthController extends Controller
             'role'     => ['required', 'in:user,association'],
         ];
 
-        // 2) Si association, le matricule est requis
+        // 2) Si association, le matricule est requis (format : 7 chiffres + 1 lettre majuscule)
         if ($request->input('role') === 'association') {
             $rules['matricule'] = ['required', 'regex:/^\d{7}[A-Z]$/', 'unique:users,matricule'];
         } else {
@@ -101,7 +101,6 @@ class AuthController extends Controller
     }
 
     // ====== MOT DE PASSE OUBLIÉ / RESET ======
-
     public function showForgotForm()
     {
         return view('auth.passwords.email');
@@ -152,45 +151,34 @@ class AuthController extends Controller
     }
 
     // ====== AUTHENTIFICATION ADMIN ======
-
-    /**
-     * Afficher le formulaire de login admin
-     */
     public function showAdminLoginForm()
     {
-        // Redirection si déjà connecté en tant qu'admin
         if (Auth::check() && Auth::user()->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }
-        
+
         return view('admin.auth.login');
     }
 
-    /**
-     * Login admin
-     */
     public function adminLogin(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'email'    => 'required|email',
             'password' => 'required'
         ]);
 
         $credentials = $request->only('email', 'password');
-        $remember = $request->filled('remember');
+        $remember    = $request->filled('remember');
 
-        // Tentative de connexion
         if (!Auth::attempt($credentials, $remember)) {
             return back()->withErrors([
                 'email' => 'Identifiants incorrects.'
             ])->withInput($request->except('password'));
         }
 
-        // Vérifier le rôle admin après authentification réussie
         $user = Auth::user();
-        
         if (!$user->isAdmin()) {
-            Auth::logout(); // Déconnecter si pas admin
+            Auth::logout();
             return back()->withErrors([
                 'email' => 'Accès réservé aux administrateurs.'
             ])->withInput($request->except('password'));
@@ -202,9 +190,6 @@ class AuthController extends Controller
             ->with('status', 'Connexion admin réussie !');
     }
 
-    /**
-     * Logout admin
-     */
     public function adminLogout(Request $request)
     {
         Auth::logout();

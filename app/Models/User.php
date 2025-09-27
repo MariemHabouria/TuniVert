@@ -10,15 +10,15 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name','email','password','role','matricule'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'matricule'];
 
-    protected $hidden = ['password','remember_token'];
+    protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed', // <-- auto-hash du mot de passe
+            'password' => 'hashed', // auto-hash du mot de passe
         ];
     }
 
@@ -35,12 +35,20 @@ class User extends Authenticatable
         return $this->role === 'user';
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    // ---------------------------
+    // Formations
+    // ---------------------------
     public function formationsOrganisees()
     {
         return $this->hasMany(\App\Models\Formation::class, 'organisateur_id');
     }
 
-    public function formationsInscrites() 
+    public function formationsInscrites()
     {
         return $this->belongsToMany(\App\Models\Formation::class, 'formation_user')
                     ->withPivot('inscrit_at');
@@ -49,7 +57,6 @@ class User extends Authenticatable
     // ---------------------------
     // Challenges
     // ---------------------------
-
     // Challenges créés par l'association
     public function challengesOrganises()
     {
@@ -66,16 +73,12 @@ class User extends Authenticatable
     public function scoresChallenges()
     {
         return $this->hasManyThrough(
-            \App\Models\ScoreChallenge::class, 
-            \App\Models\ParticipantChallenge::class, 
+            \App\Models\ScoreChallenge::class,
+            \App\Models\ParticipantChallenge::class,
             'utilisateur_id',              // clé étrangère dans participant_challenges
             'participant_challenge_id',    // clé étrangère dans score_challenges
             'id',                          // clé locale dans users
             'id'                           // clé locale dans participant_challenges
         );
     }
-    public function isAdmin(): bool
-{
-    return $this->role === 'admin';
-}
 }

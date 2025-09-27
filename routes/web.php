@@ -6,6 +6,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\ScoreChallengeController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\FormationController;
+use App\Http\Controllers\FormationInscriptionController;
+use App\Http\Controllers\AvisFormationController;
+use App\Http\Controllers\RessourceFormationController;
 
 // Pages publiques
 Route::view('/', 'pages.index')->name('home');
@@ -18,11 +22,13 @@ foreach ($pages as $page) {
 
 // Auth routes pour invités
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+    Route::get('/login',    [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login',   [AuthController::class, 'login'])->name('login.submit');
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
-    Route::get('/password/forgot', [AuthController::class, 'showForgotForm'])->name('password.request');
+    Route::post('/register',[AuthController::class, 'register'])->name('register.submit');
+
+    // Mot de passe oublié
+    Route::get('/password/forgot',  [AuthController::class, 'showForgotForm'])->name('password.request');
     Route::post('/password/forgot', [AuthController::class, 'sendResetLink'])->name('password.email');
     Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
     Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
@@ -31,8 +37,46 @@ Route::middleware('guest')->group(function () {
 // Routes protégées pour utilisateurs connectés
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+
+    // Création (associations uniquement)
+    Route::get('/organisateur/formations/create', [FormationController::class, 'create'])->name('formations.create');
+    Route::post('/organisateur/formations',        [FormationController::class, 'store'])->name('formations.store');
+
+    // Ressources
+    Route::post('/organisateur/formations/{formation}/ressources', [FormationController::class, 'storeResource'])
+        ->name('formations.resources.store');
+
+    // Inscription aux formations
+    Route::post('/formations/{formation}/inscrire', [FormationInscriptionController::class, 'store'])
+        ->name('formations.inscrire');
+    Route::delete('/formations/{formation}/desinscrire', [FormationInscriptionController::class, 'destroy'])
+        ->name('formations.desinscrire');
+
+    // Avis sur une formation
+    Route::post('/formations/{formation}/avis', [AvisFormationController::class, 'store'])
+        ->middleware('auth')
+        ->name('formations.avis.store');
+
+    // Ajout d'une ressource à une formation
+    Route::post('/formations/{formation}/ressources', [RessourceFormationController::class, 'store'])
+        ->middleware('auth')
+        ->name('formations.ressources.store');
+
+    // Edit / Update / Destroy formations
+    Route::get('organisateur/formations/{formation}/edit', [FormationController::class, 'edit'])->name('formations.edit');
+    Route::put('organisateur/formations/{formation}', [FormationController::class, 'update'])->name('formations.update');
+    Route::delete('organisateur/formations/{formation}', [FormationController::class, 'destroy'])->name('formations.destroy');
+
+    Route::middleware(['auth'])->get('/mes-formations/stats', [FormationController::class, 'dashboard'])
+        ->name('formations.dashboard');
+
+    // Déconnexion
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
+
+// Catalogue accessible à tous
+Route::get('/formations',        [FormationController::class, 'index'])->name('formations.index');
+Route::get('/formations/{formation}', [FormationController::class, 'show'])->name('formations.show');
 
 // Routes Challenges
 Route::prefix('challenges')->group(function () {

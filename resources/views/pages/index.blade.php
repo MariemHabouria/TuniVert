@@ -108,91 +108,112 @@
                         </div>
                         @endauth
 
+                        <!-- Intégration du code Formation -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('formations.index') }}">Formation</a>
+                        </li>
+
+                        @auth
+                            @if(auth()->user()->role === 'association')
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('formations.create') }}">Créer une formation</a>
+                                </li>
+                            @endif
+                        @endauth
+
+                        @auth
+                            @if(Auth::user()->role === 'association')
+                                <a href="{{ route('formations.dashboard') }}" class="nav-item nav-link">Statistiques</a>
+                            @endif
+                        @endauth
+
                         <a href="contact.html" class="nav-item nav-link">Contact</a>
                     </div>
 
                     <!-- Partie authentification -->
                     <div class="d-flex align-items-center flex-nowrap pt-xl-0" style="margin-left: 15px;">
-                        @guest
-                        <li class="nav-item d-flex align-items-center gap-2 ms-lg-2">
-                            <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">
-                                Log In
-                            </a>
-                            <a href="{{ route('register') }}" class="btn btn-primary btn-sm">
-                                Sign Up
-                            </a>
-                        </li>
-                        @endguest
+                        <ul class="navbar-nav">
+                            @guest
+                            <li class="nav-item d-flex align-items-center gap-2 ms-lg-2">
+                                <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm">
+                                    Log In
+                                </a>
+                                <a href="{{ route('register') }}" class="btn btn-primary btn-sm">
+                                    Sign Up
+                                </a>
+                            </li>
+                            @endguest
 
-                        @auth
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
-                                <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
-                                      style="width:38px;height:38px;">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                </span>
-                                @if(Auth::user()->role === 'association')
-                                <small class="text-muted d-block" style="font-size: 0.7rem;">Association</small>
-                                @endif
-                            </a>
-
-                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
-                                <li class="px-3 py-2">
-                                    <div class="fw-semibold">{{ Auth::user()->name }}</div>
-                                    <div class="small text-muted">{{ Auth::user()->email }}</div>
+                            @auth
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
+                                    <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                                          style="width:38px;height:38px;">
+                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                    </span>
                                     @if(Auth::user()->role === 'association')
-                                    <span class="badge bg-primary mt-1">Association</span>
+                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Association</small>
                                     @endif
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
+                                </a>
 
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
-                                        <svg width="16" height="16" viewBox="0 0 24 24">
-                                            <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-5 0-9 2.69-9 6v1h18v-1c0-3.31-4-6-9-6z"/>
-                                        </svg>
-                                        Profil
-                                    </a>
-                                </li>
+                                <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
+                                    <li class="px-3 py-2">
+                                        <div class="fw-semibold">{{ Auth::user()->name }}</div>
+                                        <div class="small text-muted">{{ Auth::user()->email }}</div>
+                                        @if(Auth::user()->role === 'association')
+                                        <span class="badge bg-primary mt-1">Association</span>
+                                        @endif
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
 
-                                <!-- Options spécifiques selon le type d'utilisateur -->
-                                @if(Auth::user()->role === 'association')
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
-                                        <i class="fas fa-plus"></i>
-                                        Créer un Challenge
-                                    </a>
-                                </li>
-                                @else
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.profil') }}">
-                                        <i class="fas fa-trophy"></i>
-                                        Mes Challenges
-                                    </a>
-                                </li>
-                                @endif
-
-                                <li>
-                                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
                                             <svg width="16" height="16" viewBox="0 0 24 24">
-                                                <path fill="currentColor" d="M12 2v10M7 4.9A8 8 0 1 0 17 4.9" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                                <path fill="currentColor" d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-5 0-9 2.69-9 6v1h18v-1c0-3.31-4-6-9-6z"/>
                                             </svg>
-                                            Se déconnecter
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                        @endauth
+                                            Profil
+                                        </a>
+                                    </li>
+
+                                    <!-- Options spécifiques selon le type d'utilisateur -->
+                                    @if(Auth::user()->role === 'association')
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
+                                            <i class="fas fa-plus"></i>
+                                            Créer un Challenge
+                                        </a>
+                                    </li>
+                                    @else
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.profil') }}">
+                                            <i class="fas fa-trophy"></i>
+                                            Mes Challenges
+                                        </a>
+                                    </li>
+                                    @endif
+
+                                    <li>
+                                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
+                                                <svg width="16" height="16" viewBox="0 0 24 24">
+                                                    <path fill="currentColor" d="M12 2v10M7 4.9A8 8 0 1 0 17 4.9" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                                                </svg>
+                                                Se déconnecter
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                            @endauth
+                        </ul>
                     </div>
                 </div>
             </nav>
         </div>
     </div>
-        <!-- Navbar End -->
+    <!-- Navbar End -->
 
         
        <!-- Carousel Start -->
