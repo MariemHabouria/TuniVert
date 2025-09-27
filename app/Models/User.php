@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -80,5 +80,10 @@ class User extends Authenticatable
             'id',                          // clé locale dans users
             'id'                           // clé locale dans participant_challenges
         );
+    }
+
+    public function donations()
+    {
+        return $this->hasMany(Donation::class, 'utilisateur_id');
     }
 }

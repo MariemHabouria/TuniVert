@@ -2,8 +2,12 @@
 @section('title', 'Se connecter')
 
 @section('content')
-<div class="container">
-  <div class="login-card">
+<div class="container scene-3d">
+  <div class="login-card card-3d" id="authCard">
+    <span class="shine" aria-hidden="true"></span>
+    <span class="orb orb-1" aria-hidden="true"></span>
+    <span class="orb orb-2" aria-hidden="true"></span>
+    <span class="orb orb-3" aria-hidden="true"></span>
     {{-- On centre tout le contenu dans la carte --}}
     <div class="login-inner d-flex justify-content-center">
       <div class="login-left mx-auto" style="max-width:560px;">
@@ -61,5 +65,45 @@
       {{-- (plus de colonne droite) --}}
     </div>
   </div>
+@push('scripts')
+<script>
+  (function(){
+    const card = document.getElementById('authCard');
+    if(!card) return;
+    const maxTilt = 10; // deg
+    let raf = null;
+    let rect = null;
+    let px = 50, py = 50; // for shine
+    function setTilt(e){
+      if(!rect) rect = card.getBoundingClientRect();
+      const cx = rect.left + rect.width/2;
+      const cy = rect.top + rect.height/2;
+      const x = (e.clientX - cx) / (rect.width/2);
+      const y = (e.clientY - cy) / (rect.height/2);
+      const rx = (+y * maxTilt).toFixed(2);
+      const ry = (-x * maxTilt).toFixed(2);
+      px = ((e.clientX - rect.left)/rect.width*100).toFixed(2);
+      py = ((e.clientY - rect.top)/rect.height*100).toFixed(2);
+      card.style.setProperty('--px', px+'%');
+      card.style.setProperty('--py', py+'%');
+      card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+    }
+    function reset(){
+      card.style.transform = '';
+      card.style.removeProperty('--px');
+      card.style.removeProperty('--py');
+      rect = null;
+    }
+    function onMove(e){
+      if(raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(()=> setTilt(e));
+    }
+    card.addEventListener('mousemove', onMove);
+    card.addEventListener('mouseleave', reset);
+    window.addEventListener('scroll', ()=> rect=null, {passive:true});
+    window.addEventListener('resize', ()=> rect=null);
+  })();
+</script>
+@endpush
 </div>
 @endsection

@@ -151,3 +151,90 @@ html, body { overflow-x: hidden; }
 /* Si tu avais un mot-symbole, on n'en a plus besoin */
 .auth-brand .brand-wordmark{ display:none; }
 .avatar{ font-weight:600; letter-spacing:.5px; }
+
+/* ===== 3D Look for Auth Cards ===== */
+/* Perspective wrapper */
+.scene-3d{
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+}
+
+/* 3D card base */
+.login-card.card-3d{
+  --tMax: 10deg;         /* max tilt */
+  --tScale: 1.005;       /* tiny scale on hover */
+  --elev: 40px;          /* elevation shadow */
+  transform-style: preserve-3d;
+  will-change: transform;
+  position: relative;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+/* Subtle layer lines inside the card */
+.login-card.card-3d::before{
+  content: "";
+  position:absolute; inset:0; pointer-events:none; border-radius: inherit;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(255,255,255,.08), transparent 60%),
+    repeating-linear-gradient( to bottom right,
+      rgba(255,255,255,.06) 0 2px, transparent 2px 6px
+    );
+  transform: translateZ(1px);
+}
+
+/* Shine layer controlled by CSS vars --px/--py */
+.login-card.card-3d .shine{
+  position:absolute; inset:0; border-radius: inherit; pointer-events:none;
+  background: radial-gradient(
+    400px 300px at var(--px, 50%) var(--py, 50%),
+    rgba(255,255,255,.35), rgba(255,255,255,0) 70%
+  );
+  opacity: 0; transition: opacity .3s ease;
+  transform: translateZ(60px);
+}
+.login-card.card-3d:hover .shine{ opacity: .9; }
+
+/* Decorative floating orbs inside card */
+.login-card.card-3d .orb{
+  position:absolute; border-radius: 50%; pointer-events:none; user-select:none;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.45), rgba(255,255,255,.08));
+  box-shadow: 0 16px 50px rgba(0,0,0,.25);
+  filter: saturate(110%);
+}
+.orb.orb-1{ width:140px; height:140px; right:-28px; top:-28px; transform: translateZ(90px); animation: floaty 8s ease-in-out infinite; }
+.orb.orb-2{ width:110px; height:110px; left:-22px; bottom:-22px; transform: translateZ(70px); animation: floaty 10s ease-in-out infinite reverse; }
+.orb.orb-3{ width:64px; height:64px; left: 55%; top: 18%; transform: translateZ(110px); animation: floaty 6s ease-in-out infinite; opacity:.9; }
+
+@keyframes floaty{
+  0%,100%{ transform: translateZ(80px) translateY(0) }
+  50%{ transform: translateZ(80px) translateY(-12px) }
+}
+
+/* Hover elevation */
+.login-card.card-3d:hover{
+  transform: scale(var(--tScale)) translateZ(0);
+  box-shadow: 0 30px 80px rgba(0,0,0,.35);
+}
+
+/* Lift controls for key UI elements */
+.login-card.card-3d h1,
+.login-card.card-3d p,
+.login-card.card-3d .form-pill,
+.login-card.card-3d .btn{
+  transform: translateZ(20px);
+}
+.login-card.card-3d .btn:hover{ transform: translateZ(30px); }
+
+/* Inputs lift on focus */
+.login-card.card-3d .form-pill:has(.form-control:focus){
+  transform: translateZ(28px);
+}
+
+/* Optional logo lift */
+.login-card.card-3d .auth-logo{ transform: translateZ(40px); }
+
+/* Reduce motion preference: disable heavy effects */
+@media (prefers-reduced-motion: reduce){
+  .login-card.card-3d,
+  .login-card.card-3d *{ transition: none !important; animation: none !important; }
+}
