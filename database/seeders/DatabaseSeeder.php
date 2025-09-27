@@ -8,21 +8,29 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-<<<<<<< HEAD
         // Crée quelques utilisateurs basiques
         \App\Models\User::factory(10)->create();
+
+        // ⚡ Crée un admin fixe
+        \App\Models\User::factory()->create([
+            'name' => 'Admin',
+            'email' => 'admin@tunivert.tn',
+            'password' => bcrypt('admin123'), // mot de passe pour se connecter
+            'role' => 'admin',
+            'is_association' => false,
+            'matricule_association' => null,
+        ]);
 
         // Appelle le seeder de challenges
         $this->call(ChallengeSeeder::class);
 
-        // ⚡ Si tu veux toujours ton utilisateur test
+        // ⚡ Utilisateur test
         \App\Models\User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
-=======
-        $this->call([
-            DemoDataSeeder::class,
->>>>>>> d5aff4a5164f4361cb1432e9ba7aaa839255f3ba
         ]);
+
+        // Appelle le seeder de données de démonstration
+        $this->call(DemoDataSeeder::class);
     }
 }
