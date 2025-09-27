@@ -20,7 +20,7 @@
                 <div class="footer-item d-flex flex-column">
                     <h4 class="mb-4 text-white">Nos Services</h4>
                     <a href="{{ route('service') }}" class="text-body mb-2"><i class="fas fa-angle-right me-2"></i>Formations</a>
-                    <a href="{{ route('events') }}" class="text-body mb-2"><i class="fas fa-angle-right me-2"></i>Événements</a>
+                    <a href="{{ route('events.browse') }}" class="text-body mb-2"><i class="fas fa-angle-right me-2"></i>Événements</a>
                     <a href="{{ route('blog') }}" class="text-body mb-2"><i class="fas fa-angle-right me-2"></i>Forums</a>
                     <a href="{{ route('challenges.index') }}" class="text-body mb-2"><i class="fas fa-angle-right me-2"></i>Challenges</a>
                     <a href="{{ route('causes') }}" class="text-body mb-2"><i class="fas fa-angle-right me-2"></i>Donations</a>
