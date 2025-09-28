@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Tunivert - Protection de l\'Environnement')</title>
-    
+    <title>@yield('title', 'TuniVert - Environnement & Nature')</title>
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,8 +23,8 @@
     <!-- Customized Bootstrap Stylesheet -->
     <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
-    
-    @yield('styles')
+
+    @stack('styles')
 </head>
 <body>
     <!-- Spinner Start -->
@@ -31,15 +33,15 @@
     </div>
     <!-- Spinner End -->
 
-    {{-- Inclure la navbar --}}
+    {{-- Navbar incluse --}}
     @include('layouts.navbar')
 
-    {{-- Contenu spécifique de la page --}}
+    {{-- Contenu spécifique --}}
     <main>
         @yield('content')
     </main>
 
-    {{-- Inclure le footer --}}
+    {{-- Footer inclus --}}
     @include('layouts.footer')
 
     <!-- Back to Top -->
@@ -56,7 +58,7 @@
 
     <!-- Template Javascript -->
     <script src="{{ asset('js/main.js') }}"></script>
-    
-    @yield('scripts')
+
+    @stack('scripts')
 </body>
 </html>
