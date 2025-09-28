@@ -41,7 +41,7 @@
                     <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
                     <a href="{{ route('events.browse') }}" class="nav-item nav-link {{ request()->routeIs('events.browse') ? 'active' : '' }}">Événements</a>
                     <a href="{{ route('service') }}" class="nav-item nav-link {{ request()->routeIs('service') ? 'active' : '' }}">Formations</a>
-                    <a href="{{ route('causes') }}" class="nav-item nav-link {{ request()->routeIs('causes') ? 'active' : '' }}">Donations</a>
+
                     <a href="{{ route('blog') }}" class="nav-item nav-link {{ request()->routeIs('blog') ? 'active' : '' }}">Forums</a>
                     <a href="{{ route('contact') }}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a>
 
@@ -93,6 +93,35 @@
                         </div>
                     </div>
                 </div>
+<!-- Donations Dropdown -->
+<div class="nav-item dropdown">
+    <a href="#" class="nav-link dropdown-toggle {{ request()->is('donations*') || request()->is('donation') ? 'active' : '' }}" data-bs-toggle="dropdown">
+        Donations
+    </a>
+    <div class="dropdown-menu m-0 bg-secondary rounded-0">
+        <!-- Page publique -->
+        <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+            <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+        </a>
+
+        @auth
+            <!-- Créer un don -->
+            <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
+                <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
+            </a>
+
+            <!-- Historique des dons -->
+            <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
+                <i class="fas fa-history me-2"></i>Historique
+            </a>
+        @else
+            <div class="dropdown-divider"></div>
+            <span class="dropdown-item text-muted">
+                <i class="fas fa-lock me-2"></i>Connectez-vous pour donner
+            </span>
+        @endauth
+    </div>
+</div>
 
                 <!-- Authentification -->
                 <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">

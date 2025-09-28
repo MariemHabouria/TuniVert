@@ -152,37 +152,39 @@
             </div>
 
             <!-- Sidebar - Mes Badges -->
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
-                    <div class="card-header py-3" style="background: linear-gradient(135deg, var(--bs-warning) 0%, var(--bs-danger) 100%); border-radius: 15px 15px 0 0;">
-                        <h4 class="mb-0 text-white">
-                            <i class="fas fa-medal me-2"></i>Mes Badges
-                        </h4>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row g-3">
-                            @forelse($badges as $badge)
-                                <div class="col-6 col-sm-4 text-center">
-                                    <div class="badge-card p-3" style="border-radius: 10px; background: var(--bs-light); transition: all 0.3s ease;">
-                                        <div class="mb-2">
-                                            <i class="fas fa-medal fa-2x" style="color: var(--bs-warning);"></i>
-                                        </div>
-                                        <small class="fw-semibold d-block" style="color: var(--bs-dark);">
-                                            {{ $badge->badge }}
-                                        </small>
-                                        <small class="text-muted">Débloqué</small>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="col-12 text-center py-4">
-                                    <i class="fas fa-medal display-1 text-muted mb-3" style="opacity: 0.5;"></i>
-                                    <h6 class="text-muted">Aucun badge pour le moment</h6>
-                                    <p class="text-muted small">Participez à des challenges pour débloquer des badges !</p>
-                                </div>
-                            @endforelse
+<div class="col-lg-4">
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+        <div class="card-header py-3" style="background: linear-gradient(135deg, var(--bs-warning) 0%, var(--bs-danger) 100%); border-radius: 15px 15px 0 0;">
+            <h4 class="mb-0 text-white">
+                <i class="fas fa-medal me-2"></i>Mes Badges
+            </h4>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-3">
+                @forelse($badges as $badge)
+                    <div class="col-6 col-sm-4 text-center">
+                        <div class="badge-card p-3" style="border-radius: 10px; background: var(--bs-light); transition: all 0.3s ease;">
+                            <div class="mb-2">
+                                <i class="fas fa-medal fa-2x" style="color: var(--bs-warning);"></i>
+                            </div>
+                            <small class="fw-semibold d-block" style="color: var(--bs-dark);">
+                                {{ is_object($badge) ? $badge->badge : $badge }}
+                            </small>
+                            <small class="text-muted">Débloqué</small>
                         </div>
                     </div>
-                </div>
+                @empty
+                    <div class="col-12 text-center py-4">
+                        <i class="fas fa-medal display-1 text-muted mb-3" style="opacity: 0.5;"></i>
+                        <h6 class="text-muted">Aucun badge pour le moment</h6>
+                        <p class="text-muted small">Participez à des challenges pour débloquer des badges !</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+</div>
+
 
                 <!-- Statistiques -->
                 <div class="card border-0 shadow-sm" style="border-radius: 15px;">
