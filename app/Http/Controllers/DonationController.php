@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Donation;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -69,8 +70,10 @@ class DonationController extends Controller
         // Gamification
         try {
             $res = app(GamificationService::class)->onDonation($don);
-            if (!empty($res['new_badges'])) {
-                session()->flash('new_badges', $res['new_badges']);
+            // Handle new badge format that includes removal
+            $newBadges = $res['new_badges'] ?? $res ?? [];
+            if (!empty($newBadges)) {
+                session()->flash('new_badges', $newBadges);
             }
         } catch (\Throwable $e) {}
         // Flash points earned (+X)
@@ -89,11 +92,22 @@ class DonationController extends Controller
                     $owner->notify(new DonationReceived($don));
                 }
                 if ($recipient) {
-                    $mailable = new \App\Mail\DonationReceiptSimple($don);
-                    if (app()->environment('local')) {
-                        Mail::mailer('log')->to($recipient)->queue($mailable);
+                    // For bank transfer, use full receipt with QR code like e-dinar method
+                    $mailable = ($validated['moyen_paiement'] === 'virement_bancaire') 
+                        ? new \App\Mail\DonationReceipt($don)
+                        : new \App\Mail\DonationReceiptSimple($don);
+                        
+                    // For bank transfer, always send real emails to test email functionality
+                    if ($validated['moyen_paiement'] === 'virement_bancaire') {
+                        // Send bank transfer emails immediately using SMTP (real email) even in local
+                        Mail::to($recipient)->sendNow($mailable);
                     } else {
-                        Mail::to($recipient)->queue($mailable);
+                        // Other payment methods: use log mailer in local, real email in production
+                        if (app()->environment('local')) {
+                            Mail::mailer('log')->to($recipient)->queue($mailable);
+                        } else {
+                            Mail::to($recipient)->queue($mailable);
+                        }
                     }
                 }
             }
@@ -170,8 +184,10 @@ class DonationController extends Controller
         ]);
         try {
             $res = app(GamificationService::class)->onDonation($don);
-            if (!empty($res['new_badges'])) {
-                session()->flash('new_badges', $res['new_badges']);
+            // Handle new badge format that includes removal
+            $newBadges = $res['new_badges'] ?? $res ?? [];
+            if (!empty($newBadges)) {
+                session()->flash('new_badges', $newBadges);
             }
         } catch (\Throwable $e) {}
         // Flash points for subsequent redirect to history
@@ -232,17 +248,16 @@ class DonationController extends Controller
             ->orderBy('ub.awarded_at', 'desc')
             ->select('b.slug','b.name','b.icon','b.description','ub.awarded_at')
             ->get();
-        // If user has donations but zero badges, re-evaluate to backfill
+        // Always re-evaluate badges to ensure consistency and handle removals
         try {
-            if ($badges->isEmpty() && DB::table('donations')->where('utilisateur_id',$userId)->exists()) {
-                app(\App\Services\GamificationService::class)->evaluateBadges(\App\Models\User::find($userId));
-                $badges = DB::table('user_badges as ub')
-                    ->join('badges as b', 'b.id', '=', 'ub.badge_id')
-                    ->where('ub.user_id', $userId)
-                    ->orderBy('ub.awarded_at', 'desc')
-                    ->select('b.slug','b.name','b.icon','b.description','ub.awarded_at')
-                    ->get();
-            }
+            app(\App\Services\GamificationService::class)->evaluateBadges(\App\Models\User::find($userId));
+            // Refresh badges after evaluation
+            $badges = DB::table('user_badges as ub')
+                ->join('badges as b', 'b.id', '=', 'ub.badge_id')
+                ->where('ub.user_id', $userId)
+                ->orderBy('ub.awarded_at', 'desc')
+                ->select('b.slug','b.name','b.icon','b.description','ub.awarded_at')
+                ->get();
         } catch (\Throwable $e) {}
         $allBadges = DB::table('badges')->select('slug','name','icon','description')->orderBy('id')->get();
         $ownedSlugs = $badges->pluck('slug')->all();
@@ -480,8 +495,10 @@ class DonationController extends Controller
                 ]);
                 try {
                     $res = app(GamificationService::class)->onDonation($don);
-                    if (!empty($res['new_badges'])) {
-                        session()->flash('new_badges', $res['new_badges']);
+                    // Handle new badge format that includes removal
+                    $newBadges = $res['new_badges'] ?? $res ?? [];
+                    if (!empty($newBadges)) {
+                        session()->flash('new_badges', $newBadges);
                     }
                 } catch (\Throwable $e) {}
                 try {
@@ -507,5 +524,72 @@ class DonationController extends Controller
             }
         }
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Test bank transfer email functionality
+     */
+    public function testBankTransferEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+            'montant' => ['required', 'numeric', 'min:1'],
+            'is_anonymous' => ['nullable', 'boolean'],
+        ]);
+
+        try {
+            // Find or create a test user with this email
+            $user = User::firstOrCreate(
+                ['email' => $validated['email']],
+                [
+                    'name' => 'Test User',
+                    'password' => bcrypt('password'),
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            // Create test donation
+            $don = Donation::create([
+                'utilisateur_id' => $user->id,
+                'is_anonymous' => (bool)($validated['is_anonymous'] ?? false),
+                'evenement_id' => null,
+                'montant' => (float)$validated['montant'],
+                'moyen_paiement' => 'virement_bancaire',
+                'transaction_id' => 'TEST_WEB_' . time(),
+                'date_don' => now(),
+            ]);
+
+            $newBadges = [];
+            
+            // Apply gamification
+            try {
+                $res = app(GamificationService::class)->onDonation($don);
+                $newBadges = $res['new_badges'] ?? [];
+            } catch (\Throwable $e) {
+                // Gamification errors are non-critical
+            }
+
+            // Send email using the same logic as real donations
+            $recipient = $user->email;
+            $mailable = new DonationReceipt($don);
+            
+            // For bank transfer, always send real emails
+            Mail::to($recipient)->sendNow($mailable);
+
+            return response()->json([
+                'success' => true,
+                'donation_id' => $don->id,
+                'amount' => $don->montant,
+                'transaction_id' => $don->transaction_id,
+                'email_sent_to' => $recipient,
+                'badges' => !empty($newBadges) ? implode(', ', array_column($newBadges, 'name')) : null,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

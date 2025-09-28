@@ -21,9 +21,16 @@ class GamificationService
             'method' => $donation->moyen_paiement,
         ]);
 
-        $newBadges = $this->evaluateBadges($user);
+        $badgeResult = $this->evaluateBadges($user);
         $this->updateChallenges($user, $donation);
-        return ['points' => $points, 'new_badges' => $newBadges];
+        
+        // Handle both old and new badge format
+        if (isset($badgeResult['new_badges'])) {
+            return ['points' => $points, 'new_badges' => $badgeResult['new_badges'], 'removed_badges' => $badgeResult['removed_badges']];
+        } else {
+            // Backward compatibility
+            return ['points' => $points, 'new_badges' => $badgeResult];
+        }
     }
 
     public function awardPoints(User $user, int $points, string $reason, ?Donation $donation = null, array $meta = []): void
@@ -64,7 +71,29 @@ class GamificationService
         $owned = DB::table('user_badges')->where('user_id', $user->id)->pluck('badge_id');
         $ownedSlugs = DB::table('badges')->whereIn('id', $owned)->pluck('slug')->all();
         $awarded = [];
+        $removed = [];
 
+        // Check for badge removal (when user no longer meets requirements)
+        foreach ($ownedSlugs as $ownedSlug) {
+            if (isset($rules[$ownedSlug]) && !$rules[$ownedSlug]()) {
+                // Remove badge from user
+                if (isset($badgeMap[$ownedSlug])) {
+                    DB::table('user_badges')
+                        ->where('user_id', $user->id)
+                        ->where('badge_id', $badgeMap[$ownedSlug])
+                        ->delete();
+                    $removed[] = $ownedSlug;
+                }
+            }
+        }
+
+        // Refresh owned badges after removal
+        if (!empty($removed)) {
+            $owned = DB::table('user_badges')->where('user_id', $user->id)->pluck('badge_id');
+            $ownedSlugs = DB::table('badges')->whereIn('id', $owned)->pluck('slug')->all();
+        }
+
+        // Check for new badge awards
         foreach ($rules as $slug => $ok) {
             if (!in_array($slug, $ownedSlugs, true) && $ok() && isset($badgeMap[$slug])) {
                 DB::table('user_badges')->insert([
@@ -85,16 +114,22 @@ class GamificationService
                 }
             }
         }
-        return $awarded;
+        
+        return ['new_badges' => $awarded, 'removed_badges' => $removed];
     }
 
     public function updateChallenges(User $user, Donation $donation): void
     {
-        $now = now();
-        $active = DB::table('challenges')
-            ->where('period_start', '<=', $now)
-            ->where('period_end', '>=', $now)
-            ->get();
+        try {
+            $now = now();
+            $active = DB::table('challenges')
+                ->where('period_start', '<=', $now)
+                ->where('period_end', '>=', $now)
+                ->get();
+        } catch (\Throwable $e) {
+            // Handle missing challenges table gracefully
+            return;
+        }
 
         foreach ($active as $ch) {
             if (!$this->matchesScope($ch, $donation)) continue;

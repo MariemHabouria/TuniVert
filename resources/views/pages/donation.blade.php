@@ -39,12 +39,17 @@
         <!-- Navbar start -->
         <div class="container-fluid fixed-top px-0">
             <div class="container px-0">
+                <!-- Topbar -->
                 <div class="topbar">
                     <div class="row align-items-center justify-content-center">
                         <div class="col-md-8">
                             <div class="topbar-info d-flex flex-wrap">
-                                <a href="#" class="text-light me-4"><i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn</a>
-                                <a href="#" class="text-light"><i class="fas fa-phone-alt text-white me-2"></i>+01234567890</a>
+                                <a href="mailto:Tunivert@gmail.tn" class="text-light me-4">
+                                    <i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn
+                                </a>
+                                <a href="tel:+21612345678" class="text-light">
+                                    <i class="fas fa-phone-alt text-white me-2"></i>+216 12 345 678
+                                </a>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -58,48 +63,215 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Navbar -->
                 <nav class="navbar navbar-light bg-light navbar-expand-xl">
-                    <a href="index.html" class="navbar-brand ms-3">
-                        <h1 class="text-primary display-5">Environs</h1>
+                    <a href="{{ route('home') }}" class="navbar-brand ms-3">
+                        <h1 class="text-primary display-5">Tunivert</h1>
                     </a>
                     <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
                         <span class="fa fa-bars text-primary"></span>
                     </button>
+
                     <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
                         <div class="navbar-nav ms-auto">
-                            <a href="index.html" class="nav-item nav-link">Home</a>
-                            <a href="about.html" class="nav-item nav-link">About</a>
-                            <a href="service.html" class="nav-item nav-link">Services</a>
-                            <a href="causes.html" class="nav-item nav-link">Causes</a>
-                            <a href="events.html" class="nav-item nav-link">Events</a>
+                            <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a>
+                            <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
+                            <a href="{{ route('events.browse') }}" class="nav-item nav-link {{ request()->routeIs('events.browse') ? 'active' : '' }}">Événements</a>
+                            <a href="{{ route('service') }}" class="nav-item nav-link {{ request()->routeIs('service') ? 'active' : '' }}">Formations</a>
+          
+                            <a href="{{ route('blog') }}" class="nav-item nav-link {{ request()->routeIs('blog') ? 'active' : '' }}">Forums</a>
+                            <a href="{{ route('contact') }}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a>
+
+                            <!-- Challenge Dropdown -->
                             <div class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Pages</a>
+                                <a href="#" class="nav-link dropdown-toggle {{ request()->is('challenges*') ? 'active' : '' }}" data-bs-toggle="dropdown">
+                                    Challenges
+                                </a>
                                 <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                                    <a href="blog.html" class="dropdown-item">Blog</a>
-                                    <a href="gallery.html" class="dropdown-item">Gallery</a>
-                                    <a href="volunteer.html" class="dropdown-item">Volunteers</a>
-                                    <a href="donation.html" class="dropdown-item active">Donation</a>
-                                    <a href="404.html" class="dropdown-item">404 Error</a>
+                                    @auth
+                                        @if(Auth::user()->role === 'association')
+                                            <a href="{{ route('challenges.create') }}" class="dropdown-item {{ request()->routeIs('challenges.create') ? 'active' : '' }}">
+                                                <i class="fas fa-plus me-2"></i>Créer un Challenge
+                                            </a>
+                                            <a href="{{ route('challenges.crud') }}" class="dropdown-item {{ request()->routeIs('challenges.crud') ? 'active' : '' }}">
+                                                <i class="fas fa-cog me-2"></i>Gérer mes Challenges
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a href="{{ route('scores.classement', ['challenge' => 'current']) }}" class="dropdown-item">
+                                                <i class="fas fa-chart-bar me-2"></i>Statistiques
+                                            </a>
+                                        @else
+                                            <a href="{{ route('challenges.index') }}" class="dropdown-item">
+                                                <i class="fas fa-trophy me-2"></i>Voir les Challenges
+                                            </a>
+                                            <a href="{{ route('challenges.profil') }}" class="dropdown-item">
+                                                <i class="fas fa-user-check me-2"></i>Mes Participations
+                                            </a>
+                                        @endif
+                                    @else
+                                        <a href="{{ route('challenges.index') }}" class="dropdown-item">
+                                            <i class="fas fa-trophy me-2"></i>Voir les Challenges
+                                        </a>
+                                    @endauth
                                 </div>
                             </div>
-                            <a href="contact.html" class="nav-item nav-link">Contact</a>
-                        </div>
-                                                <div class="d-flex align-items-center flex-nowrap pt-xl-0" style="margin-left: 15px;">
-@guest
-  <a href="{{ route('login') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4 me-2">Log In</a>
-  <a href="{{ route('register') }}" class="btn btn-outline-primary py-2 px-4">Sign Up</a>
-@endguest
 
-@auth
-    <a href="{{ route('donations.history') }}" class="btn btn-outline-primary me-3">My Donations</a>
-    <div class="d-inline-flex align-items-center gap-2">
-    <span class="fw-semibold text-dark">Bonjour, {{ Auth::user()->name }}</span>
-    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-      @csrf
-      <button type="submit" class="btn btn-danger py-2 px-4">Logout</button>
-    </form>
-  </div>
-@endauth                        </div>
+                            <!-- Formation Dropdown -->
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle {{ request()->is('formations*') ? 'active' : '' }}" data-bs-toggle="dropdown">
+                                    Formations
+                                </a>
+                                <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                                    <a href="{{ route('formations.index') }}" class="dropdown-item">Catalogue</a>
+                                    @auth
+                                        @if(Auth::user()->role === 'association')
+                                            <a href="{{ route('formations.create') }}" class="dropdown-item {{ request()->routeIs('formations.create') ? 'active' : '' }}">Créer une formation</a>
+                                            <a href="{{ route('formations.dashboard') }}" class="dropdown-item {{ request()->routeIs('formations.dashboard') ? 'active' : '' }}">Mes formations</a>
+                                        @endif
+                                    @endauth
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Donations Dropdown -->
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle {{ request()->is('donations*') || request()->is('donation') ? 'active' : '' }}" data-bs-toggle="dropdown">
+                                Donations
+                            </a>
+                            <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                                <!-- Page publique -->
+                                <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                                    <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+                                </a>
+
+                                @auth
+                                    <!-- Créer un don -->
+                                    <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
+                                        <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
+                                    </a>
+
+                                    <!-- Historique des dons -->
+                                    <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
+                                        <i class="fas fa-history me-2"></i>Historique
+                                    </a>
+                                @else
+                                    <div class="dropdown-divider"></div>
+                                    <span class="dropdown-item text-muted">
+                                        <i class="fas fa-lock me-2"></i>Connectez-vous pour donner
+                                    </span>
+                                @endauth
+                            </div>
+                        </div>
+
+                        <!-- Auth pour guest -->
+                        <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">
+                            @guest
+                                <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
+                                <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
+                            @endguest
+
+                            @auth
+                                <div class="nav-item dropdown position-relative">
+                                    <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
+                                        <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                                              style="width:38px;height:38px;">
+                                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                        </span>
+                                        @if(session('new_badges'))
+                                          <span class="position-absolute translate-middle badge rounded-pill bg-warning text-dark" style="top:0; right:-4px; font-size:.65rem;">
+                                            +{{ count(session('new_badges')) }}
+                                          </span>
+                                        @endif
+                                        @if(Auth::user()->role === 'association')
+                                            <small class="text-muted d-block" style="font-size: 0.7rem;">Association</small>
+                                        @endif
+                                    </a>
+
+                                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 260px;">
+                                        <li class="px-3 py-2">
+                                            <div class="fw-semibold d-flex align-items-center gap-1">
+                                                {{ Auth::user()->name }}
+                                                @php
+                                                    // Re-evaluate badges to ensure current eligibility
+                                                    try {
+                                                        app(\App\Services\GamificationService::class)->evaluateBadges(Auth::user());
+                                                    } catch (\Throwable $e) {}
+                                                    $userBadges = DB::table('user_badges as ub')
+                                                        ->join('badges as b', 'b.id', '=', 'ub.badge_id')
+                                                        ->where('ub.user_id', Auth::id())
+                                                        ->orderBy('ub.awarded_at', 'desc')
+                                                        ->limit(3)
+                                                        ->pluck('b.icon')
+                                                        ->toArray();
+                                                @endphp
+                                                @if(!empty($userBadges))
+                                                    <div class="d-flex align-items-center" style="font-size: 0.8rem;">
+                                                        @foreach($userBadges as $icon)
+                                                            <span style="margin-left: 2px;">{{ $icon }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            <div class="small text-muted">{{ Auth::user()->email }}</div>
+                                            @if(Auth::user()->role === 'association')
+                                                <span class="badge bg-primary mt-1">Association</span>
+                                            @endif
+                                            @if(session('new_badges'))
+                                                <div class="mt-2 small">
+                                                    <div class="fw-bold text-success mb-1" style="font-size:.7rem; letter-spacing:.05em;">Nouveaux Badges</div>
+                                                    <div class="d-flex flex-wrap gap-2">
+                                                        @foreach(array_slice(session('new_badges'),0,3) as $b)
+                                                          <div class="d-flex align-items-center gap-1 px-2 py-1 rounded bg-light border" style="font-size:.7rem;">
+                                                            <span style="font-size:1rem; line-height:1;">{{ $b['icon'] ?? '🏅' }}</span>
+                                                            <span class="fw-semibold">{{ $b['name'] ?? $b['slug'] }}</span>
+                                                          </div>
+                                                        @endforeach
+                                                    </div>
+                                                    @if(count(session('new_badges'))>3)
+                                                      <div class="text-muted mt-1" style="font-size:.65rem;">+ {{ count(session('new_badges'))-3 }} autres…</div>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
+                                                <i class="fas fa-user"></i>
+                                                Profil
+                                            </a>
+                                        </li>
+
+                                        @if(Auth::user()->role === 'association')
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
+                                                <i class="fas fa-plus"></i>
+                                                Créer un Challenge
+                                            </a>
+                                        </li>
+                                        @else
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.profil') }}">
+                                                <i class="fas fa-trophy"></i>
+                                                Mes Participations
+                                            </a>
+                                        </li>
+                                        @endif
+
+                                        <li>
+                                            <form action="{{ route('logout') }}" method="POST" class="d-inline w-100">
+                                                @csrf
+                                                <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100">
+                                                    <i class="fas fa-sign-out-alt"></i>
+                                                    Se déconnecter
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            @endauth
+                        </div>
                     </div>
                 </nav>
             </div>
@@ -1407,6 +1579,4 @@
                     });
                 </script>
 
-    </body>
-
-</html>
+    </body></html>
