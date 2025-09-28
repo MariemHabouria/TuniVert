@@ -137,6 +137,7 @@
     {{ $challenge->participants_count }}
 </small>
 
+
                                 </div>
                             </div>
 
