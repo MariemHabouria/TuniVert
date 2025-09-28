@@ -74,12 +74,10 @@ Route::middleware('auth')->group(function () {
 
     // Avis sur une formation
     Route::post('/formations/{formation}/avis', [AvisFormationController::class, 'store'])
-        ->middleware('auth')
         ->name('formations.avis.store');
 
     // Ajout d'une ressource à une formation
     Route::post('/formations/{formation}/ressources', [RessourceFormationController::class, 'store'])
-        ->middleware('auth')
         ->name('formations.ressources.store');
 
     // Edit / Update / Destroy formations
@@ -87,10 +85,8 @@ Route::middleware('auth')->group(function () {
     Route::put('organisateur/formations/{formation}', [FormationController::class, 'update'])->name('formations.update');
     Route::delete('organisateur/formations/{formation}', [FormationController::class, 'destroy'])->name('formations.destroy');
 
-    Route::middleware(['auth'])->get('/mes-formations/stats', [FormationController::class, 'dashboard'])
-        ->name('formations.dashboard');
+    Route::get('/mes-formations/stats', [FormationController::class, 'dashboard'])->name('formations.dashboard');
 
-    // Déconnexion
     // Donations (donor actions)
     Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
     Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
@@ -104,7 +100,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/payments/paypal/create-order', [DonationController::class, 'createPayPalOrder'])->name('payments.paypal.create');
     Route::post('/payments/paypal/capture', [DonationController::class, 'capturePayPalOrder'])->name('payments.paypal.capture');
 
-    // Payments - Paymee (e‑DINAR)
+    // Payments - Paymee (e-DINAR)
     Route::post('/payments/paymee/create', [DonationController::class, 'createPaymeePayment'])->name('payments.paymee.create');
 
     // Payments - Test (mock) - only if enabled
@@ -127,15 +123,14 @@ Route::middleware('auth')->group(function () {
 Route::get('/formations',        [FormationController::class, 'index'])->name('formations.index');
 Route::get('/formations/{formation}', [FormationController::class, 'show'])->name('formations.show');
 
-// Routes Challenges
+// Routes Challenges (publiques + authentifiées)
 Route::prefix('challenges')->group(function () {
     Route::get('/', [ChallengeController::class, 'index'])->name('challenges.index');
-    
+
     Route::middleware('auth')->group(function () {
         Route::get('/profil', [ChallengeController::class, 'profil'])->name('challenges.profil');
         Route::post('/{id}/participate', [ChallengeController::class, 'participer'])->name('challenges.participate');
         Route::post('/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
-    Route::get('/create', [AdminController::class, 'challengesCreate'])->name('create');
 
         Route::prefix('association')->group(function () {
             Route::get('/create', [ChallengeController::class, 'create'])->name('challenges.create');
@@ -163,24 +158,30 @@ Route::prefix('scores')->name('scores.')->middleware('auth')->group(function () 
 Route::prefix('admin')->name('admin.')->group(function () {
     // Login Admin accessible sans auth
     Route::get('/login', [AuthController::class, 'showAdminLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'adminLogin'])->name('login.submit'); 
+    Route::post('/login', [AuthController::class, 'adminLogin'])->name('login.submit');
     Route::post('/logout', [AuthController::class, 'adminLogout'])->name('logout');
 
     // Routes admin protégées
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-    
+
+    // Utilisateurs (admin)
     Route::prefix('utilisateurs')->name('utilisateurs.')->group(function () {
         Route::get('/', [AdminController::class, 'utilisateursIndex'])->name('index');
         Route::get('/create', [AdminController::class, 'utilisateursCreate'])->name('create');
         Route::get('/roles', [AdminController::class, 'utilisateursRoles'])->name('roles');
+        Route::get('/{user}', [AdminController::class, 'utilisateursShow'])->name('show');
+        Route::get('/{user}/edit', [AdminController::class, 'utilisateursEdit'])->name('edit');
+        Route::delete('/{user}', [AdminController::class, 'utilisateursDestroy'])->name('destroy');
     });
 
+    // Événements (admin)
     Route::prefix('evenements')->name('evenements.')->group(function () {
         Route::get('/', [AdminController::class, 'evenementsIndex'])->name('index');
         Route::get('/create', [AdminController::class, 'evenementsCreate'])->name('create');
         Route::get('/categories', [AdminController::class, 'evenementsCategories'])->name('categories');
     });
 
+    // Challenges (admin)
     Route::prefix('challenges')->name('challenges.')->group(function () {
         Route::get('/', [AdminController::class, 'challengesIndex'])->name('index');
 
@@ -194,37 +195,50 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');
     });
 
+
+    // Forums (admin)
     Route::prefix('forums')->name('forums.')->group(function () {
         Route::get('/', [AdminController::class, 'forumsIndex'])->name('index');
         Route::get('/categories', [AdminController::class, 'forumsCategories'])->name('categories');
         Route::get('/moderations', [AdminController::class, 'forumsModerations'])->name('moderations');
     });
 
+    // Formations (admin)
     Route::prefix('formations')->name('formations.')->group(function () {
         Route::get('/', [AdminController::class, 'formationsIndex'])->name('index');
         Route::get('/create', [AdminController::class, 'formationsCreate'])->name('create');
         Route::get('/inscriptions', [AdminController::class, 'formationsInscriptions'])->name('inscriptions');
+        // dynamique en dernier
+        Route::get('/{formation}', [AdminController::class, 'formationsShow'])
+            ->whereNumber('formation')
+            ->name('show');
     });
 
+    // Donations (admin)
     Route::prefix('donations')->name('donations.')->group(function () {
-        Route::get('/', [AdminController::class, 'donationsIndex'])->name('index');
-        Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
+        Route::get('/',         [AdminController::class, 'donationsHistory'])->name('index');   // page d’historique
+        Route::get('/history',  [AdminController::class, 'donationsHistory'])->name('history'); // alias
+        Route::get('/campagnes',[AdminController::class, 'donationsCampagnes'])->name('campagnes');
         Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
     });
 
+    // UI
     Route::prefix('ui-features')->name('ui-features.')->group(function () {
         Route::get('/buttons', [AdminController::class, 'uiButtons'])->name('buttons');
         Route::get('/typography', [AdminController::class, 'uiTypography'])->name('typography');
     });
 
+    // Forms
     Route::prefix('forms')->name('forms.')->group(function () {
         Route::get('/basic', [AdminController::class, 'formsBasic'])->name('basic');
     });
 
+    // Charts
     Route::prefix('charts')->name('charts.')->group(function () {
         Route::get('/chartjs', [AdminController::class, 'chartsChartjs'])->name('chartjs');
     });
 
+    // Tables
     Route::prefix('tables')->name('tables.')->group(function () {
         Route::get('/basic', [AdminController::class, 'tablesBasic'])->name('basic');
     });

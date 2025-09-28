@@ -367,10 +367,10 @@ function openProofModal(fileUrl, participantName) {
     
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
         // Image
-        proofContent.innerHTML = `<img src="${fileUrl}" alt="Preuve ${participantName}" class="img-fluid">`;
+        proofContent.innerHTML = <img src="${fileUrl}" alt="Preuve ${participantName}" class="img-fluid">;
     } else if (fileExtension === 'pdf') {
         // PDF
-        proofContent.innerHTML = `<embed src="${fileUrl}" type="application/pdf" class="w-100">`;
+        proofContent.innerHTML = <embed src="${fileUrl}" type="application/pdf" class="w-100">;
     } else if (['doc', 'docx'].includes(fileExtension)) {
         // Document Word - afficher un lien de téléchargement
         proofContent.innerHTML = `
@@ -418,7 +418,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const action = e.submitter.value;
             const participantName = this.closest('.card').querySelector('.card-title').textContent;
             
-            if (!confirm(`Voulez-vous vraiment ${action === 'valider' ? 'valider' : 'rejeter'} la participation de ${participantName} ?`)) {
+            if (!confirm(Voulez-vous vraiment ${action === 'valider' ? 'valider' : 'rejeter'} la participation de ${participantName} ?)) {
                 e.preventDefault();
                 
                 // Animation de secousse sur le bouton
