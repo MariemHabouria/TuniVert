@@ -35,17 +35,11 @@
                     <div class="card-header position-relative p-0" style="border: none;">
                         <!-- Badges de statut et catégorie -->
                         <div class="position-absolute top-0 start-0 m-4 d-flex flex-column gap-2">
-                            @php
-                                $now = \Carbon\Carbon::now();
-                                $dateDebut = \Carbon\Carbon::parse($challenge->date_debut);
-                                $dateFin = \Carbon\Carbon::parse($challenge->date_fin);
-                            @endphp
-                            
-                            @if($now->between($dateDebut, $dateFin))
+                            @if(\Carbon\Carbon::now()->between(\Carbon\Carbon::parse($challenge->date_debut), \Carbon\Carbon::parse($challenge->date_fin)))
                                 <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #28a745, #20c997); font-size: 0.8rem;">
                                     <i class="fas fa-play-circle me-1"></i>En cours
                                 </span>
-                            @elseif($now->lt($dateDebut))
+                            @elseif(\Carbon\Carbon::now()->lt(\Carbon\Carbon::parse($challenge->date_debut)))
                                 <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #17a2b8, #0dcaf0); font-size: 0.8rem;">
                                     <i class="fas fa-clock me-1"></i>À venir
                                 </span>
@@ -109,7 +103,7 @@
                                     <i class="fas fa-bullseye me-3" style="font-size: 1.5rem; color: var(--bs-primary);"></i>
                                     <div>
                                         <h6 class="mb-1" style="color: var(--bs-dark);">Objectif</h6>
-                                        <p class="mb-0 text-muted">{{ $challenge->objectif ?? 'Non spécifié' }}</p>
+                                        <p class="mb-0 text-muted">{{ $challenge->objectif }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -119,8 +113,8 @@
                                     <div>
                                         <h6 class="mb-1" style="color: var(--bs-dark);">Période</h6>
                                         <p class="mb-0 text-muted">
-                                            {{ $dateDebut->format('d/m/Y') }} - 
-                                            {{ $dateFin->format('d/m/Y') }}
+                                            {{ \Carbon\Carbon::parse($challenge->date_debut)->format('d/m/Y') }} - 
+                                            {{ \Carbon\Carbon::parse($challenge->date_fin)->format('d/m/Y') }}
                                         </p>
                                     </div>
                                 </div>
@@ -130,7 +124,7 @@
                                     <i class="fas fa-users me-3" style="font-size: 1.5rem; color: var(--bs-primary);"></i>
                                     <div>
                                         <h6 class="mb-1" style="color: var(--bs-dark);">Participants</h6>
-                                        <p class="mb-0 text-muted">{{ $challenge->participants_count ?? $challenge->participants->count() }} participants</p>
+                                        <p class="mb-0 text-muted">{{ $challenge->participations_count ?? 0 }} participants</p>
                                     </div>
                                 </div>
                             </div>
@@ -151,27 +145,18 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center mb-3">
-                                    <i class="fas fa-user me-3" style="font-size: 1.5rem; color: var(--bs-primary);"></i>
-                                    <div>
-                                        <h6 class="mb-1" style="color: var(--bs-dark);">Organisateur</h6>
-                                        <p class="mb-0 text-muted">{{ $challenge->organisateur->name ?? 'Non spécifié' }}</p>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Barre de progression du temps -->
                         <div class="mb-4">
                             @php
-                                $totalDays = $dateDebut->diffInDays($dateFin);
-                                $daysPassed = $now->diffInDays($dateDebut);
-                                $progressPercentage = $totalDays > 0 ? min(100, max(0, ($daysPassed / $totalDays) * 100)) : 0;
+                                $totalDays = \Carbon\Carbon::parse($challenge->date_debut)->diffInDays($challenge->date_fin);
+                                $daysPassed = \Carbon\Carbon::now()->diffInDays($challenge->date_debut);
+                                $progressPercentage = min(100, max(0, ($daysPassed / $totalDays) * 100));
                             @endphp
                             <div class="d-flex justify-content-between mb-2">
-                                <small class="text-muted">Début: {{ $dateDebut->format('d/m/Y') }}</small>
-                                <small class="text-muted">Fin: {{ $dateFin->format('d/m/Y') }}</small>
+                                <small class="text-muted">Début: {{ \Carbon\Carbon::parse($challenge->date_debut)->format('d/m/Y') }}</small>
+                                <small class="text-muted">Fin: {{ \Carbon\Carbon::parse($challenge->date_fin)->format('d/m/Y') }}</small>
                             </div>
                             <div class="progress" style="height: 10px; border-radius: 5px;">
                                 <div class="progress-bar" 
@@ -184,10 +169,8 @@
                             </div>
                             <div class="text-center mt-2">
                                 <small class="text-muted">
-                                    @if($progressPercentage < 100 && $now->between($dateDebut, $dateFin))
+                                    @if($progressPercentage < 100)
                                         {{ number_format($progressPercentage, 1) }}% du temps écoulé
-                                    @elseif($now->lt($dateDebut))
-                                        Début dans {{ $now->diffInDays($dateDebut) }} jours
                                     @else
                                         Challenge terminé
                                     @endif
@@ -211,85 +194,36 @@
                                         </button>
                                     </form>
                                 @else
-                                    <!-- Informations sur la participation -->
-                                    <div class="bg-light p-4 rounded mb-3" style="border-left: 4px solid var(--bs-success);">
-                                        <h5 class="mb-3" style="color: var(--bs-success);">
-                                            <i class="fas fa-check-circle me-2"></i>Vous participez à ce challenge
-                                        </h5>
-                                        
-                                        <!-- Statut de la participation -->
-                                        <div class="mb-3">
-                                            <strong>Statut :</strong>
-                                            @switch($participantChallenge->statut)
-                                                @case('en_cours')
-                                                    <span class="badge bg-warning text-dark">En cours</span>
-                                                    @break
-                                                @case('en_attente')
-                                                    <span class="badge bg-info">En attente de validation</span>
-                                                    @break
-                                                @case('valide')
-                                                    <span class="badge bg-success">Validé</span>
-                                                    @break
-                                                @case('rejete')
-                                                    <span class="badge bg-danger">Rejeté</span>
-                                                    @break
-                                            @endswitch
-                                        </div>
-
-                                        <!-- Score actuel -->
-                                        @if($participantChallenge->score)
-                                            <div class="mb-3">
-                                                <strong>Score :</strong>
-                                                <span class="badge bg-primary">{{ $participantChallenge->score->points }} points</span>
-                                                @if($participantChallenge->score->badge)
-                                                    <span class="badge bg-warning text-dark ms-2">Badge: {{ $participantChallenge->score->badge }}</span>
-                                                @endif
-                                            </div>
-                                        @endif
-
-                                        <!-- Formulaire de soumission de preuve -->
-                                        @if($participantChallenge->statut === 'en_cours' || $participantChallenge->statut === 'en_attente')
-                                            <form method="POST" action="{{ route('challenges.submit', $challenge->id) }}" enctype="multipart/form-data">
-                                                @csrf
-                                                <div class="row">
-                                                    <div class="col-md-8">
-                                                        <div class="mb-3">
-                                                            <label for="preuve" class="form-label fw-semibold">Ajouter votre preuve :</label>
-                                                            <input type="file" name="preuve" id="preuve" class="form-control" required 
-                                                                   accept="image/*,.pdf,.doc,.docx">
-                                                            <div class="form-text">Formats acceptés: images, PDF, Word (max: 5MB)</div>
-                                                            @error('preuve')
-                                                                <div class="text-danger small">{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <button type="submit" 
-                                                                class="btn btn-warning btn-lg w-100 mt-4 shadow-sm"
-                                                                style="border-radius: 10px; transition: all 0.3s ease;">
-                                                            <i class="fas fa-paper-plane me-2"></i>Soumettre
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        @endif
-
-                                        <!-- Preuve existante -->
-                                        @if($participantChallenge->preuve)
-                                            <div class="mt-3">
-                                                <strong>Preuve soumise :</strong>
-                                                <a href="{{ asset('storage/' . $participantChallenge->preuve) }}" 
-                                                   target="_blank" 
-                                                   class="btn btn-sm btn-outline-primary ms-2">
-                                                    <i class="fas fa-eye me-1"></i>Voir la preuve
-                                                </a>
-                                            </div>
-                                        @endif
-                                    </div>
+                                    <!-- Formulaire de soumission de preuve -->
+<div class="bg-light p-4 rounded" style="border-left: 4px solid var(--bs-success);">
+    <h5 class="mb-3" style="color: var(--bs-success);">
+        <i class="fas fa-check-circle me-2"></i>Vous participez à ce challenge
+    </h5>
+    <form method="POST" action="{{ route('challenges.submit', $challenge->id) }}" enctype="multipart/form-data">
+        @csrf
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label for="preuve" class="form-label fw-semibold">Ajouter votre preuve :</label>
+                    <input type="file" name="preuve" id="preuve" class="form-control" required 
+                           accept="image/*,.pdf,.doc,.docx">
+                    <div class="form-text">Formats acceptés: images, PDF, Word (max: 5MB)</div>
+                    @error('preuve')
+                        <div class="text-danger small">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" 
+                        class="btn btn-warning btn-lg w-100 mt-4 shadow-sm"
+                        style="border-radius: 10px; transition: all 0.3s ease;">
+                    <i class="fas fa-paper-plane me-2"></i>Soumettre
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
                                 @endif
-
-
-
                             @else
                                 <!-- Message pour les non-connectés -->
                                 <div class="alert alert-info text-center">
@@ -297,6 +231,9 @@
                                     <a href="{{ route('login') }}" class="alert-link">Connectez-vous</a> pour participer à ce challenge et gagner des points !
                                 </div>
                             @endauth
+
+                            <!-- Bouton Classement -->
+                            
                         </div>
                     </div>
                 </div>
@@ -317,10 +254,11 @@
 .challenge-detail-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     background: white;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%);
 }
 
 .challenge-detail-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px) scale(1.02);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
 }
 
@@ -346,6 +284,7 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .challenge-detail-card {
+        clip-path: none; /* Supprimer l'effet de clip-path sur mobile */
         margin: 0 -15px;
         border-radius: 0;
     }
@@ -361,15 +300,14 @@
 }
 
 /* Animation pour la barre de progression */
-.progress-bar {
-    transition: width 1.5s ease-in-out;
+@keyframes progressAnimation {
+    0% { width: 0%; }
+    100% { width: var(--progress-width); }
 }
 
-/* Styles pour les statuts */
-.badge.bg-warning { background: linear-gradient(135deg, #ffc107, #fd7e14) !important; }
-.badge.bg-info { background: linear-gradient(135deg, #17a2b8, #0dcaf0) !important; }
-.badge.bg-success { background: linear-gradient(135deg, #28a745, #20c997) !important; }
-.badge.bg-danger { background: linear-gradient(135deg, #dc3545, #bb2d3b) !important; }
+.progress-bar {
+    animation: progressAnimation 1.5s ease-in-out;
+}
 </style>
 @endsection
 
@@ -388,16 +326,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 200);
 
     // Prévisualisation du nom du fichier
-    const fileInput = document.getElementById('preuve');
-    if (fileInput) {
-        fileInput.addEventListener('change', function() {
-            if (this.files.length > 0) {
-                const fileName = this.files[0].name;
-                // Vous pourriez afficher le nom du fichier dans un élément
-                console.log('Fichier sélectionné:', fileName);
-            }
-        });
-    }
+    window.previewFileName = function(input) {
+        if (input.files.length > 0) {
+            const fileName = input.files[0].name;
+            // Vous pourriez afficher le nom du fichier quelque part
+            console.log('Fichier sélectionné:', fileName);
+        }
+    };
 
     // Confirmation de participation
     const participateForm = document.querySelector('form[action*="participate"]');
@@ -414,16 +349,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 500);
             }
         });
-    }
-
-    // Animation pour la barre de progression
-    const progressBar = document.querySelector('.progress-bar');
-    if (progressBar) {
-        const width = progressBar.style.width;
-        progressBar.style.width = '0%';
-        setTimeout(() => {
-            progressBar.style.width = width;
-        }, 500);
     }
 });
 

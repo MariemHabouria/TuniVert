@@ -21,22 +21,14 @@
             data: [50, 110, 60, 290, 200, 115, 130, 170, 90, 210, 240, 280, 200],
             backgroundColor: saleGradientBg,
             borderColor: [
-<<<<<<< HEAD
-                '#006D2C',
-=======
-                '#006d2c',
->>>>>>> formation
+                '#1F3BB3',
             ],
             borderWidth: 1.5,
             fill: true, // 3: no fill
             pointBorderWidth: 1,
             pointRadius: [4, 4, 4, 4, 4,4, 4, 4, 4, 4,4, 4, 4],
             pointHoverRadius: [2, 2, 2, 2, 2,2, 2, 2, 2, 2,2, 2, 2],
-<<<<<<< HEAD
-            pointBackgroundColor: ['#006D2C)', '#006D2C', '#006D2C', '#006D2C','#006D2C)', '#006D2C', '#006D2C', '#006D2C','#006D2C)', '#006D2C', '#006D2C', '#006D2C','#006D2C)'],
-=======
-            pointBackgroundColor: ['#006d2c', '#006d2c', '#006d2c', '#006d2c','#006d2c', '#006d2c', '#006d2c', '#006d2c','#006d2c', '#006d2c', '#006d2c', '#006d2c','#006d2c'],
->>>>>>> formation
+            pointBackgroundColor: ['#1F3BB3)', '#1F3BB3', '#1F3BB3', '#1F3BB3','#1F3BB3)', '#1F3BB3', '#1F3BB3', '#1F3BB3','#1F3BB3)', '#1F3BB3', '#1F3BB3', '#1F3BB3','#1F3BB3)'],
             pointBorderColor: ['#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff','#fff',],
         },{
           label: 'Last week',
@@ -205,15 +197,9 @@
           },{
             label: 'This week',
             data: [215, 290, 210, 250, 290, 230, 290, 210, 280, 220, 190, 300],
-<<<<<<< HEAD
-            backgroundColor: "#006D2C",
+            backgroundColor: "#1F3BB3",
             borderColor: [
-                '#006D2C',
-=======
-            backgroundColor: "#006d2c",
-            borderColor: [
-                '#006d2c',
->>>>>>> formation
+                '#1F3BB3',
             ],
             borderWidth: 0,
               barPercentage: 0.35,
@@ -383,21 +369,13 @@
           datasets: [{
             data: [40, 20, 30, 10],
             backgroundColor: [
-<<<<<<< HEAD
-              "#006D2C",
-=======
-              "#006d2c",
->>>>>>> formation
+              "#1F3BB3",
               "#FDD0C7",
               "#52CDFF",
               "#81DADA"
             ],
             borderColor: [
-<<<<<<< HEAD
-              "#006D2C",
-=======
-              "#006d2c",
->>>>>>> formation
+              "#1F3BB3",
               "#FDD0C7",
               "#52CDFF",
               "#81DADA"

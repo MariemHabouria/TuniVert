@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Challenge;
 use App\Models\ParticipantChallenge;
+use App\Models\ScoreChallenge;
 
 class ChallengeSeeder extends Seeder
 {
@@ -21,17 +22,25 @@ class ChallengeSeeder extends Seeder
                 'organisateur_id' => $association->id,
             ]);
 
-            // 3️⃣ Pour chaque challenge, créer 5 participants avec score automatique
+            // 3️⃣ Pour chaque challenge, créer 5 participants
             $challenges->each(function ($challenge) use ($users) {
-                ParticipantChallenge::factory(5)->create()->each(function ($participant) use ($challenge, $users) {
+                $participants = ParticipantChallenge::factory(5)->make()->each(function ($participant) use ($challenge, $users) {
                     $participant->challenge_id = $challenge->id;
+
+                    // Choisir un utilisateur aléatoire
                     $participant->utilisateur_id = $users->random()->id;
+
+                    // Choisir une preuve aléatoire : image ou vidéo
                     $participant->preuve = rand(0,1) 
                         ? 'https://via.placeholder.com/640x480.png?text=image' 
                         : 'https://sample-videos.com/video123/mp4/240/big_buck_bunny_240p_1mb.mp4';
+
                     $participant->save();
 
-                    // $participant->score est déjà créé via afterCreating
+                    // Créer le score pour ce participant
+                    ScoreChallenge::factory()->create([
+                        'participant_challenge_id' => $participant->id,
+                    ]);
                 });
             });
         });

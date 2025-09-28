@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory; // <- Ajouté
 
 class ScoreChallenge extends Model
 {
-    use HasFactory;
+    use HasFactory; // <- Ajouté
 
     protected $fillable = [
         'participant_challenge_id', 
@@ -19,6 +19,6 @@ class ScoreChallenge extends Model
 
     public function participant()
     {
-        return $this->belongsTo(ParticipantChallenge::class, 'participant_challenge_id');
+        return $this->belongsTo(\App\Models\ParticipantChallenge::class, 'participant_challenge_id');
     }
 }

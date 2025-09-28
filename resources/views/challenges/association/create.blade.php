@@ -144,12 +144,10 @@
                             <!-- Boutons -->
                             <div class="row mt-5 pt-4">
                                 <div class="col-12 d-flex justify-content-between">
-                                    <a href="{{ route('challenges.association.index') }}" class="btn btn-secondary btn-lg px-4">
-    <i class="fas fa-arrow-left me-2"></i>Retour aux Challenges
-</a>
-
-                                   
-
+                                    <a href="{{ route('challenges.index') }}" class="btn btn-secondary btn-lg px-4" 
+                                       style="border-radius: 10px; background: var(--bs-gray); border: none;">
+                                        <i class="fas fa-arrow-left me-2"></i>Retour aux Challenges
+                                    </a>
                                     <button type="submit" class="btn btn-success btn-lg px-5"
                                             style="border-radius: 10px; background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-success) 100%); border: none;">
                                         <i class="fas fa-plus me-2"></i>Créer le Challenge

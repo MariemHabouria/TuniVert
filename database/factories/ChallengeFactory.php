@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User;
 use App\Models\Challenge;
 
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Challenge>
+ */
 class ChallengeFactory extends Factory
 {
     protected $model = Challenge::class;
@@ -27,7 +30,6 @@ class ChallengeFactory extends Factory
             ]),
             'difficulte'      => $this->faker->randomElement(['facile','moyen','difficile']),
             'objectif'        => $this->faker->numberBetween(10,100),
-            'actif'           => $this->faker->boolean(80),
         ];
     }
 }

@@ -57,7 +57,7 @@
       const x = (e.clientX-cx)/(rect.width/2), y=(e.clientY-cy)/(rect.height/2);
       card.style.setProperty('--px', ((e.clientX-rect.left)/rect.width*100).toFixed(2)+'%');
       card.style.setProperty('--py', ((e.clientY-rect.top)/rect.height*100).toFixed(2)+'%');
-      card.style.transform = rotateX(${(y*maxTilt).toFixed(2)}deg) rotateY(${(-x*maxTilt).toFixed(2)}deg);
+      card.style.transform = `rotateX(${(y*maxTilt).toFixed(2)}deg) rotateY(${(-x*maxTilt).toFixed(2)}deg)`;
     }
     function onMove(e){ if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>setTilt(e)); }
     function reset(){ card.style.transform=''; card.style.removeProperty('--px'); card.style.removeProperty('--py'); rect=null; }

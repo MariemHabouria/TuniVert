@@ -1,78 +1,43 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Challenge;
+
 use App\Models\ParticipantChallenge;
 use App\Models\ScoreChallenge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+
 class ScoreChallengeController extends Controller
 {
-    /**
-     * Ajouter ou mettre à jour un score pour un participant
-     */
+    // Ajouter ou mettre à jour un score pour un participant
     public function storeOrUpdate(Request $request, $participantId)
     {
         $request->validate([
             'points' => 'required|integer|min:0',
         ]);
 
-        $participant = ParticipantChallenge::with('challenge')->findOrFail($participantId);
+        $participant = ParticipantChallenge::findOrFail($participantId);
 
-        // Vérification des permissions
-        if (!Auth::check() || $participant->challenge->organisateur_id != Auth::id()) {
+        // Vérification des permissions (à adapter selon votre système d'authentification)
+        if (!Auth::user() || $participant->challenge->organisateur_id != Auth::id()) {
             abort(403, "Accès refusé");
         }
 
-        // CORRECTION : Vérifier que le participant est validé
-        if ($participant->statut !== 'valide') {
-            return redirect()->back()->with('error', 'Le participant doit être validé avant de pouvoir avoir un score.');
-        }
-
-        // CORRECTION : Utilisation de updateOrCreate avec tous les champs
         $score = ScoreChallenge::updateOrCreate(
             ['participant_challenge_id' => $participantId],
-            [
-                'points' => $request->points,
-                'badge' => $this->determinerBadge($request->points),
-                'date_maj' => now(),
-                'rang' => 0 // Sera recalculé après
-            ]
+            ['points' => $request->points]
         );
 
-        // Recalculer le classement après modification
-        $this->recalculerClassementChallenge($participant->challenge_id);
+        // Définir badge basé sur les points
+        $score->badge = $this->determinerBadge($score->points);
+        $score->save();
 
         return redirect()->back()->with('success', 'Score mis à jour avec succès !');
     }
 
-    /**
-     * Supprimer un score
-     */
-    public function destroy($id)
-    {
-        $score = ScoreChallenge::findOrFail($id);
-        $participant = $score->participant;
-
-        // Vérification des permissions
-        if (!Auth::check() || $participant->challenge->organisateur_id != Auth::id()) {
-            abort(403, "Accès refusé");
-        }
-
-        $challengeId = $participant->challenge_id;
-        $score->delete();
-
-        // Recalculer le classement après suppression
-        $this->recalculerClassementChallenge($challengeId);
-
-        return redirect()->back()->with('success', 'Score supprimé avec succès !');
-    }
-
-    /**
-     * Déterminer le badge selon les points
-     */
+    // Déterminer le badge selon les points
     private function determinerBadge($points)
     {
         if ($points >= 200) return 'Or';
@@ -81,85 +46,80 @@ class ScoreChallengeController extends Controller
         return null;
     }
 
-    /**
-     * Recalculer le classement d'un challenge
-     */
-    private function recalculerClassementChallenge($challengeId)
+    // Supprimer un score
+    public function destroy($id)
     {
-        $participants = ParticipantChallenge::with('score')
-            ->where('challenge_id', $challengeId)
-            ->where('statut', 'valide')
-            ->get()
-            ->sortByDesc(function($participant) {
-                return $participant->score ? $participant->score->points : 0;
-            })
-            ->values();
+        $score = ScoreChallenge::findOrFail($id);
+        $participant = $score->participant;
 
-        foreach ($participants as $index => $participant) {
-            if ($participant->score) {
-                $participant->score->update([
-                    'rang' => $index + 1,
-                    'date_maj' => now()
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Classement d'un challenge spécifique ou du plus récent
-     */
-    public function classement($challengeId = null)
-    {
-        if ($challengeId) {
-            $challenge = $challengeId === 'current'
-                ? Challenge::latest()->firstOrFail()
-                : Challenge::findOrFail($challengeId);
-
-            $participants = ParticipantChallenge::with(['utilisateur', 'score'])
-                ->where('challenge_id', $challenge->id)
-                ->where('statut', 'valide') // CORRECTION : seulement les validés
-                ->get()
-                ->sortByDesc(function($participant) {
-                    return $participant->score ? $participant->score->points : 0;
-                })
-                ->values()
-                ->map(function($participant, $index) {
-                    $participant->current_rang = $index + 1;
-                    return $participant;
-                });
-
-            return view('challenges.participant.classement', compact('participants', 'challenge'));
+        // Vérification des permissions
+        if (!Auth::user() || $participant->challenge->organisateur_id != Auth::id()) {
+            abort(403, "Accès refusé");
         }
 
-        return $this->classementGlobal();
+        $score->delete();
+        return redirect()->back()->with('success', 'Score supprimé avec succès !');
     }
 
-    /**
-     * Classement global (tous challenges confondus)
-     */
-    public function classementGlobal()
-    {
-        // CORRECTION : Utiliser ScoreChallenge pour le classement global
-        $scoresGrouped = ScoreChallenge::with('participant.utilisateur')
+
+public function classement($challengeId = null)
+{
+    if ($challengeId) {
+        // Classement par challenge spécifique
+        if ($challengeId === 'current') {
+            $challenge = Challenge::latest()->firstOrFail();
+        } else {
+            $challenge = Challenge::findOrFail($challengeId);
+        }
+
+        $participants = ParticipantChallenge::with(['utilisateur', 'score'])
+            ->where('challenge_id', $challenge->id)
+            ->where('statut', '!=', 'rejete')
             ->get()
-            ->groupBy('participant.utilisateur_id')
-            ->map(function ($scores, $utilisateurId) {
-                $firstScore = $scores->first();
-                return [
-                    'utilisateur' => $firstScore->participant->utilisateur,
-                    'score_total' => $scores->sum('points'),
-                    'badges' => $scores->pluck('badge')->filter()->unique()->values(),
-                    'utilisateur_id' => $utilisateurId
-                ];
-            })
-            ->sortByDesc('score_total')
+            ->sortByDesc(fn($p) => $p->score->points ?? 0)
             ->values()
-            ->map(function($item, $index) {
-                return (object) array_merge((array)$item, ['rang' => $index + 1]);
-            });
+            ->map(fn($p, $i) => tap($p, fn($p) => $p->rang = $i + 1));
 
-        return view('challenges.participant.classement_global', [
-            'participants' => $scoresGrouped
-        ]);
+        return view('challenges.participant.classement', compact('participants', 'challenge'));
     }
+
+    // Classement global par participant (tous challenges confondus)
+    $participantsGrouped = ParticipantChallenge::with(['utilisateur', 'score'])
+        ->get()
+        ->groupBy('utilisateur_id')
+        ->map(function ($group) {
+            $scoreTotal = $group->sum(fn($p) => $p->score->points ?? 0);
+            return [
+                'utilisateur' => $group->first()->utilisateur,
+                'score_total' => $scoreTotal
+            ];
+        })
+        ->sortByDesc('score_total')
+        ->values()
+        ->map(fn($item, $i) => (object) array_merge((array)$item, ['rang' => $i + 1]));
+
+    return view('challenges.participant.classement_global', ['participants' => $participantsGrouped]);
+}
+public function classementGlobal()
+{
+    // Récupérer tous les participants avec leurs scores et utilisateurs
+    $participantsGrouped = ParticipantChallenge::with(['utilisateur', 'score'])
+        ->get()
+        ->groupBy('utilisateur_id') // Regrouper par utilisateur
+        ->map(function ($group) {
+            $scoreTotal = $group->sum(fn($p) => $p->score->points ?? 0);
+            return [
+                'utilisateur' => $group->first()->utilisateur,
+                'score_total' => $scoreTotal,
+                'badges' => $group->pluck('score.badge')->filter() // badges existants
+            ];
+        })
+        ->sortByDesc('score_total') // Tri décroissant
+        ->values()
+        ->map(fn($item, $i) => (object) array_merge((array)$item, ['rang' => $i + 1]));
+
+    return view('challenges.participant.classement_global', [
+        'participants' => $participantsGrouped
+    ]);
+}
 }
