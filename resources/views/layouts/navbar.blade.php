@@ -99,34 +99,39 @@
         Donations
     </a>
     <div class="dropdown-menu m-0 bg-secondary rounded-0">
-        <!-- Page publique -->
-        <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
-            <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
-        </a>
-
         @auth
             @if(Auth::user()->role === 'association')
-                <!-- Association Dashboard - Featured -->
+                <!-- Association Dashboard - Only for association users -->
                 <a href="{{ route('donations.dashboard') }}" class="dropdown-item bg-primary text-white {{ request()->routeIs('donations.dashboard') ? 'active' : '' }}">
                     <i class="fas fa-tachometer-alt me-2"></i><strong>Dashboard Association</strong>
                     <small class="d-block text-light">Gestion & Analytics</small>
                 </a>
-                <div class="dropdown-divider"></div>
-            @endif
-            
-            <!-- Créer un don -->
-            <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
-                <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
-            </a>
+            @else
+                <!-- Regular user options -->
+                <!-- Page publique -->
+                <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                    <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+                </a>
+                
+                <!-- Créer un don -->
+                <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
+                </a>
 
-            <!-- Historique des dons -->
-            <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
-                <i class="fas fa-history me-2"></i>Historique
-            </a>
+                <!-- Historique des dons -->
+                <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
+                    <i class="fas fa-history me-2"></i>Historique
+                </a>
+            @endif
         @else
+            <!-- Guest user options -->
+            <!-- Page publique -->
+            <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+            </a>
             <div class="dropdown-divider"></div>
             <span class="dropdown-item text-muted">
-                <i class="fas fa-lock me-2"></i>Connectez-vous pour donner
+                <i class="fas fa-lock me-2"></i>Connectez-vous pour plus d'options
             </span>
         @endauth
     </div>
