@@ -134,8 +134,9 @@
                                         <i class="fas fa-users me-1" style="color: var(--bs-primary);"></i>Participants:
                                     </small>
                                     <small class="text-muted">
-                                        {{ $challenge->participations_count ?? 0 }}
-                                    </small>
+    {{ $challenge->participants_count }}
+</small>
+
                                 </div>
                             </div>
 

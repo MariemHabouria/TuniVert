@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ParticipantChallenge;
 use App\Models\User;
 use App\Models\Challenge;
+use App\Models\ScoreChallenge;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ParticipantChallenge>
@@ -16,13 +17,10 @@ class ParticipantChallengeFactory extends Factory
 
     public function definition(): array
     {
-        // Choix aléatoire entre 'image' ou 'video'
         $typePreuve = $this->faker->randomElement(['image', 'video']);
-
-        // Génération du lien selon le type
         $preuve = $typePreuve === 'image'
-            ? $this->faker->imageUrl(640, 480, 'nature')      // image
-            : $this->faker->url() . '/video.mp4';             // vidéo fictive
+            ? $this->faker->imageUrl(640, 480, 'nature')
+            : $this->faker->url() . '/video.mp4';
 
         return [
             'challenge_id'   => Challenge::factory(),
@@ -30,5 +28,18 @@ class ParticipantChallengeFactory extends Factory
             'statut'         => $this->faker->randomElement(['en_cours','complet','annule']),
             'preuve'         => $preuve,
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (ParticipantChallenge $participant) {
+            ScoreChallenge::factory()->create([
+                'participant_challenge_id' => $participant->id,
+                'points' => rand(10, 100),
+                'rang' => 1,
+                'badge' => 'bronze',
+                'date_maj' => now(),
+            ]);
+        });
     }
 }

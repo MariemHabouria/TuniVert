@@ -30,6 +30,7 @@ class ChallengeFactory extends Factory
             ]),
             'difficulte'      => $this->faker->randomElement(['facile','moyen','difficile']),
             'objectif'        => $this->faker->numberBetween(10,100),
+            'actif'           => $this->faker->boolean(80), // 80% de chances que le challenge soit actif
         ];
     }
 }

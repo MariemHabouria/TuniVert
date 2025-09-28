@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Challenge;
+use App\Models\ScoreChallenge; // <- IMPORT DU MODELE
 
 class AdminController extends Controller
 {
@@ -14,8 +15,7 @@ class AdminController extends Controller
     private function checkAdmin()
     {
         if (!Auth::check()) {
-            // Redirection immédiate si pas connecté
-            return redirect()->route('admin.login')->send();
+            return redirect()->route('admin.login');
         }
 
         if (Auth::user()->role !== 'admin') {
@@ -93,15 +93,13 @@ class AdminController extends Controller
     /**
      * Challenges
      */
-public function challengesIndex()
+    public function challengesIndex()
     {
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        // ✅ Récupérer tous les challenges avec le nombre de participants
         $challenges = Challenge::withCount('participants')->get();
 
-        // ✅ Envoyer à la vue
         return view('admin.challenges.index', compact('challenges'));
     }
 
@@ -118,11 +116,75 @@ public function challengesIndex()
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        // ✅ Charger un challenge avec ses participants
         $challenge = Challenge::with('participants')->findOrFail($id);
 
         return view('admin.challenges.participations', compact('challenge'));
     }
+
+    public function challengesScores($challengeId)
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        $challenge = Challenge::with(['participants.utilisateur', 'participants.score'])->findOrFail($challengeId);
+
+        return view('admin.challenges.scores', compact('challenge'));
+    }
+
+ public function allScores()
+{
+    $check = $this->checkAdmin();
+    if ($check !== true) return $check;
+
+    // Charger les participants et leurs scores
+    $challenges = Challenge::with(['participants.utilisateur', 'participants.score'])->get();
+
+    // Compter les badges en normalisant en minuscules
+    $badgesStats = ScoreChallenge::selectRaw('LOWER(badge) as badge, COUNT(*) as count')
+        ->whereNotNull('badge')
+        ->where('badge', '!=', '')
+        ->groupBy('badge')
+        ->pluck('count', 'badge')
+        ->toArray();
+
+    // Nombre total de participants
+    $totalParticipants = $challenges->sum(fn($challenge) => $challenge->participants->count());
+
+    // Total des points
+    $totalPoints = $challenges->sum(fn($challenge) => 
+        $challenge->participants->sum(fn($p) => $p->points)
+    );
+
+    // Points moyens par participant
+    $pointsMoyens = $totalParticipants > 0 ? round($totalPoints / $totalParticipants, 2) : 0;
+
+    $stats = [
+        'total_challenges' => $challenges->count(),
+        'total_participants' => $totalParticipants,
+        'total_points' => $totalPoints,
+        'points_moyens' => $pointsMoyens,
+        'badges_count' => [
+            'Or' => $badgesStats['or'] ?? 0,
+            'Argent' => $badgesStats['argent'] ?? 0,
+            'Bronze' => $badgesStats['bronze'] ?? 0,
+        ]
+    ];
+
+    return view('admin.challenges.all_scores', compact('challenges', 'stats'));
+}
+public function toggleChallenge($id)
+{
+    $check = $this->checkAdmin();
+    if ($check !== true) return $check;
+
+    $challenge = Challenge::findOrFail($id);
+    $challenge->actif = !$challenge->actif;
+    $challenge->save();
+
+    return redirect()->back()->with('success', 'Le statut du challenge a été mis à jour.');
+}
+
+
 
     /**
      * Forums
