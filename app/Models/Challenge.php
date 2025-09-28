@@ -18,28 +18,19 @@ class Challenge extends Model
         'categorie', 
         'difficulte', 
         'objectif',
-        'actif', // nouveau champ pour bloquer/débloquer
+        'actif',
     ];
 
-    /**
-     * Relation avec l'organisateur (utilisateur)
-     */
     public function organisateur()
     {
         return $this->belongsTo(User::class, 'organisateur_id');
     }
 
-    /**
-     * Relation avec les participants
-     */
     public function participants()
     {
         return $this->hasMany(ParticipantChallenge::class);
     }
 
-    /**
-     * Vérifie si le challenge est actif
-     */
     public function isActif()
     {
         return $this->actif;

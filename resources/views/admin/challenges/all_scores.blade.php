@@ -164,15 +164,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     // CORRECTION : Définir les couleurs en JavaScript
     const colors = {
-        primary: '#004C21',      // Vert principal
-        secondary: '#F3E0C6',    // Beige secondaire
-        light: '#F2F2F2',        // Gris clair
-        dark: '#222222',         // Noir
-        success: '#28a745',      // Vert succès
-        info: '#17a2b8',         // Bleu info
-        warning: '#ffc107',      // Jaune warning
-        danger: '#dc3545'        // Rouge danger
-    };
+    primary: '#006D2C',     // Vert principal
+    secondary: '#F5F0E6',   // Beige clair
+    light: '#F8F9FA',       // Gris très clair
+    dark: '#212121',        // Gris foncé
+    success: '#28A745',     // Vert succès
+    info: '#1E88E5',        // Bleu clair
+    warning: '#F9A825',     // Jaune doré
+    danger: '#E53935'       // Rouge vif
+};
 
     // Préparer les données pour les graphiques
     @php
@@ -454,39 +454,39 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .bg-primary {
-    background-color: #004C21 !important;
-}
-
-.bg-success {
-    background-color: #28a745 !important;
-}
-
-.bg-info {
-    background-color: #17a2b8 !important;
-}
-
-.bg-warning {
-    background-color: #ffc107 !important;
+    background-color: #006D2C !important;
 }
 
 .text-primary {
-    color: #004C21 !important;
+    color: #006D2C !important;
 }
 
 .border-left-primary {
-    border-left: 4px solid #004C21 !important;
+    border-left: 4px solid #006D2C !important;
+}
+
+.bg-success {
+    background-color: #28A745 !important;
+}
+
+.bg-info {
+    background-color: #1E88E5 !important;
+}
+
+.bg-warning {
+    background-color: #F9A825 !important;
 }
 
 .border-left-success {
-    border-left: 4px solid #28a745 !important;
+    border-left: 4px solid #28A745 !important;
 }
 
 .border-left-info {
-    border-left: 4px solid #17a2b8 !important;
+    border-left: 4px solid #1E88E5 !important;
 }
 
 .border-left-warning {
-    border-left: 4px solid #ffc107 !important;
+    border-left: 4px solid #F9A825 !important;
 }
 
 .chart-container {

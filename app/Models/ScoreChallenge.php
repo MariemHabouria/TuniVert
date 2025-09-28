@@ -17,11 +17,8 @@ class ScoreChallenge extends Model
         'date_maj'
     ];
 
-    /**
-     * Relation inverse vers ParticipantChallenge
-     */
     public function participant()
     {
-        return $this->belongsTo(\App\Models\ParticipantChallenge::class, 'participant_challenge_id');
+        return $this->belongsTo(ParticipantChallenge::class, 'participant_challenge_id');
     }
 }

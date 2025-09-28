@@ -8,9 +8,6 @@ use App\Models\User;
 use App\Models\Challenge;
 use App\Models\ScoreChallenge;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ParticipantChallenge>
- */
 class ParticipantChallengeFactory extends Factory
 {
     protected $model = ParticipantChallenge::class;
@@ -37,9 +34,11 @@ class ParticipantChallengeFactory extends Factory
                 'participant_challenge_id' => $participant->id,
                 'points' => rand(10, 100),
                 'rang' => 1,
-                'badge' => 'bronze',
+                'badge' => ['bronze','argent','or'][array_rand(['bronze','argent','or'])],
                 'date_maj' => now(),
             ]);
+
+            $participant->refresh(); // recharge le score lié pour points/badge
         });
     }
 }
