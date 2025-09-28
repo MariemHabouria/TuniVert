@@ -168,4 +168,97 @@ Route::resource('alertes', AlerteForumController::class)->only(['index','show'])
 | 404 Fallback
 |--------------------------------------------------------------------------
 */
+// ===== ROUTES ADMIN (application wide) =====
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Login Admin accessible sans auth
+    Route::get('/login', [AuthController::class, 'showAdminLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'adminLogin'])->name('login.submit'); 
+    Route::post('/logout', [AuthController::class, 'adminLogout'])->name('logout');
+
+    // Routes admin protégées
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    
+    Route::prefix('utilisateurs')->name('utilisateurs.')->group(function () {
+        Route::get('/', [AdminController::class, 'utilisateursIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'utilisateursCreate'])->name('create');
+        Route::get('/roles', [AdminController::class, 'utilisateursRoles'])->name('roles');
+    });
+
+    Route::prefix('evenements')->name('evenements.')->group(function () {
+        Route::get('/', [AdminController::class, 'evenementsIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'evenementsCreate'])->name('create');
+        Route::get('/categories', [AdminController::class, 'evenementsCategories'])->name('categories');
+    });
+
+    Route::prefix('challenges')->name('challenges.')->group(function () {
+        Route::get('/', [AdminController::class, 'challengesIndex'])->name('index');
+
+        // Participations d’un challenge
+        Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])
+            ->name('participations');
+
+        Route::get('/scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
+
+        // Toggle challenge (bloquer/débloquer)
+        Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');
+    });
+
+    Route::prefix('forums')->name('forums.')->group(function () {
+        Route::get('/', [AdminController::class, 'forumsIndex'])->name('index');
+        Route::get('/categories', [AdminController::class, 'forumsCategories'])->name('categories');
+        Route::get('/moderations', [AdminController::class, 'forumsModerations'])->name('moderations');
+    });
+
+    Route::prefix('formations')->name('formations.')->group(function () {
+        Route::get('/', [AdminController::class, 'formationsIndex'])->name('index');
+        Route::get('/create', [AdminController::class, 'formationsCreate'])->name('create');
+        Route::get('/inscriptions', [AdminController::class, 'formationsInscriptions'])->name('inscriptions');
+    });
+
+    Route::prefix('donations')->name('donations.')->group(function () {
+        Route::get('/', [AdminController::class, 'donationsIndex'])->name('index');
+        Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
+        Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
+    });
+
+    Route::prefix('ui-features')->name('ui-features.')->group(function () {
+        Route::get('/buttons', [AdminController::class, 'uiButtons'])->name('buttons');
+        Route::get('/typography', [AdminController::class, 'uiTypography'])->name('typography');
+    });
+
+    Route::prefix('forms')->name('forms.')->group(function () {
+        Route::get('/basic', [AdminController::class, 'formsBasic'])->name('basic');
+    });
+
+    Route::prefix('charts')->name('charts.')->group(function () {
+        Route::get('/chartjs', [AdminController::class, 'chartsChartjs'])->name('chartjs');
+    });
+
+    Route::prefix('tables')->name('tables.')->group(function () {
+        Route::get('/basic', [AdminController::class, 'tablesBasic'])->name('basic');
+    });
+});
+
+// Paymee return/cancel (public)
+Route::get('/payments/paymee/return', [DonationController::class, 'paymeeReturn'])->name('payments.paymee.return');
+Route::get('/payments/paymee/cancel', [DonationController::class, 'paymeeCancel'])->name('payments.paymee.cancel');
+
+// TestPay checkout and cancel (public)
+if (config('services.testpay.enabled')) {
+    Route::get('/payments/test/checkout', [TestPaymentController::class, 'checkout'])->name('payments.test.checkout');
+    Route::get('/payments/test/cancel', [TestPaymentController::class, 'cancel'])->name('payments.test.cancel');
+}
+
+// Paymee webhook (public API, CSRF exempt via api middleware)
+Route::post('/webhooks/paymee', [DonationController::class, 'paymeeWebhook'])
+    ->name('webhooks.paymee')
+    ->middleware('api');
+///
+Route::prefix('admin')->name('admin.')->group(function () {
+    // ... autres routes admin ...
+
+    // 🔥 Page de gestion des alertes
+    Route::get('/alertes', [AdminController::class, 'alertesIndex'])->name('alertes.index');
+});
+// 404 fallback
 Route::fallback(fn () => abort(404));

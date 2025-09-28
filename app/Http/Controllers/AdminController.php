@@ -5,16 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Challenge;
+use App\Models\Forum;
+use App\Models\AlerteForum;
+use App\Models\User;
 
 class AdminController extends Controller
 {
     /**
-     * Vérifier si l'utilisateur est admin
+     * Vérifie si l'utilisateur est admin
      */
     private function checkAdmin()
     {
         if (!Auth::check()) {
-            // Redirection immédiate si pas connecté
             return redirect()->route('admin.login')->send();
         }
 
@@ -26,19 +28,34 @@ class AdminController extends Controller
     }
 
     /**
-     * Dashboard Admin
+     * Dashboard principal
      */
-    public function dashboard()
-    {
-        $check = $this->checkAdmin();
-        if ($check !== true) return $check;
+   public function dashboard()
+{
+    $check = $this->checkAdmin();
+    if ($check !== true) return $check;
 
-        return view('admin.dashboard.index');
-    }
+    // 🔥 Statistiques
+    $forumsCount   = Forum::count();
+    $topicsCount   = Forum::count();        // si pas de table "topics", garder Forum
+    $messagesCount = AlerteForum::count();
+    $membersCount  = User::count();
 
-    /**
-     * Gestion des utilisateurs
-     */
+    // 🔥 Liste des derniers forums (par ex. 10 derniers)
+    $forums = Forum::latest()->take(10)->get();
+
+    return view('admin.dashboard.index', compact(
+        'forumsCount',
+        'topicsCount',
+        'messagesCount',
+        'membersCount',
+        'forums'             // 👉 ajout ici
+    ));
+}
+
+    /* ==============================
+     *     UTILISATEURS
+     * ==============================*/
     public function utilisateursIndex()
     {
         $check = $this->checkAdmin();
@@ -63,9 +80,9 @@ class AdminController extends Controller
         return view('admin.utilisateurs.roles');
     }
 
-    /**
-     * Événements
-     */
+    /* ==============================
+     *     ÉVÉNEMENTS
+     * ==============================*/
     public function evenementsIndex()
     {
         $check = $this->checkAdmin();
@@ -90,18 +107,17 @@ class AdminController extends Controller
         return view('admin.evenements.categories');
     }
 
-    /**
-     * Challenges
-     */
-public function challengesIndex()
+    /* ==============================
+     *     CHALLENGES
+     * ==============================*/
+    public function challengesIndex()
     {
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        // ✅ Récupérer tous les challenges avec le nombre de participants
+        // Charger les challenges avec le nombre de participants
         $challenges = Challenge::withCount('participants')->get();
 
-        // ✅ Envoyer à la vue
         return view('admin.challenges.index', compact('challenges'));
     }
 
@@ -118,22 +134,23 @@ public function challengesIndex()
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        // ✅ Charger un challenge avec ses participants
         $challenge = Challenge::with('participants')->findOrFail($id);
 
         return view('admin.challenges.participations', compact('challenge'));
     }
 
-    /**
-     * Forums
-     */
+    /* ==============================
+     *     FORUMS
+     * ==============================*/
     public function forumsIndex()
-    {
-        $check = $this->checkAdmin();
-        if ($check !== true) return $check;
+{
+    $this->checkAdmin();
 
-        return view('admin.forums.index');
-    }
+    // Utiliser paginate() au lieu de all()
+    $forums = Forum::orderBy('created_at', 'desc')->paginate(10);
+
+    return view('admin.forums.index', compact('forums'));
+}
 
     public function forumsCategories()
     {
@@ -150,10 +167,21 @@ public function challengesIndex()
 
         return view('admin.forums.moderations');
     }
+public function alertesIndex()
+{
+    $check = $this->checkAdmin();
+    if ($check !== true) return $check;
 
-    /**
-     * Formations
-     */
+    $alertes = AlerteForum::with('user')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+
+    // ✅ Vue à l’intérieur du sous-dossier "alertes"
+    return view('admin.alertes.index', compact('alertes'));
+}
+    /* ==============================
+     *     FORMATIONS
+     * ==============================*/
     public function formationsIndex()
     {
         $check = $this->checkAdmin();
@@ -178,9 +206,9 @@ public function challengesIndex()
         return view('admin.formations.inscriptions');
     }
 
-    /**
-     * Donations
-     */
+    /* ==============================
+     *     DONATIONS
+     * ==============================*/
     public function donationsIndex()
     {
         $check = $this->checkAdmin();
@@ -205,9 +233,9 @@ public function challengesIndex()
         return view('admin.donations.rapports');
     }
 
-    /**
-     * UI Features
-     */
+    /* ==============================
+     *     UI FEATURES
+     * ==============================*/
     public function uiButtons()
     {
         $check = $this->checkAdmin();
@@ -224,9 +252,9 @@ public function challengesIndex()
         return view('admin.ui-features.typography');
     }
 
-    /**
-     * Forms
-     */
+    /* ==============================
+     *     FORMS
+     * ==============================*/
     public function formsBasic()
     {
         $check = $this->checkAdmin();
@@ -235,9 +263,9 @@ public function challengesIndex()
         return view('admin.forms.basic');
     }
 
-    /**
-     * Charts
-     */
+    /* ==============================
+     *     CHARTS
+     * ==============================*/
     public function chartsChartjs()
     {
         $check = $this->checkAdmin();
@@ -246,9 +274,9 @@ public function challengesIndex()
         return view('admin.charts.chartjs');
     }
 
-    /**
-     * Tables
-     */
+    /* ==============================
+     *     TABLES
+     * ==============================*/
     public function tablesBasic()
     {
         $check = $this->checkAdmin();

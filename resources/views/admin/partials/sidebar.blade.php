@@ -64,16 +64,27 @@
                     <li class="nav-item {{ request()->is('admin/challenges') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.challenges.index') }}">Tous les challenges</a>
                     </li>
-                    <li class="nav-item {{ request()->is('admin/challenges/create') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.challenges.create') }}">Nouveau challenge</a>
-                    </li>
-                    <li class="nav-item {{ request()->is('admin/challenges/participations') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.challenges.participations') }}">Participations</a>
-                    </li>
+                    
+                 
                 </ul>
             </div>
         </li>
-        
+        <!-- Alertes -->
+<li class="nav-item {{ request()->is('admin/alertes*') ? 'active' : '' }}">
+    <a class="nav-link" data-bs-toggle="collapse" href="#alertes" aria-expanded="false">
+        <i class="menu-icon mdi mdi-alert-circle-outline"></i>
+        <span class="menu-title">Alertes</span>
+        <i class="menu-arrow"></i>
+    </a>
+    <div class="collapse {{ request()->is('admin/alertes*') ? 'show' : '' }}" id="alertes">
+        <ul class="nav flex-column sub-menu">
+            <li class="nav-item {{ request()->is('admin/alertes') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.alertes.index') }}">Gestion des alertes</a>
+            </li>
+        </ul>
+    </div>
+</li>
+
         <!-- Forums -->
         <li class="nav-item {{ request()->is('admin/forums*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#forums" aria-expanded="false">
@@ -86,12 +97,7 @@
                     <li class="nav-item {{ request()->is('admin/forums') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.forums.index') }}">Gestion des forums</a>
                     </li>
-                    <li class="nav-item {{ request()->is('admin/forums/categories') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.forums.categories') }}">Catégories</a>
-                    </li>
-                    <li class="nav-item {{ request()->is('admin/forums/moderations') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.forums.moderations') }}">Modération</a>
-                    </li>
+                   
                 </ul>
             </div>
         </li>
