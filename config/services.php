@@ -35,4 +35,38 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'currency' => env('STRIPE_CURRENCY', 'usd'),
+    ],
+
+    'paypal' => [
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'secret' => env('PAYPAL_SECRET'),
+        'mode' => env('PAYPAL_MODE', 'sandbox'), // or 'live'
+        'currency' => env('PAYPAL_CURRENCY', env('STRIPE_CURRENCY', 'USD')),
+    ],
+
+    'paymee' => [
+        // API key from Paymee dashboard (Sandbox or Live)
+        'api_key' => env('PAYMEE_API_KEY'),
+        // Mode: sandbox | live (controls which base URL is used)
+        'mode' => env('PAYMEE_MODE', 'sandbox'),
+        // Optional default currency for display/reference only
+        'currency' => env('PAYMEE_CURRENCY', env('STRIPE_CURRENCY', 'TND')),
+    ],
+
+    'testpay' => [
+        'enabled' => env('TEST_PAYMENTS_ENABLED', false),
+    ],
+
+    // Bank transfer coordinates (editable via .env)
+    'bank' => [
+        'beneficiary' => env('BANK_BENEFICIARY', 'TuniVert'),
+        'iban' => env('BANK_IBAN', 'TN59 1000 0000 0000 0000 0000'),
+        'swift' => env('BANK_SWIFT', 'TUNIVERTXXX'),
+        'note' => env('BANK_TRANSFER_NOTE', 'Utilisez la référence reçue par email comme motif du virement.'),
+    ],
+
 ];

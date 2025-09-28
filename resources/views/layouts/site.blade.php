@@ -61,7 +61,7 @@
           {{-- Pages principales --}}
           <li class="nav-item"><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a></li>
           <li class="nav-item"><a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a></li>
-          <li class="nav-item"><a href="{{ route('events') }}" class="nav-link {{ request()->routeIs('events') ? 'active' : '' }}">Événements</a></li>
+          <li class="nav-item"><a href="{{ route('events.browse') }}" class="nav-link {{ request()->routeIs('events.browse') ? 'active' : '' }}">Événements</a></li>
           <li class="nav-item"><a href="{{ route('service') }}" class="nav-link {{ request()->routeIs('service') ? 'active' : '' }}">Formations</a></li>
           <li class="nav-item"><a href="{{ route('causes') }}" class="nav-link {{ request()->routeIs('causes') ? 'active' : '' }}">Donations</a></li>
           <li class="nav-item"><a href="{{ route('blog') }}" class="nav-link {{ request()->routeIs('blog') ? 'active' : '' }}">Forums</a></li>

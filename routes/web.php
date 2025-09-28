@@ -10,17 +10,37 @@ use App\Http\Controllers\FormationController;
 use App\Http\Controllers\FormationInscriptionController;
 use App\Http\Controllers\AvisFormationController;
 use App\Http\Controllers\RessourceFormationController;
+// Donations / Events additions
+use App\Http\Controllers\DonationController;
+use App\Http\Controllers\DonationAdminController;
+use App\Http\Controllers\DonationOrganizerController;
+use App\Http\Controllers\TestPaymentController;
+use App\Http\Controllers\EventsController;
+
+// Include QR verification route (donations branch)
+require __DIR__.'/qr-verify.php';
 
 // Pages publiques
 Route::view('/', 'pages.index')->name('home');
 
+// Union des pages (HEAD + donations)
 $pages = ['about','blog','causes','contact','donation','events','gallery','service'];
 foreach ($pages as $page) {
     Route::view("/{$page}", "pages.{$page}")->name($page);
     Route::view("/{$page}.html", "pages.{$page}");
 }
 
-// Auth routes pour invités
+// Events routes (dynamic listing)
+Route::get('/events', [EventsController::class, 'index'])->name('events.browse');
+Route::get('/events/{id}', [EventsController::class, 'show'])->name('events.show');
+
+// Alias pour legacy chemins
+Route::view('/index', 'pages.index');
+Route::view('/index.html', 'pages.index');
+Route::view('/services', 'pages.service');
+Route::view('/services.html', 'pages.service');
+
+// Auth routes (invités uniquement)
 Route::middleware('guest')->group(function () {
     Route::get('/login',    [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login',   [AuthController::class, 'login'])->name('login.submit');
@@ -34,7 +54,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
-// Routes protégées pour utilisateurs connectés
+// Routes protégées pour utilisateurs connectés (profil + formations + donations)
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
 
@@ -69,6 +89,35 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['auth'])->get('/mes-formations/stats', [FormationController::class, 'dashboard'])
         ->name('formations.dashboard');
+
+    // Déconnexion
+    // Donations (donor actions)
+    Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
+    Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
+    Route::get('/donations/history', [DonationController::class, 'history'])->name('donations.history');
+
+    // Payments - Stripe
+    Route::post('/payments/stripe/intent', [DonationController::class, 'createStripeIntent'])->name('payments.stripe.intent');
+    Route::post('/payments/stripe/confirm', [DonationController::class, 'confirmStripePayment'])->name('payments.stripe.confirm');
+
+    // Payments - PayPal
+    Route::post('/payments/paypal/create-order', [DonationController::class, 'createPayPalOrder'])->name('payments.paypal.create');
+    Route::post('/payments/paypal/capture', [DonationController::class, 'capturePayPalOrder'])->name('payments.paypal.capture');
+
+    // Payments - Paymee (e‑DINAR)
+    Route::post('/payments/paymee/create', [DonationController::class, 'createPaymeePayment'])->name('payments.paymee.create');
+
+    // Payments - Test (mock) - only if enabled
+    if (config('services.testpay.enabled')) {
+        Route::post('/payments/test/create', [TestPaymentController::class, 'create'])->name('payments.test.create');
+        Route::post('/payments/test/complete', [TestPaymentController::class, 'complete'])->name('payments.test.complete');
+    }
+
+    // Admin donations listing (simple placeholder separate from admin area)
+    Route::get('/admin/donations', [DonationAdminController::class, 'index'])->name('admin.donations.index');
+
+    // Organizer donations by event
+    Route::get('/organizer/events/{eventId}/donations', [DonationOrganizerController::class, 'byEvent'])->name('organizer.donations.byEvent');
 
     // Déconnexion
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -109,7 +158,7 @@ Route::prefix('scores')->name('scores.')->middleware('auth')->group(function () 
     Route::get('/classement/{challenge}', [ScoreChallengeController::class, 'classement'])->name('classement');
 });
 
-// ===== ROUTES ADMIN =====
+// ===== ROUTES ADMIN (application wide) =====
 Route::prefix('admin')->name('admin.')->group(function () {
     // Login Admin accessible sans auth
     Route::get('/login', [AuthController::class, 'showAdminLoginForm'])->name('login');
@@ -172,3 +221,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/basic', [AdminController::class, 'tablesBasic'])->name('basic');
     });
 });
+
+// Paymee return/cancel (public)
+Route::get('/payments/paymee/return', [DonationController::class, 'paymeeReturn'])->name('payments.paymee.return');
+Route::get('/payments/paymee/cancel', [DonationController::class, 'paymeeCancel'])->name('payments.paymee.cancel');
+
+// TestPay checkout and cancel (public)
+if (config('services.testpay.enabled')) {
+    Route::get('/payments/test/checkout', [TestPaymentController::class, 'checkout'])->name('payments.test.checkout');
+    Route::get('/payments/test/cancel', [TestPaymentController::class, 'cancel'])->name('payments.test.cancel');
+}
+
+// Paymee webhook (public API, CSRF exempt via api middleware)
+Route::post('/webhooks/paymee', [DonationController::class, 'paymeeWebhook'])
+    ->name('webhooks.paymee')
+    ->middleware('api');
+
+// 404 fallback
+Route::fallback(fn () => abort(404));
