@@ -95,6 +95,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
     Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
     Route::get('/donations/history', [DonationController::class, 'history'])->name('donations.history');
+    
+    // Association dashboard
+    Route::get('/donations/dashboard', [DonationController::class, 'associationDashboard'])
+        ->name('donations.dashboard');
 
     // Payments - Stripe
     Route::post('/payments/stripe/intent', [DonationController::class, 'createStripeIntent'])->name('payments.stripe.intent');
