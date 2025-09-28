@@ -116,6 +116,17 @@ Route::middleware('auth')->group(function () {
     // Admin donations listing (simple placeholder separate from admin area)
     Route::get('/admin/donations', [DonationAdminController::class, 'index'])->name('admin.donations.index');
 
+    // Test bank transfer email functionality
+    Route::get('/test-bank-donation', function() {
+        return view('test-bank-donation');
+    })->name('test.bank.donation');
+    Route::post('/test-bank-donation', [DonationController::class, 'testBankTransferEmail'])->name('test.bank.donation.post');
+
+    // Test badge notifications (disabled - no more popups)
+    Route::get('/test-badges', function() {
+        return redirect('/donations/history')->with('success', 'Badge notifications are now disabled. Badges only show in navbar and history page.');
+    })->name('test.badges');
+
     // Organizer donations by event
     Route::get('/organizer/events/{eventId}/donations', [DonationOrganizerController::class, 'byEvent'])->name('organizer.donations.byEvent');
 
