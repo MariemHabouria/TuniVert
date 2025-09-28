@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -27,6 +27,13 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
+        }
+
+        // Complète le nombre d'utilisateurs démo jusqu'à 20
+        $target = 20;
+        $current = User::count();
+        if ($current < $target) {
+            User::factory($target - $current)->create();
         }
 
         // Appelle tous les seeders nécessaires
