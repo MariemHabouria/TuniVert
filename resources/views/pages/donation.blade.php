@@ -515,7 +515,7 @@
                                                             </span>
                                                         </label>
                                                         <input type="password" class="form-control edinar-input" id="edinar_cvv" name="cvv" 
-                                                               placeholder="***" maxlength="4" autocomplete="off" required>
+                                                               placeholder="*" maxlength="4" autocomplete="off" required>
                                                         <div class="invalid-feedback" id="cvvError"></div>
                                                     </div>
                                                 </div>
@@ -526,7 +526,7 @@
                                                             <i class="fas fa-key me-2"></i>Code PIN
                                                         </label>
                                                         <input type="password" class="form-control edinar-input" id="edinar_pin" name="pin" 
-                                                               placeholder="****" maxlength="6" inputmode="numeric" autocomplete="off" required>
+                                                               placeholder="**" maxlength="6" inputmode="numeric" autocomplete="off" required>
                                                         <div class="form-text">
                                                             <i class="fas fa-info-circle me-1"></i>
                                                             Code PIN de votre carte (4 à 6 chiffres)
@@ -957,13 +957,13 @@
                                                                         </div>
                                                                         <div class="col-md-6">
                                                                             <label class="form-label" for="tp_cvv">CVV</label>
-                                                                            <input type="password" class="form-control" id="tp_cvv" name="cvv" placeholder="***" maxlength="4" autocomplete="off">
+                                                                            <input type="password" class="form-control" id="tp_cvv" name="cvv" placeholder="*" maxlength="4" autocomplete="off">
                                                                         </div>
                                                                     </div>
                                                                     <div class="row g-3 mt-1">
                                                                         <div class="col-md-6">
                                                                             <label class="form-label" for="tp_pin">Code PIN</label>
-                                                                            <input type="password" class="form-control" id="tp_pin" name="pin" placeholder="****" maxlength="6" inputmode="numeric" autocomplete="off" required>
+                                                                            <input type="password" class="form-control" id="tp_pin" name="pin" placeholder="**" maxlength="6" inputmode="numeric" autocomplete="off" required>
                                                                             <div class="form-text">4 à 6 chiffres (simulation).</div>
                                                                         </div>
                                                                         <div class="col-md-6">
@@ -1092,7 +1092,7 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label" for="bank_cvv"><i class="fas fa-lock me-1"></i>CVV</label>
-                                                    <input type="password" class="form-control" id="bank_cvv" name="bank_cvv" placeholder="***" maxlength="4" autocomplete="off">
+                                                    <input type="password" class="form-control" id="bank_cvv" name="bank_cvv" placeholder="*" maxlength="4" autocomplete="off">
                                                 </div>
                                             </div>
                                             <small class="text-muted d-block mt-1">Ces informations ne servent qu'à associer votre virement à votre don. Aucun débit par carte n'est effectué.</small>
