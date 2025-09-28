@@ -1,0 +1,240 @@
+/* ====== Thème Tunivert (variables) ====== */
+:root{
+  --brand: #0f8b42;
+  --brand-dark: #0b6b33;
+  --brand-50: rgba(15,139,66,.15);
+  --bs-primary: var(--brand);
+  --bs-primary-rgb: 15,139,66;
+
+  /* Transparence de la CARTE (ajuste ces 3 variables si tu veux) */
+  --card-a1: .0;   /* côté gauche (vert)          */
+  --card-a2: .0;   /* centre (vert clair)         */
+  --card-a3: .0;   /* côté droit (blanc transluc.) */
+}
+
+/* ===== Boutons / Inputs ===== */
+.btn-primary{ background:var(--brand); border-color:var(--brand); }
+.btn-primary:hover,.btn-primary:focus{ background:var(--brand-dark); border-color:var(--brand-dark); }
+
+.form-control:focus,.form-select:focus{
+  border-color: var(--brand);
+  box-shadow: 0 0 0 .2rem var(--brand-50);
+}
+
+.link-brand{ color: var(--brand); text-decoration:none; }
+.link-brand:hover{ color: var(--brand-dark); text-decoration:underline; }
+
+/* ===== Contexte page auth (fond plein écran) ===== */
+.auth-bg{
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% 10%, rgba(255,255,255,.25) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(135deg, #0B6B2F 0%, #4EA853 45%, #9CD97D 100%);
+  background-attachment: fixed;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+/* Variante photo + voile vert */
+.auth-bg.bg-photo{
+  background:
+    linear-gradient(135deg, rgba(11,107,47,.65), rgba(78,168,83,.65)),
+    url("/img/auth-bg.jpg") center / cover no-repeat fixed;
+}
+
+/* ===== Carte Login/Register (glass + transparente) ===== */
+.login-card, .auth-card{
+  max-width: 920px;
+  margin: 56px auto;
+  border-radius: 28px;
+  /* -> Dégradé TRANSPARENT (ajuste --card-a1..a3 plus haut) */
+  background: linear-gradient(
+    135deg,
+    rgba(17,138,58, var(--card-a1)) 0%,
+    rgba(31,185,85, var(--card-a2)) 42%,
+    rgba(255,255,255, var(--card-a3)) 100%
+  );
+  /* Effet verre */
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  border: 1px solid rgba(255,255,255,.35);
+  box-shadow: 0 24px 60px rgba(0,0,0,.25);
+  overflow: hidden;
+  color: #fff;
+}
+
+.login-inner{ display:flex; flex-wrap:wrap; }
+.login-left, .login-right{ flex:1 1 380px; padding: 36px; }
+
+/* Colonne droite décor */
+.login-right{ position:relative; min-height: 320px; }
+.login-right .welcome{
+  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 600; font-size: 2.2rem; text-align: right;
+  text-shadow: 0 2px 10px rgba(0,0,0,.15);
+}
+.login-right .leaves{
+  position:absolute; right: 14px; bottom: -8px; width: 280px;
+  opacity:.95; pointer-events:none; user-select:none;
+}
+
+/* Champs pills avec icônes */
+.form-pill{ position: relative; }
+.form-pill .form-control{
+  height: 46px; border-radius: 999px; padding-left: 46px; border: none;
+  background: rgba(255,255,255,.85);              /* + transparent qu’avant */
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.30);
+  color:#111;
+}
+.form-pill .form-control::placeholder{ color: rgba(0,0,0,.55); }
+.form-pill .form-control:focus{
+  box-shadow: inset 0 0 0 2px #fff, 0 0 0 .25rem rgba(255,255,255,.22);
+}
+.input-icon{ position:absolute; left:16px; top:50%; transform:translateY(-50%); opacity:.85; }
+.input-icon svg{ width:18px; height:18px; fill: var(--brand); }
+
+/* Bouton blanc arrondi */
+.btn-white{
+  border-radius:999px; background:#fff; color: var(--brand);
+  font-weight:600; border:0; height:46px;
+}
+.btn-white:hover{ background:#f3fff7; color: var(--brand-dark); }
+
+/* Liens doux sur fond vert */
+.link-soft{ color:#f0fff4; text-decoration:none; }
+.link-soft:hover{ color:#fff; text-decoration:underline; }
+
+/* Titres & petits textes */
+.login-left h1{ font-weight:700; letter-spacing:.3px; }
+.login-left .muted{ color: rgba(255,255,255,.9); }
+
+/* Utilitaires */
+.auth-badge{
+  display:inline-flex; align-items:center; gap:.5rem;
+  font-weight:600; color:#fff; background:var(--brand);
+  padding:.35rem .7rem; border-radius:.5rem;
+}
+
+html, body { overflow-x: hidden; }
+
+
+/* Logo sur pages auth */
+.auth-logo{
+  width: 72px;            /* ajuste la taille */
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.25));
+}
+
+/* Mot-symbole à côté du logo (optionnel) */
+.auth-brand .brand-wordmark{
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #fff;            /* sur fond vert translucide */
+  letter-spacing: .3px;
+}
+
+/* Si tu veux centrer le bloc logo+nom pile au-dessus du titre */
+.auth-brand{ justify-content: center; }
+
+.auth-logo { filter: brightness(1.05) drop-shadow(0 2px 8px rgba(0,0,0,.25)); }
+
+/* Logo des pages Auth – grande taille et centré */
+.auth-logo{ display:block; margin:0 auto; height:auto; }
+.auth-logo-lg{
+  width: 200px;              /* agrandir ici */
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,.25));
+}
+
+
+/* Si tu avais un mot-symbole, on n'en a plus besoin */
+.auth-brand .brand-wordmark{ display:none; }
+.avatar{ font-weight:600; letter-spacing:.5px; }
+
+/* ===== 3D Look for Auth Cards ===== */
+/* Perspective wrapper */
+.scene-3d{
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+}
+
+/* 3D card base */
+.login-card.card-3d{
+  --tMax: 10deg;         /* max tilt */
+  --tScale: 1.005;       /* tiny scale on hover */
+  --elev: 40px;          /* elevation shadow */
+  transform-style: preserve-3d;
+  will-change: transform;
+  position: relative;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+/* Subtle layer lines inside the card */
+.login-card.card-3d::before{
+  content: "";
+  position:absolute; inset:0; pointer-events:none; border-radius: inherit;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(255,255,255,.08), transparent 60%),
+    repeating-linear-gradient( to bottom right,
+      rgba(255,255,255,.06) 0 2px, transparent 2px 6px
+    );
+  transform: translateZ(1px);
+}
+
+/* Shine layer controlled by CSS vars --px/--py */
+.login-card.card-3d .shine{
+  position:absolute; inset:0; border-radius: inherit; pointer-events:none;
+  background: radial-gradient(
+    400px 300px at var(--px, 50%) var(--py, 50%),
+    rgba(255,255,255,.35), rgba(255,255,255,0) 70%
+  );
+  opacity: 0; transition: opacity .3s ease;
+  transform: translateZ(60px);
+}
+.login-card.card-3d:hover .shine{ opacity: .9; }
+
+/* Decorative floating orbs inside card */
+.login-card.card-3d .orb{
+  position:absolute; border-radius: 50%; pointer-events:none; user-select:none;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.45), rgba(255,255,255,.08));
+  box-shadow: 0 16px 50px rgba(0,0,0,.25);
+  filter: saturate(110%);
+}
+.orb.orb-1{ width:140px; height:140px; right:-28px; top:-28px; transform: translateZ(90px); animation: floaty 8s ease-in-out infinite; }
+.orb.orb-2{ width:110px; height:110px; left:-22px; bottom:-22px; transform: translateZ(70px); animation: floaty 10s ease-in-out infinite reverse; }
+.orb.orb-3{ width:64px; height:64px; left: 55%; top: 18%; transform: translateZ(110px); animation: floaty 6s ease-in-out infinite; opacity:.9; }
+
+@keyframes floaty{
+  0%,100%{ transform: translateZ(80px) translateY(0) }
+  50%{ transform: translateZ(80px) translateY(-12px) }
+}
+
+/* Hover elevation */
+.login-card.card-3d:hover{
+  transform: scale(var(--tScale)) translateZ(0);
+  box-shadow: 0 30px 80px rgba(0,0,0,.35);
+}
+
+/* Lift controls for key UI elements */
+.login-card.card-3d h1,
+.login-card.card-3d p,
+.login-card.card-3d .form-pill,
+.login-card.card-3d .btn{
+  transform: translateZ(20px);
+}
+.login-card.card-3d .btn:hover{ transform: translateZ(30px); }
+
+/* Inputs lift on focus */
+.login-card.card-3d .form-pill:has(.form-control:focus){
+  transform: translateZ(28px);
+}
+
+/* Optional logo lift */
+.login-card.card-3d .auth-logo{ transform: translateZ(40px); }
+
+/* Reduce motion preference: disable heavy effects */
+@media (prefers-reduced-motion: reduce){
+  .login-card.card-3d,
+  .login-card.card-3d *{ transition: none !important; animation: none !important; }
+}

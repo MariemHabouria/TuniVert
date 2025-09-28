@@ -1,0 +1,171 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ChallengeController;
+use App\Http\Controllers\ScoreChallengeController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\FormationController;
+use App\Http\Controllers\FormationInscriptionController;
+use App\Http\Controllers\AvisFormationController;
+use App\Http\Controllers\RessourceFormationController;
+use App\Http\Controllers\DonationController;
+use App\Http\Controllers\DonationAdminController;
+use App\Http\Controllers\DonationOrganizerController;
+use App\Http\Controllers\TestPaymentController;
+use App\Http\Controllers\EventsController;
+
+// 🚀 Ajout des contrôleurs Forums & Alertes
+use App\Http\Controllers\ForumController;
+use App\Http\Controllers\AlerteForumController;
+
+// Include QR verification route
+require __DIR__.'/qr-verify.php';
+
+/*
+|--------------------------------------------------------------------------
+| Pages publiques
+|--------------------------------------------------------------------------
+*/
+Route::view('/', 'pages.index')->name('home');
+
+// Pages classiques
+$pages = ['about','blog','causes','contact','donation','events','gallery','service'];
+foreach ($pages as $page) {
+    Route::view("/{$page}", "pages.{$page}")->name($page);
+    Route::view("/{$page}.html", "pages.{$page}");
+}
+
+// Events
+Route::get('/events', [EventsController::class, 'index'])->name('events.browse');
+Route::get('/events/{id}', [EventsController::class, 'show'])->name('events.show');
+
+// Alias
+Route::view('/index', 'pages.index');
+Route::view('/index.html', 'pages.index');
+Route::view('/services', 'pages.service');
+Route::view('/services.html', 'pages.service');
+
+/*
+|--------------------------------------------------------------------------
+| Authentification
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest')->group(function () {
+    Route::get('/login',    [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login',   [AuthController::class, 'login'])->name('login.submit');
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register',[AuthController::class, 'register'])->name('register.submit');
+
+    // Mot de passe oublié
+    Route::get('/password/forgot',  [AuthController::class, 'showForgotForm'])->name('password.request');
+    Route::post('/password/forgot', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
+});
+
+// Routes protégées
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+
+    // Déconnexion
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Formations
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/organisateur/formations/create', [FormationController::class, 'create'])->name('formations.create');
+    Route::post('/organisateur/formations', [FormationController::class, 'store'])->name('formations.store');
+    Route::post('/organisateur/formations/{formation}/ressources', [FormationController::class, 'storeResource'])->name('formations.resources.store');
+    Route::post('/formations/{formation}/inscrire', [FormationInscriptionController::class, 'store'])->name('formations.inscrire');
+    Route::delete('/formations/{formation}/desinscrire', [FormationInscriptionController::class, 'destroy'])->name('formations.desinscrire');
+    Route::post('/formations/{formation}/avis', [AvisFormationController::class, 'store'])->name('formations.avis.store');
+    Route::post('/formations/{formation}/ressources', [RessourceFormationController::class, 'store'])->name('formations.ressources.store');
+    Route::get('organisateur/formations/{formation}/edit', [FormationController::class, 'edit'])->name('formations.edit');
+    Route::put('organisateur/formations/{formation}', [FormationController::class, 'update'])->name('formations.update');
+    Route::delete('organisateur/formations/{formation}', [FormationController::class, 'destroy'])->name('formations.destroy');
+    Route::get('/mes-formations/stats', [FormationController::class, 'dashboard'])->name('formations.dashboard');
+});
+Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
+Route::get('/formations/{formation}', [FormationController::class, 'show'])->name('formations.show');
+
+/*
+|--------------------------------------------------------------------------
+| Donations
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
+    Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
+    Route::get('/donations/history', [DonationController::class, 'history'])->name('donations.history');
+});
+
+// Payments
+Route::post('/payments/stripe/intent', [DonationController::class, 'createStripeIntent'])->name('payments.stripe.intent');
+Route::post('/payments/stripe/confirm', [DonationController::class, 'confirmStripePayment'])->name('payments.stripe.confirm');
+Route::post('/payments/paypal/create-order', [DonationController::class, 'createPayPalOrder'])->name('payments.paypal.create');
+Route::post('/payments/paypal/capture', [DonationController::class, 'capturePayPalOrder'])->name('payments.paypal.capture');
+Route::post('/payments/paymee/create', [DonationController::class, 'createPaymeePayment'])->name('payments.paymee.create');
+Route::get('/payments/paymee/return', [DonationController::class, 'paymeeReturn'])->name('payments.paymee.return');
+Route::get('/payments/paymee/cancel', [DonationController::class, 'paymeeCancel'])->name('payments.paymee.cancel');
+Route::post('/webhooks/paymee', [DonationController::class, 'paymeeWebhook'])->middleware('api')->name('webhooks.paymee');
+
+/*
+|--------------------------------------------------------------------------
+| Challenges
+|--------------------------------------------------------------------------
+*/
+Route::prefix('challenges')->group(function () {
+    Route::get('/', [ChallengeController::class, 'index'])->name('challenges.index');
+    
+    Route::middleware('auth')->group(function () {
+        Route::get('/profil', [ChallengeController::class, 'profil'])->name('challenges.profil');
+        Route::post('/{id}/participate', [ChallengeController::class, 'participer'])->name('challenges.participate');
+        Route::post('/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
+
+        Route::prefix('association')->group(function () {
+            Route::get('/create', [ChallengeController::class, 'create'])->name('challenges.create');
+            Route::post('/', [ChallengeController::class, 'store'])->name('challenges.store');
+            Route::get('/crud', [ChallengeController::class, 'crud'])->name('challenges.crud');
+            Route::get('/{id}/edit', [ChallengeController::class, 'edit'])->name('challenges.edit');
+            Route::put('/{id}', [ChallengeController::class, 'update'])->name('challenges.update');
+            Route::delete('/{id}', [ChallengeController::class, 'destroy'])->name('challenges.destroy');
+            Route::post('/participants/{participant}/action', [ChallengeController::class, 'actionParticipant'])->name('challenges.participants.action');
+            Route::get('/participants/{id}', [ChallengeController::class, 'participants'])->name('challenges.participants');
+        });
+    });
+
+    Route::get('/{id}', [ChallengeController::class, 'show'])->name('challenges.show');
+});
+
+// Scores
+Route::prefix('scores')->name('scores.')->middleware('auth')->group(function () {
+    Route::post('/{participant}', [ScoreChallengeController::class, 'storeOrUpdate'])->name('update');
+    Route::delete('/{score}', [ScoreChallengeController::class, 'destroy'])->name('destroy');
+    Route::get('/classement/{challenge}', [ScoreChallengeController::class, 'classement'])->name('classement');
+});
+
+/*
+|--------------------------------------------------------------------------
+| 🚀 Forums & Alertes
+|--------------------------------------------------------------------------
+*/
+// Forums
+Route::resource('forums', ForumController::class);
+Route::post('/forums/{id}/reply', [ForumController::class, 'reply'])->middleware('auth')->name('forums.reply');
+
+Route::resource('alertes', AlerteForumController::class)->middleware('auth')->except(['index','show']);
+Route::resource('alertes', AlerteForumController::class)->only(['index','show']);
+
+
+/*
+|--------------------------------------------------------------------------
+| 404 Fallback
+|--------------------------------------------------------------------------
+*/
+Route::fallback(fn () => abort(404));
