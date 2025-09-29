@@ -206,15 +206,63 @@ public function alertesIndex()
         return view('admin.formations.inscriptions');
     }
 
-    /* ==============================
-     *     DONATIONS
-     * ==============================*/
-    public function donationsIndex()
+    /**
+     * Donations
+     */
+    public function donationsIndex(Request $request)
     {
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        return view('admin.donations.index');
+        // Importer le modèle Donation
+        $query = \App\Models\Donation::with(['user']);
+
+        // Filtres
+        if ($request->filled('moyen_paiement')) {
+            $query->where('moyen_paiement', $request->moyen_paiement);
+        }
+
+        if ($request->filled('date_debut')) {
+            $query->whereDate('date_don', '>=', $request->date_debut);
+        }
+
+        if ($request->filled('date_fin')) {
+            $query->whereDate('date_don', '<=', $request->date_fin);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('user', function($subQ) use ($search) {
+                    $subQ->where('name', 'LIKE', "%{$search}%")
+                         ->orWhere('email', 'LIKE', "%{$search}%");
+                })->orWhere('transaction_id', 'LIKE', "%{$search}%")
+                  ->orWhere('montant', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Statistiques
+        $stats = [
+            'total' => \App\Models\Donation::sum('montant') ?? 0,
+            'count' => \App\Models\Donation::count(),
+            'total_mois' => \App\Models\Donation::whereMonth('date_don', now()->month)
+                                               ->whereYear('date_don', now()->year)
+                                               ->sum('montant') ?? 0,
+            'count_mois' => \App\Models\Donation::whereMonth('date_don', now()->month)
+                                                ->whereYear('date_don', now()->year)
+                                                ->count(),
+            'donateurs_uniques' => \App\Models\Donation::distinct()->count('utilisateur_id')
+        ];
+
+        // Moyens de paiement disponibles
+        $moyens_paiement = \App\Models\Donation::distinct()
+                                              ->pluck('moyen_paiement')
+                                              ->filter()
+                                              ->values();
+
+        $dons = $query->orderBy('date_don', 'desc')->paginate(20);
+
+        return view('admin.donations.index', compact('dons', 'stats', 'moyens_paiement'));
     }
 
     public function donationsCampagnes()
@@ -230,7 +278,37 @@ public function alertesIndex()
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        return view('admin.donations.rapports');
+        // Statistiques pour les rapports
+        $stats = [
+            'total_annee' => \App\Models\Donation::whereYear('date_don', now()->year)->sum('montant'),
+            'total_mois' => \App\Models\Donation::whereMonth('date_don', now()->month)->sum('montant'),
+            'total_semaine' => \App\Models\Donation::where('date_don', '>=', now()->startOfWeek())->sum('montant'),
+            'moyens_stats' => \App\Models\Donation::selectRaw('moyen_paiement, COUNT(*) as count, SUM(montant) as total')
+                ->groupBy('moyen_paiement')
+                ->get(),
+            'donations_par_mois' => \App\Models\Donation::selectRaw('YEAR(date_don) as year, MONTH(date_don) as month, COUNT(*) as count, SUM(montant) as total')
+                ->whereYear('date_don', now()->year)
+                ->groupBy('year', 'month')
+                ->orderBy('year')
+                ->orderBy('month')
+                ->get()
+        ];
+
+        return view('admin.donations.rapports', compact('stats'));
+    }
+
+    public function donationsMethodes()
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        // Méthodes de paiement disponibles avec statistiques
+        $methodes = \App\Models\Donation::selectRaw('moyen_paiement, COUNT(*) as usage_count, SUM(montant) as total_amount')
+            ->groupBy('moyen_paiement')
+            ->orderBy('usage_count', 'desc')
+            ->get();
+
+        return view('admin.donations.methodes', compact('methodes'));
     }
 
     /* ==============================

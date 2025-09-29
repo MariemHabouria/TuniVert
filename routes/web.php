@@ -83,6 +83,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
     Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
     Route::get('/donations/history', [DonationController::class, 'history'])->name('donations.history');
+    
+    // Association dashboard
+    Route::get('/donations/dashboard', [DonationController::class, 'associationDashboard'])
+        ->name('donations.dashboard');
 
     // Déconnexion
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -207,6 +211,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'donationsIndex'])->name('index');
         Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
         Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
+        Route::get('/methodes', [AdminController::class, 'donationsMethodes'])->name('methodes');
     });
 
     Route::prefix('ui-features')->name('ui-features.')->group(function () {

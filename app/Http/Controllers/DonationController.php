@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use App\Notifications\DonationReceived;
 use App\Mail\DonationReceipt;
 use Illuminate\Support\Facades\Mail;
@@ -507,5 +509,215 @@ class DonationController extends Controller
             }
         }
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Test bank transfer email functionality
+     */
+    public function testBankTransferEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email'],
+            'montant' => ['required', 'numeric', 'min:1'],
+            'is_anonymous' => ['nullable', 'boolean'],
+        ]);
+
+        try {
+            // Find or create a test user with this email
+            $user = User::firstOrCreate(
+                ['email' => $validated['email']],
+                [
+                    'name' => 'Test User',
+                    'password' => bcrypt('password'),
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            // Create test donation
+            $don = Donation::create([
+                'utilisateur_id' => $user->id,
+                'is_anonymous' => (bool)($validated['is_anonymous'] ?? false),
+                'evenement_id' => null,
+                'montant' => (float)$validated['montant'],
+                'moyen_paiement' => 'virement_bancaire',
+                'transaction_id' => 'TEST_WEB_' . time(),
+                'date_don' => now(),
+            ]);
+
+            $newBadges = [];
+            
+            // Apply gamification
+            try {
+                $res = app(GamificationService::class)->onDonation($don);
+                $newBadges = $res['new_badges'] ?? [];
+            } catch (\Throwable $e) {
+                // Gamification errors are non-critical
+            }
+
+            // Send email using the same logic as real donations
+            $recipient = $user->email;
+            $mailable = new DonationReceipt($don);
+            
+            // For bank transfer, always send real emails
+            Mail::to($recipient)->sendNow($mailable);
+
+            return response()->json([
+                'success' => true,
+                'donation_id' => $don->id,
+                'amount' => $don->montant,
+                'transaction_id' => $don->transaction_id,
+                'email_sent_to' => $recipient,
+                'badges' => !empty($newBadges) ? implode(', ', array_column($newBadges, 'name')) : null,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Association Dashboard - Overview of donations and analytics
+     */
+    public function associationDashboard(Request $request)
+    {
+        // Only allow association users
+        if (!Auth::check() || Auth::user()->role !== 'association') {
+            abort(403, 'Access denied. Association role required.');
+        }
+
+        $period = $request->get('period', '30'); // Default to 30 days
+        $startDate = now()->subDays((int)$period);
+        
+        // Total collected in selected period
+        $totalCollected = DB::table('donations')
+            ->where('date_don', '>=', $startDate)
+            ->sum('montant');
+            
+        // Previous period comparison
+        $previousPeriodStart = now()->subDays((int)$period * 2);
+        $previousPeriodEnd = now()->subDays((int)$period);
+        $previousTotal = DB::table('donations')
+            ->whereBetween('date_don', [$previousPeriodStart, $previousPeriodEnd])
+            ->sum('montant');
+            
+        $evolution = $previousTotal > 0 ? (($totalCollected - $previousTotal) / $previousTotal) * 100 : 0;
+
+        // Top 5 events by amount (using only donations table)
+        $topEvents = DB::table('donations as d')
+            ->select(
+                DB::raw('CASE 
+                    WHEN d.evenement_id IS NULL THEN "Donation Générale" 
+                    ELSE CONCAT("Événement #", d.evenement_id) 
+                END as event_name'),
+                'd.evenement_id',
+                DB::raw('SUM(d.montant) as total'),
+                DB::raw('COUNT(d.id) as count')
+            )
+            ->where('d.date_don', '>=', $startDate)
+            ->groupBy('d.evenement_id')
+            ->orderByDesc('total')
+            ->limit(5)
+            ->get();
+
+        // Recent donations (last 10)
+        $recentDonations = DB::table('donations as d')
+            ->leftJoin('users as u', 'd.utilisateur_id', '=', 'u.id')
+            ->select(
+                'd.id',
+                'd.montant',
+                'd.moyen_paiement',
+                'd.date_don',
+                'd.is_anonymous',
+                'd.evenement_id',
+                DB::raw('CASE WHEN d.is_anonymous = 1 THEN "Anonyme" ELSE COALESCE(u.name, "Utilisateur supprimé") END as donor_name'),
+                DB::raw('CASE 
+                    WHEN d.evenement_id IS NULL THEN "Donation Générale" 
+                    ELSE CONCAT("Événement #", d.evenement_id) 
+                END as event_name')
+            )
+            ->orderByDesc('d.date_don')
+            ->limit(10)
+            ->get();
+
+        // Event progress using statistiques_donations table
+        $eventProgress = collect();
+        try {
+            // Check if statistiques_donations table exists
+            if (Schema::hasTable('statistiques_donations')) {
+                $eventProgress = DB::table('statistiques_donations as s')
+                    ->select(
+                        's.evenement_id as id',
+                        DB::raw('CASE 
+                            WHEN s.evenement_id IS NULL THEN "Donation Générale" 
+                            ELSE CONCAT("Événement #", s.evenement_id) 
+                        END as title'),
+                        DB::raw('1000 as target_amount'), // Default target for demo
+                        's.montant_total as raised',
+                        DB::raw('(s.montant_total / 1000) * 100 as progress_percentage')
+                    )
+                    ->where('s.montant_total', '>', 0)
+                    ->orderByDesc('progress_percentage')
+                    ->limit(5)
+                    ->get();
+            }
+        } catch (\Exception $e) {
+            Log::info('Statistiques donations table not accessible: ' . $e->getMessage());
+        }
+
+        // Analytics by payment method
+        $paymentMethods = DB::table('donations')
+            ->select(
+                'moyen_paiement',
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(montant) as total'),
+                DB::raw('AVG(montant) as average')
+            )
+            ->where('date_don', '>=', $startDate)
+            ->groupBy('moyen_paiement')
+            ->orderByDesc('total')
+            ->get();
+
+        // Alerts & Notifications
+        $alerts = [];
+        
+        // Check for pending payouts (placeholder - implement based on your payout system)
+        $pendingPayouts = 0; // Implement your payout logic
+        if ($pendingPayouts > 0) {
+            $alerts[] = [
+                'type' => 'warning',
+                'icon' => 'fas fa-clock',
+                'message' => "{$pendingPayouts} payout(s) en attente",
+                'action' => '/admin/payouts'
+            ];
+        }
+
+        // Check for recent bank transfers (since we don't have verified_at column)
+        $recentBankTransfers = DB::table('donations')
+            ->where('moyen_paiement', 'virement_bancaire')
+            ->where('date_don', '>=', now()->subDays(7))
+            ->count();
+            
+        if ($recentBankTransfers > 0) {
+            $alerts[] = [
+                'type' => 'info',
+                'icon' => 'fas fa-university',
+                'message' => "{$recentBankTransfers} virement(s) bancaire(s) récent(s)",
+                'action' => '#'
+            ];
+        }
+
+        return view('donations.association-dashboard', compact(
+            'totalCollected',
+            'evolution',
+            'topEvents', 
+            'recentDonations',
+            'eventProgress',
+            'paymentMethods',
+            'alerts',
+            'period'
+        ));
     }
 }
