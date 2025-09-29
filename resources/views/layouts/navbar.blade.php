@@ -20,23 +20,24 @@
                         <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
                         <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
                         <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
-                        <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Navbar -->
-        <nav class="navbar navbar-light bg-light navbar-expand-xl">
-            <a href="{{ route('home') }}" class="navbar-brand ms-3">
-                <h1 class="text-primary display-5">Tunivert</h1>
-            </a>
-            <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="fa fa-bars text-primary"></span>
-            </button>
+        <nav class="navbar navbar-light bg-light navbar-expand-xl py-0">
+            <div class="container-fluid">
+                <a href="{{ route('home') }}" class="navbar-brand ms-2">
+                    <h1 class="text-primary display-5 mb-0">Tunivert</h1>
+                </a>
+                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="fa fa-bars text-primary"></span>
+                </button>
 
-            <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
-                <div class="navbar-nav ms-auto">
+                <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto flex-grow-1 justify-content-center">
                     <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a>
                     <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
                     <a href="{{ route('events.browse') }}" class="nav-item nav-link {{ request()->routeIs('events.browse') ? 'active' : '' }}">Événements</a>
@@ -135,14 +136,14 @@
             </span>
         @endauth
     </div>
-</div>
+                    </div>
 
-                <!-- Authentification -->
-                <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">
-                    @guest
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
-                    @endguest
+                    <!-- Authentification -->
+                    <div class="d-flex align-items-center flex-nowrap ms-auto">
+                        @guest
+                            <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
+                            <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
+                        @endguest
 
                     @auth
                         <div class="nav-item dropdown">
@@ -202,6 +203,7 @@
                             </ul>
                         </div>
                     @endauth
+                    </div>
                 </div>
             </div>
         </nav>

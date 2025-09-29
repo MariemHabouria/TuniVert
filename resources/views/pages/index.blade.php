@@ -54,23 +54,24 @@
                         <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
                         <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
                         <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
-                        <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Navbar -->
-        <nav class="navbar navbar-light bg-light navbar-expand-xl">
-            <a href="{{ route('home') }}" class="navbar-brand ms-3">
-                <h1 class="text-primary display-5">Tunivert</h1>
-            </a>
-            <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="fa fa-bars text-primary"></span>
-            </button>
+        <nav class="navbar navbar-light bg-light navbar-expand-xl py-0">
+            <div class="container-fluid">
+                <a href="{{ route('home') }}" class="navbar-brand ms-2">
+                    <h1 class="text-primary display-5 mb-0">Tunivert</h1>
+                </a>
+                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="fa fa-bars text-primary"></span>
+                </button>
 
-            <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
-                <div class="navbar-nav ms-auto">
+                <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto flex-grow-1 justify-content-center">
                     <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a>
                     <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
                     <a href="{{ route('events.browse') }}" class="nav-item nav-link {{ request()->routeIs('events.browse') ? 'active' : '' }}">Événements</a>
@@ -121,64 +122,63 @@
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">
                             <a href="{{ route('formations.index') }}" class="dropdown-item">Catalogue</a>
                             @auth
-                                @if(Auth::user()->role === 'association')
-                                    <a href="{{ route('formations.create') }}" class="dropdown-item {{ request()->routeIs('formations.create') ? 'active' : '' }}">Créer une formation</a>
-                                    <a href="{{ route('formations.dashboard') }}" class="dropdown-item {{ request()->routeIs('formations.dashboard') ? 'active' : '' }}">Mes formations</a>
-                                @endif
+                                <a href="{{ route('formations.create') }}" class="dropdown-item {{ request()->routeIs('formations.create') ? 'active' : '' }}">Créer une formation</a>
+                                <a href="{{ route('formations.dashboard') }}" class="dropdown-item {{ request()->routeIs('formations.dashboard') ? 'active' : '' }}">Mes formations</a>
                             @endauth
                         </div>
                     </div>
-                </div>
-<!-- Donations Dropdown -->
-<div class="nav-item dropdown">
-    <a href="#" class="nav-link dropdown-toggle {{ request()->is('donations*') || request()->is('donation') ? 'active' : '' }}" data-bs-toggle="dropdown">
-        Donations
-    </a>
-    <div class="dropdown-menu m-0 bg-secondary rounded-0">
-        @auth
-            @if(Auth::user()->role === 'association')
-                <!-- Association Dashboard - Only for association users -->
-                <a href="{{ route('donations.dashboard') }}" class="dropdown-item bg-primary text-white {{ request()->routeIs('donations.dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-tachometer-alt me-2"></i><strong>Dashboard Association</strong>
-                    <small class="d-block text-light">Gestion & Analytics</small>
-                </a>
-            @else
-                <!-- Regular user options -->
-                <!-- Page publique -->
-                <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
-                    <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
-                </a>
-                
-                <!-- Créer un don -->
-                <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
-                    <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
-                </a>
 
-                <!-- Historique des dons -->
-                <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
-                    <i class="fas fa-history me-2"></i>Historique
-                </a>
-            @endif
-        @else
-            <!-- Guest user options -->
-            <!-- Page publique -->
-            <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
-                <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
-            </a>
-            <div class="dropdown-divider"></div>
-            <span class="dropdown-item text-muted">
-                <i class="fas fa-lock me-2"></i>Connectez-vous pour plus d'options
-            </span>
-        @endauth
-    </div>
-</div>
+                    <!-- Donations Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle {{ request()->is('donations*') || request()->is('donation') ? 'active' : '' }}" data-bs-toggle="dropdown">
+                            Donations
+                        </a>
+                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                            @auth
+                                @if(Auth::user()->role === 'association')
+                                    <!-- Association Dashboard - Only for association users -->
+                                    <a href="{{ route('donations.dashboard') }}" class="dropdown-item bg-primary text-white {{ request()->routeIs('donations.dashboard') ? 'active' : '' }}">
+                                        <i class="fas fa-tachometer-alt me-2"></i><strong>Dashboard Association</strong>
+                                        <small class="d-block text-light">Gestion & Analytics</small>
+                                    </a>
+                                @else
+                                    <!-- Regular user options -->
+                                    <!-- Page publique -->
+                                    <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                                        <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+                                    </a>
+                                    
+                                    <!-- Créer un don -->
+                                    <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
+                                        <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
+                                    </a>
 
-                <!-- Auth pour guest -->
-                <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">
-                    @guest
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
-                    @endguest
+                                    <!-- Historique des dons -->
+                                    <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
+                                        <i class="fas fa-history me-2"></i>Historique
+                                    </a>
+                                @endif
+                            @else
+                                <!-- Guest user options -->
+                                <!-- Page publique -->
+                                <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                                    <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <span class="dropdown-item text-muted">
+                                    <i class="fas fa-lock me-2"></i>Connectez-vous pour plus d'options
+                                </span>
+                            @endauth
+                        </div>
+                    </div>
+                    </div>
+
+                    <!-- Auth pour guest -->
+                    <div class="d-flex align-items-center flex-nowrap ms-auto">
+                        @guest
+                            <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
+                            <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
+                        @endguest
 
                     @auth
                         <div class="nav-item dropdown">
@@ -238,6 +238,7 @@
                             </ul>
                         </div>
                     @endauth
+                    </div>
                 </div>
             </div>
         </nav>

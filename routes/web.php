@@ -225,6 +225,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'donationsIndex'])->name('index');
         Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
         Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
+        Route::get('/methodes', [AdminController::class, 'donationsMethodes'])->name('methodes');
     });
 
     Route::prefix('ui-features')->name('ui-features.')->group(function () {

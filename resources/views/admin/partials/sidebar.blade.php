@@ -136,6 +136,9 @@
                     <li class="nav-item {{ request()->is('admin/donations/rapports') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.donations.rapports') }}">Rapports</a>
                     </li>
+                    <li class="nav-item {{ request()->is('admin/donations/methodes') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.donations.methodes') }}">Méthodes de Paiement</a>
+                    </li>
                 </ul>
             </div>
         </li>
