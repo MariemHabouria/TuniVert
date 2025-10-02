@@ -29,37 +29,373 @@
   <body>
     @if (session('new_badges'))
       <div class="modal fade" id="badgeModal" tabindex="-1" aria-labelledby="badgeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-              <h5 class="modal-title" id="badgeModalLabel">Badge unlocked!</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content border-0 shadow-lg badge-modal-content">
+            <div class="modal-header badge-modal-header">
+              <div class="badge-modal-title-container">
+                <div class="trophy-icon">🏆</div>
+                <h3 class="modal-title badge-modal-title" id="badgeModalLabel">
+                  <span class="badge-unlock-text">Badge Unlocked!</span>
+                  <div class="sparkles">✨ ✨ ✨</div>
+                </h3>
+              </div>
+              <button type="button" class="btn-close btn-close-white badge-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body badge-modal-body">
               @php $nb = (array) session('new_badges'); @endphp
               @foreach ($nb as $b)
-                <div class="d-flex align-items-center gap-3 p-3 mb-2 rounded bg-light">
-                  <div style="font-size:2rem">{{ $b['icon'] ?? '🏅' }}</div>
-                  <div>
-                    <div class="fw-bold">{{ $b['name'] ?? ($b['slug'] ?? 'New badge') }}</div>
-                    <div class="text-muted small">{{ $b['description'] ?? '' }}</div>
+                <div class="badge-card">
+                  <div class="badge-glow"></div>
+                  <div class="badge-icon-container">
+                    <div class="badge-icon">{{ $b['icon'] ?? '🏅' }}</div>
+                    <div class="badge-shine"></div>
                   </div>
+                  <div class="badge-details">
+                    <h4 class="badge-name">{{ $b['name'] ?? ($b['slug'] ?? 'New Badge') }}</h4>
+                    <p class="badge-description">{{ $b['description'] ?? 'Congratulations on your achievement!' }}</p>
+                  </div>
+                  <div class="badge-celebration">🎉</div>
                 </div>
               @endforeach
-              <div class="text-center mt-2">
-                <span class="badge bg-success-subtle text-success">Well done! Keep going 🎉</span>
+              <div class="celebration-message">
+                <div class="success-badge">
+                  <span class="success-text">Outstanding Achievement!</span>
+                  <div class="success-subtitle">Keep up the amazing work! �</div>
+                </div>
               </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-success" data-bs-dismiss="modal">Awesome</button>
+            <div class="modal-footer badge-modal-footer">
+              <button type="button" class="btn badge-awesome-btn" data-bs-dismiss="modal">
+                <span class="btn-text">Awesome!</span>
+                <span class="btn-icon">🚀</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
       <style>
-        /* Simple confetti effect */
-        .confetti { position: fixed; top: -10px; width: 10px; height: 14px; opacity: .9; animation: fall 2.5s linear forwards; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0.8; } }
+        /* Enhanced Badge Modal Styles */
+        .badge-modal-content {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 20px;
+          overflow: hidden;
+          position: relative;
+        }
+        
+        .badge-modal-content::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+          pointer-events: none;
+        }
+        
+        .badge-modal-header {
+          background: linear-gradient(135deg, #ff6b6b, #ffa500);
+          border: none;
+          padding: 2rem;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .badge-modal-header::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+          animation: pulse 2s ease-in-out infinite alternate;
+        }
+        
+        .badge-modal-title-container {
+          position: relative;
+          z-index: 2;
+        }
+        
+        .trophy-icon {
+          font-size: 3rem;
+          animation: bounce 1s ease-in-out infinite alternate;
+          margin-bottom: 0.5rem;
+        }
+        
+        .badge-modal-title {
+          color: white;
+          font-weight: 800;
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+          margin: 0;
+        }
+        
+        .badge-unlock-text {
+          font-size: 1.8rem;
+          display: block;
+          animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .sparkles {
+          font-size: 1.2rem;
+          margin-top: 0.5rem;
+          animation: twinkle 1.5s ease-in-out infinite;
+        }
+        
+        .badge-close-btn {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          z-index: 3;
+          opacity: 0.8;
+          transition: opacity 0.3s ease;
+        }
+        
+        .badge-close-btn:hover {
+          opacity: 1;
+        }
+        
+        .badge-modal-body {
+          padding: 2rem;
+          background: rgba(255,255,255,0.95);
+          margin: 0;
+        }
+        
+        .badge-card {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          padding: 1.5rem;
+          margin-bottom: 1rem;
+          border-radius: 15px;
+          background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+          position: relative;
+          overflow: hidden;
+          animation: slideInLeft 0.6s ease-out;
+          transition: transform 0.3s ease;
+        }
+        
+        .badge-card:hover {
+          transform: translateY(-5px);
+        }
+        
+        .badge-glow {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(45deg, rgba(255,215,0,0.1), rgba(255,140,0,0.1));
+          border-radius: 15px;
+          animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .badge-icon-container {
+          position: relative;
+          min-width: 80px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #ffd700, #ffb347);
+          border-radius: 50%;
+          box-shadow: 0 4px 15px rgba(255,215,0,0.4);
+        }
+        
+        .badge-icon {
+          font-size: 2.5rem;
+          animation: rotate 2s ease-in-out infinite;
+          z-index: 2;
+          position: relative;
+        }
+        
+        .badge-shine {
+          position: absolute;
+          top: 10%;
+          left: 10%;
+          width: 30%;
+          height: 30%;
+          background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: shine 2s ease-in-out infinite;
+        }
+        
+        .badge-details {
+          flex: 1;
+          z-index: 2;
+          position: relative;
+        }
+        
+        .badge-name {
+          font-size: 1.4rem;
+          font-weight: 700;
+          color: #2c3e50;
+          margin: 0 0 0.5rem 0;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .badge-description {
+          color: #6c757d;
+          margin: 0;
+          font-size: 1rem;
+          line-height: 1.4;
+        }
+        
+        .badge-celebration {
+          font-size: 2rem;
+          animation: party 1s ease-in-out infinite alternate;
+          z-index: 2;
+          position: relative;
+        }
+        
+        .celebration-message {
+          text-align: center;
+          margin-top: 1rem;
+        }
+        
+        .success-badge {
+          background: linear-gradient(135deg, #28a745, #20c997);
+          color: white;
+          padding: 1rem 2rem;
+          border-radius: 25px;
+          display: inline-block;
+          box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+          animation: fadeInUp 1s ease-out 0.5s both;
+        }
+        
+        .success-text {
+          font-size: 1.1rem;
+          font-weight: 600;
+          display: block;
+        }
+        
+        .success-subtitle {
+          font-size: 0.9rem;
+          margin-top: 0.25rem;
+          opacity: 0.9;
+        }
+        
+        .badge-modal-footer {
+          background: rgba(255,255,255,0.95);
+          border: none;
+          padding: 1.5rem 2rem;
+          text-align: center;
+        }
+        
+        .badge-awesome-btn {
+          background: linear-gradient(135deg, #ff6b6b, #ffa500);
+          color: white;
+          border: none;
+          padding: 0.75rem 2rem;
+          border-radius: 25px;
+          font-size: 1.1rem;
+          font-weight: 600;
+          box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin: 0 auto;
+        }
+        
+        .badge-awesome-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(255,107,107,0.6);
+          background: linear-gradient(135deg, #ff5252, #ff9800);
+        }
+        
+        .btn-icon {
+          animation: rocket 1s ease-in-out infinite alternate;
+        }
+        
+        /* Enhanced confetti effect */
+        .confetti { 
+          position: fixed; 
+          top: -10px; 
+          width: 12px; 
+          height: 16px; 
+          opacity: .9; 
+          animation: fall 3s linear forwards;
+          border-radius: 2px;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-30px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes bounce {
+          from { transform: translateY(0); }
+          to { transform: translateY(-10px); }
+        }
+        
+        @keyframes twinkle {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        @keyframes pulse {
+          from { transform: scale(1); opacity: 0.3; }
+          to { transform: scale(1.1); opacity: 0.1; }
+        }
+        
+        @keyframes glow {
+          from { opacity: 0.3; }
+          to { opacity: 0.6; }
+        }
+        
+        @keyframes rotate {
+          0%, 100% { transform: rotate(0deg) scale(1); }
+          25% { transform: rotate(-5deg) scale(1.05); }
+          75% { transform: rotate(5deg) scale(1.05); }
+        }
+        
+        @keyframes shine {
+          0%, 100% { opacity: 0.8; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        @keyframes party {
+          from { transform: rotate(-5deg) scale(1); }
+          to { transform: rotate(5deg) scale(1.1); }
+        }
+        
+        @keyframes rocket {
+          from { transform: translateY(0); }
+          to { transform: translateY(-3px); }
+        }
+        
+        @keyframes fall { 
+          to { 
+            transform: translateY(110vh) rotate(720deg); 
+            opacity: 0; 
+          } 
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+          .badge-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+          }
+          
+          .badge-modal-title {
+            font-size: 1.5rem;
+          }
+          
+          .trophy-icon {
+            font-size: 2.5rem;
+          }
+        }
       </style>
     @endif
     <!-- Spinner Start -->
@@ -672,18 +1008,67 @@
           if (modalEl) {
             var m = new bootstrap.Modal(modalEl); m.show();
           }
-          // quick confetti shower
-          var colors = ['#28a745','#ffc107','#17a2b8','#dc3545','#6610f2'];
-          for (var i=0;i<60;i++) {
-            var div = document.createElement('div');
-            div.className = 'confetti';
-            div.style.left = (Math.random()*100)+'vw';
-            div.style.background = colors[Math.floor(Math.random()*colors.length)];
-            div.style.transform = 'translateY(0) rotate('+(Math.random()*360)+'deg)';
-            div.style.animationDelay = (Math.random()*0.7)+'s';
-            document.body.appendChild(div);
-            setTimeout(function(d){ d.remove(); }, 3000, div);
+          
+          // Enhanced confetti celebration
+          var colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98d8c8', '#f7dc6f', '#bb8fce'];
+          var shapes = ['▲', '●', '■', '♦', '★', '♥', '♠', '♣'];
+          
+          // Create multiple waves of confetti
+          for (var wave = 0; wave < 3; wave++) {
+            setTimeout(function(w) {
+              for (var i = 0; i < 80; i++) {
+                var div = document.createElement('div');
+                div.className = 'confetti';
+                
+                // Random positioning and styling
+                div.style.left = (Math.random() * 100) + 'vw';
+                div.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Add shapes occasionally
+                if (Math.random() > 0.7) {
+                  div.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                  div.style.background = 'transparent';
+                  div.style.fontSize = '16px';
+                  div.style.display = 'flex';
+                  div.style.alignItems = 'center';
+                  div.style.justifyContent = 'center';
+                }
+                
+                div.style.transform = 'translateY(0) rotate(' + (Math.random() * 360) + 'deg)';
+                div.style.animationDelay = (Math.random() * 1.5) + 's';
+                div.style.animationDuration = (2 + Math.random() * 2) + 's';
+                
+                // Add some physics variety
+                div.style.setProperty('--random-x', (Math.random() - 0.5) * 100 + 'px');
+                
+                document.body.appendChild(div);
+                setTimeout(function(d) { 
+                  if (d && d.parentNode) d.remove(); 
+                }, 5000, div);
+              }
+            }, wave * 500, wave);
           }
+          
+          // Add some floating stars
+          setTimeout(function() {
+            for (var i = 0; i < 20; i++) {
+              var star = document.createElement('div');
+              star.textContent = '✨';
+              star.style.position = 'fixed';
+              star.style.left = (Math.random() * 100) + 'vw';
+              star.style.top = (Math.random() * 100) + 'vh';
+              star.style.fontSize = '20px';
+              star.style.pointerEvents = 'none';
+              star.style.animation = 'twinkle 2s ease-in-out infinite';
+              star.style.animationDelay = (Math.random() * 2) + 's';
+              star.style.zIndex = '9999';
+              
+              document.body.appendChild(star);
+              setTimeout(function(s) { 
+                if (s && s.parentNode) s.remove(); 
+              }, 4000, star);
+            }
+          }, 1000);
         })();
       </script>
     @endif
