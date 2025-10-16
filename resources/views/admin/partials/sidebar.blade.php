@@ -63,9 +63,11 @@
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item {{ request()->is('admin/challenges') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.challenges.index') }}">Tous les challenges</a>
-                    </li>
-                    
-                 
+                   <li class="nav-item {{ request()->is('admin/challenges/scores/tous') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('admin.challenges.all_scores') }}">
+        Tous les scores
+    </a>
+</li>
                 </ul>
             </div>
         </li>
