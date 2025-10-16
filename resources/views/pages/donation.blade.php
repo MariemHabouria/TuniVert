@@ -36,75 +36,8 @@
         <!-- Spinner End -->
 
 
-        <!-- Navbar start -->
-        <div class="container-fluid fixed-top px-0">
-            <div class="container px-0">
-                <div class="topbar">
-                    <div class="row align-items-center justify-content-center">
-                        <div class="col-md-8">
-                            <div class="topbar-info d-flex flex-wrap">
-                                <a href="#" class="text-light me-4"><i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn</a>
-                                <a href="#" class="text-light"><i class="fas fa-phone-alt text-white me-2"></i>+01234567890</a>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="topbar-icon d-flex align-items-center justify-content-end">
-                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
-                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
-                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
-                                <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <nav class="navbar navbar-light bg-light navbar-expand-xl">
-                    <a href="index.html" class="navbar-brand ms-3">
-                        <h1 class="text-primary display-5">Environs</h1>
-                    </a>
-                    <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                        <span class="fa fa-bars text-primary"></span>
-                    </button>
-                    <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
-                        <div class="navbar-nav ms-auto">
-                            <a href="index.html" class="nav-item nav-link">Home</a>
-                            <a href="about.html" class="nav-item nav-link">About</a>
-                            <a href="service.html" class="nav-item nav-link">Services</a>
-                            <a href="causes.html" class="nav-item nav-link">Causes</a>
-                            <a href="events.html" class="nav-item nav-link">Events</a>
-                            <div class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Pages</a>
-                                <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                                    <a href="blog.html" class="dropdown-item">Blog</a>
-                                    <a href="gallery.html" class="dropdown-item">Gallery</a>
-                                    <a href="volunteer.html" class="dropdown-item">Volunteers</a>
-                                    <a href="donation.html" class="dropdown-item active">Donation</a>
-                                    <a href="404.html" class="dropdown-item">404 Error</a>
-                                </div>
-                            </div>
-                            <a href="contact.html" class="nav-item nav-link">Contact</a>
-                        </div>
-                                                <div class="d-flex align-items-center flex-nowrap pt-xl-0" style="margin-left: 15px;">
-@guest
-  <a href="{{ route('login') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4 me-2">Log In</a>
-  <a href="{{ route('register') }}" class="btn btn-outline-primary py-2 px-4">Sign Up</a>
-@endguest
-
-@auth
-    <a href="{{ route('donations.history') }}" class="btn btn-outline-primary me-3">My Donations</a>
-    <div class="d-inline-flex align-items-center gap-2">
-    <span class="fw-semibold text-dark">Bonjour, {{ Auth::user()->name }}</span>
-    <form action="{{ route('logout') }}" method="POST" class="d-inline">
-      @csrf
-      <button type="submit" class="btn btn-danger py-2 px-4">Logout</button>
-    </form>
-  </div>
-@endauth                        </div>
-                    </div>
-                </nav>
-            </div>
-        </div>
-        <!-- Navbar End -->
+        @include('layouts.navbar')
+        <div style="height: 120px"></div>
 
         <!-- Header Start -->
         <div class="container-fluid bg-breadcrumb">
@@ -112,7 +45,7 @@
                 <h3 class="text-white display-3 mb-4">Donation</h1>
                 <p class="fs-5 text-white mb-4">Help today because tomorrow you may be the one who needs more helping!</p>
                 <ol class="breadcrumb justify-content-center mb-0">
-                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
                     <li class="breadcrumb-item"><a href="#">Pages</a></li>
                     <li class="breadcrumb-item active text-white">Donation</li>
                 </ol>    

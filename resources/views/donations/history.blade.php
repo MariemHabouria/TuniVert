@@ -28,71 +28,8 @@
 
   <body>
     @if (session('new_badges'))
-      <div class="modal fade" id="badgeModal" tabindex="-1" aria-labelledby="badgeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-          <div class="modal-content border-0 shadow-lg badge-modal-content">
-            <div class="modal-header badge-modal-header">
-              <div class="badge-modal-title-container">
-                <div class="trophy-icon">🏆</div>
-                <h3 class="modal-title badge-modal-title" id="badgeModalLabel">
-                  <span class="badge-unlock-text">Badge Unlocked!</span>
-                  <div class="sparkles">✨ ✨ ✨</div>
-                </h3>
-              </div>
-              <button type="button" class="btn-close btn-close-white badge-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body badge-modal-body">
-              @php $nb = (array) session('new_badges'); @endphp
-              @foreach ($nb as $b)
-                <div class="badge-card">
-                  <div class="badge-glow"></div>
-                  <div class="badge-icon-container">
-                    <div class="badge-icon">{{ $b['icon'] ?? '🏅' }}</div>
-                    <div class="badge-shine"></div>
-                  </div>
-                  <div class="badge-details">
-                    <h4 class="badge-name">{{ $b['name'] ?? ($b['slug'] ?? 'New Badge') }}</h4>
-                    <p class="badge-description">{{ $b['description'] ?? 'Congratulations on your achievement!' }}</p>
-                  </div>
-                  <div class="badge-celebration">🎉</div>
-                </div>
-              @endforeach
-              <div class="celebration-message">
-                <div class="success-badge">
-                  <span class="success-text">Outstanding Achievement!</span>
-                  <div class="success-subtitle">Keep up the amazing work! �</div>
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer badge-modal-footer">
-              <button type="button" class="btn badge-awesome-btn" data-bs-dismiss="modal">
-                <span class="btn-text">Awesome!</span>
-                <span class="btn-icon">🚀</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- Badge Modal Styles -->
       <style>
-        /* Enhanced Badge Modal Styles */
-        .badge-modal-content {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 20px;
-          overflow: hidden;
-          position: relative;
-        }
-        
-        .badge-modal-content::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
-          pointer-events: none;
-        }
-        
         .badge-modal-header {
           background: linear-gradient(135deg, #ff6b6b, #ffa500);
           border: none;
@@ -404,76 +341,8 @@
     </div>
     <!-- Spinner End -->
 
-    <!-- Navbar start -->
-    <div class="container-fluid fixed-top px-0">
-      <div class="container px-0">
-        <div class="topbar">
-          <div class="row align-items-center justify-content-center">
-            <div class="col-md-8">
-              <div class="topbar-info d-flex flex-wrap">
-                <a href="#" class="text-light me-4"><i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn</a>
-                <a href="#" class="text-light"><i class="fas fa-phone-alt text-white me-2"></i>+01234567890</a>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div class="topbar-icon d-flex align-items-center justify-content-end">
-                <a href="#" class="btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
-                <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
-                <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <nav class="navbar navbar-light bg-light navbar-expand-xl">
-          <a href="/index.html" class="navbar-brand ms-3">
-            <h1 class="text-primary display-5">Environs</h1>
-          </a>
-          <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-            <span class="fa fa-bars text-primary"></span>
-          </button>
-          <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
-            <div class="navbar-nav ms-auto">
-              <a href="/index.html" class="nav-item nav-link">Home</a>
-              <a href="/about.html" class="nav-item nav-link">About</a>
-              <a href="/service.html" class="nav-item nav-link">Services</a>
-              <a href="/causes.html" class="nav-item nav-link">Causes</a>
-              <a href="/events.html" class="nav-item nav-link">Events</a>
-              <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Pages</a>
-                <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                  <a href="/blog.html" class="dropdown-item">Blog</a>
-                  <a href="/gallery.html" class="dropdown-item">Gallery</a>
-                  <a href="/volunteer.html" class="dropdown-item">Volunteers</a>
-                  <a href="/donation.html" class="dropdown-item">Donation</a>
-                  <a href="/404.html" class="dropdown-item">404 Error</a>
-                </div>
-              </div>
-              <a href="/contact.html" class="nav-item nav-link">Contact</a>
-            </div>
-            <div class="d-flex align-items-center flex-nowrap pt-xl-0" style="margin-left: 15px;">
-              @guest
-                <a href="{{ route('login') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4 me-2">Log In</a>
-                <a href="{{ route('register') }}" class="btn btn-outline-primary py-2 px-4">Sign Up</a>
-              @endguest
-
-              @auth
-                <a href="{{ route('donations.history') }}" class="btn btn-outline-primary me-3 active">My Donations</a>
-                <div class="d-inline-flex align-items-center gap-2">
-                  <span class="fw-semibold text-dark">Bonjour, {{ Auth::user()->name }}</span>
-                  <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-danger py-2 px-4">Logout</button>
-                  </form>
-                </div>
-              @endauth
-            </div>
-          </div>
-        </nav>
-      </div>
-    </div>
-    <!-- Navbar End -->
+    @include('layouts.navbar')
+    <div style="height: 120px"></div>
 
     <!-- Header Start -->
     <div class="container-fluid bg-breadcrumb">
@@ -481,7 +350,7 @@
         <h3 class="text-white display-3 mb-4">My Donations</h3>
         <p class="fs-5 text-white mb-4">Thank you for your generosity. Here is your donation history.</p>
         <ol class="breadcrumb justify-content-center mb-0">
-          <li class="breadcrumb-item"><a href="/index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
           <li class="breadcrumb-item"><a href="#">Pages</a></li>
           <li class="breadcrumb-item active text-white">Donations History</li>
         </ol>
@@ -594,7 +463,7 @@
               <span class="badge bg-primary rounded-pill me-2"><i class="fas fa-list me-1"></i> {{ $dons->total() }} donations</span>
               <span class="text-muted">Showing page {{ $dons->currentPage() }} of {{ $dons->lastPage() }}</span>
             </div>
-            <a href="{{ url('donation.html#donate') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4">
+            <a href="{{ route('donation') }}#donate" class="btn-hover-bg btn btn-primary text-white py-2 px-4">
               <i class="fas fa-donate me-2"></i>Donate again
             </a>
           </div>
@@ -664,7 +533,7 @@
                     <i class="fas fa-leaf text-primary" style="font-size: 2rem;"></i>
                   </div>
                   <p class="mb-3">You haven't made any donations yet.</p>
-                  <a href="{{ url('donation.html#donate') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4">Make your first donation</a>
+                  <a href="{{ route('donation') }}#donate" class="btn-hover-bg btn btn-primary text-white py-2 px-4">Make your first donation</a>
                 </td>
               </tr>
             @endforelse
@@ -678,125 +547,7 @@
     </div>
     <!-- History Section End -->
 
-    <!-- Footer Start -->
-    <div class="container-fluid footer bg-dark text-body py-5">
-      <div class="container py-5">
-        <div class="row g-5">
-          <div class="col-md-6 col-lg-6 col-xl-3">
-            <div class="footer-item">
-              <h4 class="mb-4 text-white">Newsletter</h4>
-              <p class="mb-4">Dolor amet sit justo amet elitr clita ipsum elitr est.Lorem ipsum dolor sit amet, consectetur adipiscing elit consectetur adipiscing elit.</p>
-              <div class="position-relative mx-auto">
-                <input class="form-control border-0 bg-secondary w-100 py-3 ps-4 pe-5" type="text" placeholder="Enter your email">
-                <button type="button" class="btn-hover-bg btn btn-primary position-absolute top-0 end-0 py-2 mt-2 me-2">SignUp</button>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-6 col-xl-3">
-            <div class="footer-item d-flex flex-column">
-              <h4 class="mb-4 text-white">Our Services</h4>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Ocean Turtle</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> White Tiger</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Social Ecology</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Loneliness</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Beauty of Life</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Present for You</a>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-6 col-xl-3">
-            <div class="footer-item d-flex flex-column">
-              <h4 class="mb-4 text-white">Volunteer</h4>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Karen Dawson</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Jack Simmons</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Michael Linden</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Simon Green</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Natalie Channing</a>
-              <a href=""><i class="fas fa-angle-right me-2"></i> Caroline Gerwig</a>
-            </div>
-          </div>
-          <div class="col-md-6 col-lg-6 col-xl-3">
-            <div class="footer-item">
-              <h4 class="mb-4 text-white">Our Gallery</h4>
-              <div class="row g-2">
-                <div class="col-4">
-                  <div class="footer-gallery">
-                    <img src="/img/gallery-footer-1.jpg" class="img-fluid w-100" alt="">
-                    <div class="footer-search-icon">
-                      <a href="/img/gallery-footer-1.jpg" data-lightbox="footerGallery-1" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-4">
-                  <div class="footer-gallery">
-                    <img src="/img/gallery-footer-2.jpg" class="img-fluid w-100" alt="">
-                    <div class="footer-search-icon">
-                      <a href="/img/gallery-footer-2.jpg" data-lightbox="footerGallery-2" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-4">
-                  <div class="footer-gallery">
-                    <img src="/img/gallery-footer-3.jpg" class="img-fluid w-100" alt="">
-                    <div class="footer-search-icon">
-                      <a href="/img/gallery-footer-3.jpg" data-lightbox="footerGallery-3" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-4">
-                  <div class="footer-gallery">
-                    <img src="/img/gallery-footer-4.jpg" class="img-fluid w-100" alt="">
-                    <div class="footer-search-icon">
-                      <a href="/img/gallery-footer-4.jpg" data-lightbox="footerGallery-4" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-4">
-                  <div class="footer-gallery">
-                    <img src="/img/gallery-footer-5.jpg" class="img-fluid w-100" alt="">
-                    <div class="footer-search-icon">
-                      <a href="/img/gallery-footer-5.jpg" data-lightbox="footerGallery-5" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-4">
-                  <div class="footer-gallery">
-                    <img src="/img/gallery-footer-6.jpg" class="img-fluid w-100" alt="">
-                    <div class="footer-search-icon">
-                      <a href="/img/gallery-footer-6.jpg" data-lightbox="footerGallery-6" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Footer End -->
-
-    <!-- Copyright Start -->
-    <div class="container-fluid copyright py-4">
-      <div class="container">
-        <div class="row g-4 align-items-center">
-          <div class="col-md-4 text-center text-md-start mb-md-0">
-            <span class="text-body"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Your Site Name</a>, All right reserved.</span>
-          </div>
-          <div class="col-md-4 text-center">
-            <div class="d-flex align-items-center justify-content-center">
-              <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
-              <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
-              <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
-              <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
-              <a href="#" class="btn-hover-color btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
-            </div>
-          </div>
-          <div class="col-md-4 text-center text-md-end text-body">
-            Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a> Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Copyright End -->
+    @include('layouts.footer')
 
     <!-- Back to Top -->
     <a href="#" class="btn btn-primary btn-primary-outline-0 btn-md-square back-to-top"><i class="fa fa-arrow-up"></i></a>
