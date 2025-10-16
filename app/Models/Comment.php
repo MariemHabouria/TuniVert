@@ -15,6 +15,8 @@ class Comment extends Model
         'content',
         'user_id',   // <-- Ajoute cette ligne
         'event_id',  // si nécessaire
+          'sentiment', // <-- Ajouté pour que Laravel puisse enregistrer le sentiment
+
     ];
     public function user()
 {

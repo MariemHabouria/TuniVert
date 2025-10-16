@@ -22,6 +22,7 @@ use App\Http\Controllers\ChatbotEventController;
 
 
 
+
 // QR verification
 require __DIR__ . '/qr-verify.php';
 
@@ -80,7 +81,9 @@ Route::post('/events/{event}/participate', [EventController::class, 'participate
 Route::post('/events/{event}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('auth');
 
 Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update')->middleware('auth');
-
+Route::post('/comments/{comment}/reanalyse', [CommentController::class, 'reanalyse'])
+    ->name('comments.reanalyse')
+    ->middleware('auth');
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('auth');
 // Liste des événements
 Route::get('events', [EventController::class, 'index'])->name('events.index');
