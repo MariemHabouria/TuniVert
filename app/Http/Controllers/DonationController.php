@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\Mail;
 use Stripe\StripeClient;
 use App\Services\GamificationService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use App\Models\PaymentMethod;
 
 class DonationController extends Controller
 {
@@ -41,9 +43,21 @@ class DonationController extends Controller
 
     public function store(Request $request)
     {
+        // Accept integrated methods and any admin-configured active methods
+        $base = ['carte','paypal','paymee','virement_bancaire'];
+        if (config('services.testpay.enabled')) { $base[] = 'test'; }
+        $allowedMethods = collect($base)
+            ->merge(function(){
+                try { return PaymentMethod::where('active', true)->pluck('key'); }
+                catch (\Throwable $e) { return collect(); }
+            })
+            ->unique()
+            ->values()
+            ->all();
+
         $validated = $request->validate([
             'montant' => ['required','numeric','min:1'],
-            'moyen_paiement' => ['required','in:carte,paypal,paymee,virement_bancaire'],
+            'moyen_paiement' => ['required', Rule::in($allowedMethods)],
             'evenement_id' => ['nullable','integer'],
             'is_anonymous' => ['nullable','boolean'],
         ]);

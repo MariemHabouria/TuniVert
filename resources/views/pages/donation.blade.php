@@ -660,11 +660,22 @@
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Payment method</label>
+                                @php
+                                    try { 
+                                        $methods = \App\Models\PaymentMethod::where('active', true)
+                                            ->whereNotIn('key', ['virement_bancaire','test'])
+                                            ->orderBy('sort_order')
+                                            ->get();
+                                    } catch (\Throwable $e) { $methods = collect(); }
+                                @endphp
                                 <select name="moyen_paiement" class="form-select" required>
-                                    @if (config('services.testpay.enabled'))
-                                    <option value="test">e‑DINAR</option>
-                                    @endif
                                     <option value="virement_bancaire">Bank transfer</option>
+                                    @if (config('services.testpay.enabled'))
+                                        <option value="test">e‑DINAR (test)</option>
+                                    @endif
+                                    @foreach($methods as $m)
+                                        <option value="{{ $m->key }}" data-type="{{ $m->type }}" data-icon="{{ $m->icon_path ?? $m->icon }}">{{ $m->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                                                         @if ($resolvedEventId)
@@ -763,6 +774,22 @@
                                                     </div>
                                                 </div>
                                                 @endauth
+
+                                {{-- Custom Payment Methods --}}
+                                @php
+                                    try {
+                                        $customMethods = \App\Models\PaymentMethod::where('active', true)
+                                            ->whereNotIn('key', ['virement_bancaire','test'])
+                                            ->orderBy('sort_order')
+                                            ->get();
+                                    } catch (\Throwable $e) {
+                                        $customMethods = collect();
+                                    }
+                                @endphp
+                                @foreach($customMethods as $cm)
+                                    <x-custom-payment-method :method="$cm" />
+                                @endforeach
+
                         @endauth
 
                         @guest
@@ -1282,26 +1309,34 @@
 
                                 if (methodSelect){
                                     methodSelect.addEventListener('change', async ()=>{
-                                        if (methodSelect.value === 'carte'){
+                                        // Hide all payment wrappers
+                                        toggleCardUI(false);
+                                        togglePayPalUI(false);
+                                        togglePaymeeUI(false);
+                                        if (bankWrapper) bankWrapper.style.display = 'none';
+                                        if (testpayWrapper) testpayWrapper.style.display = 'none';
+                                        document.querySelectorAll('.custom-payment-method-wrapper').forEach(el => el.style.display = 'none');
+
+                                        const selectedMethod = methodSelect.value;
+                                        const selectedOption = methodSelect.options[methodSelect.selectedIndex];
+                                        const methodType = selectedOption?.dataset?.type || null;
+
+                                        // Handle built-in methods
+                                        if (selectedMethod === 'carte' || methodType === 'card'){
                                             if (donateSubmit) donateSubmit.style.display = 'none';
                                             try{
                                                 toggleCardUI(true);
-                                                togglePayPalUI(false);
-                                                togglePaymeeUI(false);
                                                 const { clientSecret } = await createIntent();
                                                 await mountPaymentElement(clientSecret);
                                             }catch(e){
                                                 toggleCardUI(false);
                                                 alert(e.message || 'Card payment unavailable');
                                             }
-                                        } else if (methodSelect.value === 'paypal'){
+                                        } else if (selectedMethod === 'paypal' || methodType === 'paypal'){
                                             if (donateSubmit) donateSubmit.style.display = 'none';
-                                            toggleCardUI(false);
                                             togglePayPalUI(true);
-                                            togglePaymeeUI(false);
                                             try { await renderPayPalButtons(); } catch(e){ alert(e.message || 'PayPal unavailable'); togglePayPalUI(false); }
-                                            if (bankWrapper) bankWrapper.style.display = 'none';
-                                        } else if (methodSelect.value === 'paymee'){
+                                        } else if (selectedMethod === 'paymee' || methodType === 'paymee'){
                                             if (!PAYMEE_ENABLED){
                                                 alert('e‑DINAR (Paymee) is not configured. Please set PAYMEE_API_KEY in .env and restart the server.');
                                                 methodSelect.value = 'virement_bancaire';
@@ -1309,11 +1344,8 @@
                                                 return;
                                             }
                                             if (donateSubmit) donateSubmit.style.display = 'none';
-                                            toggleCardUI(false);
-                                            togglePayPalUI(false);
                                             togglePaymeeUI(true);
-                                            if (bankWrapper) bankWrapper.style.display = 'none';
-                                        } else if (methodSelect.value === 'test'){
+                                        } else if (selectedMethod === 'test' || methodType === 'test'){
                                             if (!TESTPAY_ENABLED){
                                                 alert('Test payments are disabled.');
                                                 methodSelect.value = 'virement_bancaire';
@@ -1321,25 +1353,20 @@
                                                 return;
                                             }
                                             if (donateSubmit) donateSubmit.style.display = 'none';
-                                            toggleCardUI(false);
-                                            togglePayPalUI(false);
-                                            togglePaymeeUI(false);
                                             toggleTestPayUI(true);
-                                            if (bankWrapper) bankWrapper.style.display = 'none';
-                                        } else if (methodSelect.value === 'virement_bancaire'){
+                                        } else if (selectedMethod === 'virement_bancaire' || methodType === 'bank_transfer'){
                                             if (donateSubmit) donateSubmit.style.display = '';
-                                            toggleCardUI(false);
-                                            togglePayPalUI(false);
-                                            togglePaymeeUI(false);
-                                            toggleTestPayUI(false);
                                             if (bankWrapper) bankWrapper.style.display = '';
                                         } else {
-                                            if (donateSubmit) donateSubmit.style.display = '';
-                                            toggleCardUI(false);
-                                            togglePayPalUI(false);
-                                            togglePaymeeUI(false);
-                                            toggleTestPayUI(false);
-                                            if (bankWrapper) bankWrapper.style.display = 'none';
+                                            // Check if it's a custom method
+                                            const customWrapper = document.querySelector(`.custom-payment-method-wrapper[data-method-key="${selectedMethod}"]`);
+                                            if (customWrapper) {
+                                                if (donateSubmit) donateSubmit.style.display = 'none';
+                                                customWrapper.style.display = 'block';
+                                            } else {
+                                                // Unknown method, fallback to default submit
+                                                if (donateSubmit) donateSubmit.style.display = '';
+                                            }
                                         }
                                     });
                                 }

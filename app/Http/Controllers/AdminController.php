@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Challenge;
 use App\Models\ScoreChallenge; // <- IMPORT DU MODELE
@@ -331,18 +332,241 @@ public function toggleChallenge($id)
         return view('admin.donations.rapports', compact('stats'));
     }
 
+    public function donationsShow(int $id)
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        $donation = \App\Models\Donation::with(['user','event'])->find($id);
+        if (!$donation) {
+            return response()->json(['ok'=>false,'error'=>'Donation introuvable'], 404);
+        }
+        return response()->json(['ok'=>true,'donation'=>$donation]);
+    }
+
+    public function donationsSendReceipt(int $id)
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        $donation = \App\Models\Donation::with('user')->find($id);
+        if (!$donation) {
+            return response()->json(['ok'=>false,'error'=>'Donation introuvable'], 404);
+        }
+        try {
+            // If anonymous donation without email, block
+            if (!$donation->user || empty($donation->user->email)) {
+                return response()->json(['ok'=>false,'error'=>'Aucun email disponible pour ce don.'], 422);
+            }
+            Mail::to($donation->user->email)->queue(new \App\Mail\DonationReceipt($donation));
+            return response()->json(['ok'=>true,'message'=>'Reçu envoyé']);
+        } catch (\Throwable $e) {
+            return response()->json(['ok'=>false,'error'=>$e->getMessage()], 500);
+        }
+    }
+
+    public function donationsDestroy(int $id)
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        $donation = \App\Models\Donation::find($id);
+        if (!$donation) {
+            return response()->json(['ok'=>false,'error'=>'Donation introuvable'], 404);
+        }
+        $donation->delete();
+        return response()->json(['ok'=>true]);
+    }
+
     public function donationsMethodes()
     {
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        // Méthodes de paiement disponibles avec statistiques
-        $methodes = \App\Models\Donation::selectRaw('moyen_paiement, COUNT(*) as usage_count, SUM(montant) as total_amount')
+        // Méthodes configurées par l'admin
+        $configMethods = \App\Models\PaymentMethod::orderBy('active','desc')->orderBy('sort_order')->get();
+
+        // Statistiques d'utilisation réelles (à partir des dons)
+        $usage = \App\Models\Donation::selectRaw('moyen_paiement, COUNT(*) as usage_count, SUM(montant) as total_amount')
             ->groupBy('moyen_paiement')
-            ->orderBy('usage_count', 'desc')
-            ->get();
+            ->get()
+            ->keyBy('moyen_paiement');
+
+        // Fusionner pour l'affichage
+        $methodes = $configMethods->map(function($m) use ($usage){
+            $stat = $usage->get($m->key);
+            $m->usage_count = $stat->usage_count ?? 0;
+            $m->total_amount = (float) ($stat->total_amount ?? 0);
+            return $m;
+        });
 
         return view('admin.donations.methodes', compact('methodes'));
+    }
+
+    public function donationsMethodesStore(\Illuminate\Http\Request $request)
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        // Normalize key: lowercase, spaces to underscore, strip invalid chars
+        try {
+            $raw = (string) $request->input('method_key', '');
+            $normalized = \Illuminate\Support\Str::of($raw)
+                ->lower()
+                ->replace(' ', '_')
+                ->replaceMatches('/[^a-z0-9_\-]/', '')
+                ->limit(100, '')
+                ->value();
+            if ($normalized !== '') { $request->merge(['method_key' => $normalized]); }
+        } catch (\Throwable $e) {}
+
+        $data = $request->validate([
+            'method_key' => ['required','string','max:100','regex:/^[a-z0-9_\-]+$/'],
+            'method_name' => ['required','string','max:150'],
+            'method_type' => ['nullable','string','in:card,paypal,bank_transfer,paymee,custom,test'],
+            'method_icon' => ['nullable','string','max:150'],
+            // Use file+mimes so SVG passes (image rule may reject some svg mime types)
+            'method_icon_file' => ['nullable','file','mimes:jpg,jpeg,png,webp,svg','max:4096'],
+            'method_description' => ['nullable','string','max:2000'],
+            // Accept checkbox 'on' value without strict boolean validation
+            'method_active' => ['nullable'],
+            'color_primary' => ['nullable','string','max:20'],
+            'color_secondary' => ['nullable','string','max:20'],
+            'button_text' => ['nullable','string','max:100'],
+            'custom_form_fields' => ['nullable','json'],
+            'custom_css' => ['nullable','string','max:10000'],
+            'instructions_html' => ['nullable','string','max:10000'],
+        ]);
+
+        $payload = [
+            'name' => $data['method_name'],
+            'type' => $data['method_type'] ?? null,
+            'icon' => $data['method_icon'] ?? null,
+            'description' => $data['method_description'] ?? null,
+            'active' => $request->boolean('method_active'),
+            'color_primary' => $data['color_primary'] ?? '#007bff',
+            'color_secondary' => $data['color_secondary'] ?? '#ffffff',
+            'button_text' => $data['button_text'] ?? 'Pay now',
+            'custom_form_fields' => $data['custom_form_fields'] ?? null,
+            'custom_css' => $data['custom_css'] ?? null,
+            'instructions_html' => $data['instructions_html'] ?? null,
+        ];
+
+        // Handle optional icon file upload
+        if ($request->hasFile('method_icon_file')) {
+            // Store on the public disk for predictable path
+            $relative = $request->file('method_icon_file')->store('payment_methods', 'public');
+            $payload['icon_path'] = 'storage/' . ltrim($relative, '/');
+        }
+
+        $pm = \App\Models\PaymentMethod::updateOrCreate(
+            ['key' => strtolower($data['method_key'])],
+            $payload
+        );
+
+        return response()->json(['ok' => true, 'method' => $pm]);
+    }
+
+    public function donationsMethodesGet($key)
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        $method = \App\Models\PaymentMethod::whereRaw('LOWER(`key`) = ?', [strtolower($key)])->first();
+        if (!$method && is_numeric($key)) {
+            $method = \App\Models\PaymentMethod::find((int)$key);
+        }
+        if (!$method) {
+            return response()->json(['ok' => false, 'error' => 'Méthode introuvable'], 404);
+        }
+        return response()->json(['ok' => true, 'method' => $method]);
+    }
+
+    public function donationsMethodesUpdate(\Illuminate\Http\Request $request, $key)
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        try {
+            $method = \App\Models\PaymentMethod::whereRaw('LOWER(`key`) = ?', [strtolower($key)])->first();
+            if (!$method && is_numeric($key)) {
+                $method = \App\Models\PaymentMethod::find((int)$key);
+            }
+            if (!$method) {
+                return response()->json(['ok'=>false,'error'=>'Méthode introuvable'], 404);
+            }
+
+            // Normalize key if changed
+            $newKey = $key; // Default to current key
+            if ($request->has('method_key') && $request->input('method_key') !== $key) {
+                try {
+                    $raw = (string) $request->input('method_key', '');
+                    $normalized = \Illuminate\Support\Str::of($raw)
+                        ->lower()
+                        ->replace(' ', '_')
+                        ->replaceMatches('/[^a-z0-9_\-]/', '')
+                        ->limit(100, '')
+                        ->value();
+                    if ($normalized !== '') { 
+                        $newKey = $normalized;
+                        $request->merge(['method_key' => $normalized]); 
+                    }
+                } catch (\Throwable $e) {}
+            }
+
+            $data = $request->validate([
+                'method_key' => ['required','string','max:100','regex:/^[a-z0-9_\-]+$/','unique:payment_methods,key,'.$method->id],
+                'method_name' => ['required','string','max:150'],
+                'method_type' => ['nullable','string','in:card,paypal,bank_transfer,paymee,custom,test'],
+                'method_icon' => ['nullable','string','max:150'],
+                'method_icon_file' => ['nullable','file','mimes:jpg,jpeg,png,webp,svg','max:4096'],
+                'method_description' => ['nullable','string','max:2000'],
+                'method_active' => ['nullable'],
+                'color_primary' => ['nullable','string','max:20'],
+                'color_secondary' => ['nullable','string','max:20'],
+                'button_text' => ['nullable','string','max:100'],
+                'custom_form_fields' => ['nullable','json'],
+                'custom_css' => ['nullable','string','max:10000'],
+                'instructions_html' => ['nullable','string','max:10000'],
+            ]);
+
+            // If changing key and it belongs to a different record, block explicitly
+            if ($newKey !== $key) {
+                $exists = \App\Models\PaymentMethod::where('key', $newKey)->where('id', '!=', $method->id)->exists();
+                if ($exists) {
+                    return response()->json(['ok'=>false,'error'=>'Cette clé est déjà utilisée par une autre méthode.'], 422);
+                }
+            }
+
+            $payload = [
+                'key' => $newKey,
+                'name' => $data['method_name'],
+                'type' => $data['method_type'] ?? null,
+                'icon' => $data['method_icon'] ?? null,
+                'description' => $data['method_description'] ?? null,
+                'active' => $request->boolean('method_active'),
+                'color_primary' => $data['color_primary'] ?? '#007bff',
+                'color_secondary' => $data['color_secondary'] ?? '#ffffff',
+                'button_text' => $data['button_text'] ?? 'Pay now',
+                'custom_form_fields' => $data['custom_form_fields'] ?? null,
+                'custom_css' => $data['custom_css'] ?? null,
+                'instructions_html' => $data['instructions_html'] ?? null,
+            ];
+
+            // Handle optional icon file upload
+            if ($request->hasFile('method_icon_file')) {
+                $relative = $request->file('method_icon_file')->store('payment_methods', 'public');
+                $payload['icon_path'] = 'storage/' . ltrim($relative, '/');
+            }
+
+            $method->update($payload);
+
+            return response()->json(['ok' => true, 'method' => $method->fresh()]);
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            return response()->json(['ok'=>false,'error'=>'Validation error','errors'=>$ve->errors()], 422);
+        } catch (\Throwable $e) {
+            return response()->json(['ok'=>false,'error'=>$e->getMessage()], 500);
+        }
     }
 
     /**

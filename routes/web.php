@@ -226,6 +226,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
         Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
         Route::get('/methodes', [AdminController::class, 'donationsMethodes'])->name('methodes');
+        Route::post('/methodes', [AdminController::class, 'donationsMethodesStore'])->name('methodes.store');
+        Route::get('/methodes/{key}', [AdminController::class, 'donationsMethodesGet'])->name('methodes.get');
+        Route::put('/methodes/{key}', [AdminController::class, 'donationsMethodesUpdate'])->name('methodes.update');
+
+        // Donation entries actions
+        Route::get('/entries/{id}', [AdminController::class, 'donationsShow'])->name('entries.show');
+        Route::post('/entries/{id}/send-receipt', [AdminController::class, 'donationsSendReceipt'])->name('entries.sendReceipt');
+        Route::delete('/entries/{id}', [AdminController::class, 'donationsDestroy'])->name('entries.destroy');
     });
 
     Route::prefix('ui-features')->name('ui-features.')->group(function () {

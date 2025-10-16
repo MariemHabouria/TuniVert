@@ -862,7 +862,7 @@
       </div>
 
       <div class="mt-4 d-flex justify-content-center">
-        {{ $dons->links('pagination::bootstrap-5') }}
+        {{ $dons->links('pagination::bootstrap-5-sm') }}
       </div>
     </div>
     <!-- History Section End -->

@@ -88,8 +88,8 @@
     @endforelse
   </div>
 
-  <div class="mt-4">
-    {{ $formations->links() }}
+  <div class="mt-4 d-flex justify-content-center">
+    {{ $formations->links('pagination::bootstrap-5-sm') }}
   </div>
 </div>
 @endsection

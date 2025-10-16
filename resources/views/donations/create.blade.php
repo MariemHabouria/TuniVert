@@ -30,16 +30,33 @@
 
           <div class="col-12 col-md-6">
             <label class="form-label">Moyen de paiement</label>
+            @php
+              try {
+                $methods = \App\Models\PaymentMethod::where('active', true)
+                  ->whereNotIn('key', ['virement_bancaire','test'])
+                  ->orderBy('sort_order')->get();
+              } catch (\Throwable $e) { $methods = collect(); }
+            @endphp
             <select name="moyen_paiement" class="form-select" required>
-              <option value="carte">Carte</option>
-              <option value="paypal">PayPal</option>
               <option value="virement_bancaire">Virement bancaire</option>
+              @if (config('services.testpay.enabled'))
+                <option value="test">e‑DINAR (test)</option>
+              @endif
+              @foreach($methods as $m)
+                <option value="{{ $m->key }}" data-type="{{ $m->type }}" data-icon="{{ $m->icon_path ?? $m->icon }}">{{ $m->name }}</option>
+              @endforeach
             </select>
           </div>
-          
+
+          {{-- Custom Payment Methods --}}
+          @foreach($methods as $cm)
+            <div class="col-12">
+              <x-custom-payment-method :method="$cm" />
+            </div>
+          @endforeach
 
           <div class="col-12">
-            <button class="btn btn-white w-100">Payer maintenant</button>
+            <button type="submit" class="btn btn-white w-100" id="submitBtn">Payer maintenant</button>
           </div>
         </form>
       </div>
@@ -63,6 +80,37 @@
     function reset(){ card.style.transform=''; card.style.removeProperty('--px'); card.style.removeProperty('--py'); rect=null; }
     card.addEventListener('mousemove', onMove); card.addEventListener('mouseleave', reset);
     addEventListener('resize', ()=>rect=null); addEventListener('scroll', ()=>rect=null, {passive:true});
+  })();
+
+  // Handle payment method selection
+  (function(){
+    const methodSelect = document.querySelector('select[name="moyen_paiement"]');
+    const submitBtn = document.getElementById('submitBtn');
+    if (!methodSelect) return;
+
+    methodSelect.addEventListener('change', function(){
+      const selectedMethod = this.value;
+      const selectedOption = this.options[this.selectedIndex];
+      const methodType = selectedOption.dataset.type;
+
+      // Hide all custom method wrappers first
+      document.querySelectorAll('.custom-payment-method-wrapper').forEach(el => el.style.display = 'none');
+
+      // Check if it's a custom method (not built-in)
+      if (selectedMethod !== 'virement_bancaire' && selectedMethod !== 'test') {
+        const customWrapper = document.querySelector(`.custom-payment-method-wrapper[data-method-key="${selectedMethod}"]`);
+        if (customWrapper) {
+          if (submitBtn) submitBtn.style.display = 'none';
+          customWrapper.style.display = 'block';
+        } else {
+          // Unknown method, show default submit
+          if (submitBtn) submitBtn.style.display = '';
+        }
+      } else {
+        // Built-in method, show default submit
+        if (submitBtn) submitBtn.style.display = '';
+      }
+    });
   })();
 </script>
 @endpush
