@@ -164,14 +164,16 @@ Route::get('/payments/test/cancel', [TestPaymentController::class, 'cancel'])->n
 | Challenges
 |--------------------------------------------------------------------------
 */
+// Routes Challenges
 Route::prefix('challenges')->group(function () {
     Route::get('/', [ChallengeController::class, 'index'])->name('challenges.index');
-
+    
     Route::middleware('auth')->group(function () {
         Route::get('/profil', [ChallengeController::class, 'profil'])->name('challenges.profil');
         Route::post('/{id}/participate', [ChallengeController::class, 'participer'])->name('challenges.participate');
-        Route::post('/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
-        Route::get('/create', [AdminController::class, 'challengesCreate'])->name('create');
+        Route::post('/challenges/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
+
+    Route::get('/create', [AdminController::class, 'challengesCreate'])->name('create');
 
         Route::prefix('association')->group(function () {
             Route::get('/create', [ChallengeController::class, 'create'])->name('challenges.create');
@@ -188,7 +190,7 @@ Route::prefix('challenges')->group(function () {
     Route::get('/{id}', [ChallengeController::class, 'show'])->name('challenges.show');
 });
 
-// Scores
+// Routes Scores
 Route::prefix('scores')->name('scores.')->middleware('auth')->group(function () {
     Route::post('/{participant}', [ScoreChallengeController::class, 'storeOrUpdate'])->name('update');
     Route::delete('/{score}', [ScoreChallengeController::class, 'destroy'])->name('destroy');
@@ -233,14 +235,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('challenges')->name('challenges.')->group(function () {
         Route::get('/', [AdminController::class, 'challengesIndex'])->name('index');
-        Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])->name('participations');
-        Route::get('/scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
 
         // Participations d’un challenge
         Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])
             ->name('participations');
+Route::get('all-scores', [AdminController::class, 'allScores'])->name('allScores');
 
         Route::get('/scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
+
+
+        // Toggle challenge (bloquer/débloquer)
         Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');
     });
 

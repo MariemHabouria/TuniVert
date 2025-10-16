@@ -7,31 +7,42 @@ use Illuminate\Database\Eloquent\Model;
 
 class Challenge extends Model
 {
-    use HasFactory; // indispensable pour les factories
+    use HasFactory;
 
     protected $fillable = [
-        'titre', 'description', 'organisateur_id', 'date_debut', 
-        'date_fin', 'categorie', 'difficulte', 'objectif'
+        'titre', 
+        'description', 
+        'organisateur_id', 
+        'date_debut', 
+        'date_fin', 
+        'categorie', 
+        'difficulte', 
+        'objectif',
+        'actif',
+        'slug',
     ];
 
+    // Relation avec l'organisateur
     public function organisateur()
     {
         return $this->belongsTo(User::class, 'organisateur_id');
     }
 
+    // Relation avec les participations
     public function participants()
     {
         return $this->hasMany(ParticipantChallenge::class);
     }
-    
-public function challengesIndex()
-{
-    $check = $this->checkAdmin();
-    if ($check !== true) return $check;
 
-    $challenges = Challenge::withCount('participants')->get();
+    // Vérifie si le challenge est actif
+    public function isActif()
+    {
+        return $this->actif;
+    }
 
-    return view('admin.challenges.index', compact('challenges'));
-}
-}
+    // Retourne le nombre total de participants validés
+    public function participantsValides()
+    {
+        return $this->participants()->where('statut', 'valide');
+    }
 }

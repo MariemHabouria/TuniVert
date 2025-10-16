@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('challenges', function (Blueprint $table) {
             $table->id();
             $table->string('titre');                               // Titre du challenge
-            $table->text('description');                           // Description
+            $table->text('description');                           // Description complète
+            $table->string('slug')->nullable()->unique();          // Slug pour URL, optionnel
             $table->string('categorie')->nullable();               // Catégorie optionnelle
             $table->enum('difficulte', ['facile', 'moyen', 'difficile'])->nullable(); // Difficulté
             $table->integer('objectif')->nullable();               // Objectif optionnel
@@ -23,7 +24,10 @@ return new class extends Migration
                   ->onDelete('cascade');
             $table->dateTime('date_debut');                        // Date de début
             $table->dateTime('date_fin');                          // Date de fin
+            $table->boolean('actif')->default(true);               // Actif ou non
             $table->timestamps();
+
+            $table->index('organisateur_id');                     // Index pour organiser les requêtes
         });
     }
 

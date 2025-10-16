@@ -109,15 +109,14 @@ class AdminController extends Controller
         return view('admin.evenements.categories');
     }
 
-    /* ==============================
-     *     CHALLENGES
-     * ==============================*/
+    /**
+     * Challenges
+     */
     public function challengesIndex()
     {
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        // Charger les challenges avec le nombre de participants
         $challenges = Challenge::withCount('participants')->get();
 
         return view('admin.challenges.index', compact('challenges'));
@@ -140,6 +139,105 @@ class AdminController extends Controller
 
         return view('admin.challenges.participations', compact('challenge'));
     }
+
+    public function challengesScores($challengeId)
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        $challenge = Challenge::with(['participants.utilisateur', 'participants.score'])->findOrFail($challengeId);
+
+        return view('admin.challenges.scores', compact('challenge'));
+    }
+
+public function allScores(Request $request)
+{
+    $check = $this->checkAdmin();
+    if ($check !== true) return $check;
+
+    $query = Challenge::with(['participants.utilisateur', 'participants.score']);
+
+    // --- Filtres dynamiques ---
+    if ($request->filled('challenge_id')) {
+        $query->where('id', $request->challenge_id);
+    }
+
+    $challenges = $query->get();
+
+    // Filtre badge au niveau des scores
+    $scoresQuery = ScoreChallenge::query();
+    if ($request->filled('badge')) {
+        $scoresQuery->whereRaw('LOWER(badge) = ?', [strtolower($request->badge)]);
+    }
+
+    // Filtre par période
+    if ($request->filled('periode')) {
+        $scoresQuery->where('created_at', '>=', now()->subDays((int)$request->periode));
+    }
+
+    // Badges stats filtrés
+    $badgesStats = $scoresQuery
+        ->selectRaw('LOWER(badge) as badge, COUNT(*) as count')
+        ->whereNotNull('badge')
+        ->groupBy('badge')
+        ->pluck('count', 'badge')
+        ->toArray();
+
+    // Statistiques générales
+    $totalParticipants = $challenges->sum(fn($c) => $c->participants->count());
+    $totalPoints = $challenges->sum(fn($c) => $c->participants->sum(fn($p) => $p->score->points ?? 0));
+    $pointsMoyens = $totalParticipants > 0 ? round($totalPoints / $totalParticipants, 2) : 0;
+
+    // Graphiques
+    $performanceData = [];
+    $performanceLabels = [];
+    $participantsData = [];
+    $participantsLabels = [];
+
+    foreach($challenges->take(8) as $challenge) {
+        $total = $challenge->participants->sum(fn($p) => $p->score->points ?? 0);
+        $count = $challenge->participants->count();
+        $avg = $count > 0 ? $total / $count : 0;
+        $performanceData[] = round($avg, 1);
+        $performanceLabels[] = \Illuminate\Support\Str::limit($challenge->titre, 20);
+    }
+
+    $popular = $challenges->sortByDesc(fn($c) => $c->participants->count())->take(6);
+    foreach($popular as $challenge) {
+        $participantsData[] = $challenge->participants->count();
+        $participantsLabels[] = \Illuminate\Support\Str::limit($challenge->titre, 25);
+    }
+
+    $stats = [
+        'total_challenges' => $challenges->count(),
+        'total_participants' => $totalParticipants,
+        'total_points' => $totalPoints,
+        'points_moyens' => $pointsMoyens,
+        'badges_count' => [
+            'Or' => $badgesStats['or'] ?? 0,
+            'Argent' => $badgesStats['argent'] ?? 0,
+            'Bronze' => $badgesStats['bronze'] ?? 0,
+        ]
+    ];
+
+    return view('admin.challenges.all_scores', compact(
+        'challenges', 'stats',
+        'performanceData', 'performanceLabels',
+        'participantsData', 'participantsLabels'
+    ));
+}
+
+public function toggleChallenge($id)
+{
+    $check = $this->checkAdmin();
+    if ($check !== true) return $check;
+
+    $challenge = Challenge::findOrFail($id);
+    $challenge->actif = !$challenge->actif;
+    $challenge->save();
+
+    return redirect()->back()->with('success', 'Le statut du challenge a été mis à jour.');
+}
 
     /* ==============================
      *     FORUMS
