@@ -10,6 +10,7 @@ use App\Http\Controllers\FormationController;
 use App\Http\Controllers\FormationInscriptionController;
 use App\Http\Controllers\AvisFormationController;
 use App\Http\Controllers\RessourceFormationController;
+// Donations / Events additions
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\DonationAdminController;
 use App\Http\Controllers\DonationOrganizerController;
@@ -161,10 +162,19 @@ Route::get('/payments/test/cancel', [TestPaymentController::class, 'cancel'])->n
 Route::prefix('challenges')->group(function () {
     Route::get('/', [ChallengeController::class, 'index'])->name('challenges.index');
 
+// Catalogue accessible à tous
+Route::get('/formations',        [FormationController::class, 'index'])->name('formations.index');
+Route::get('/formations/{formation}', [FormationController::class, 'show'])->name('formations.show');
+
+// Routes Challenges
+Route::prefix('challenges')->group(function () {
+    Route::get('/', [ChallengeController::class, 'index'])->name('challenges.index');
+    
     Route::middleware('auth')->group(function () {
         Route::get('/profil', [ChallengeController::class, 'profil'])->name('challenges.profil');
         Route::post('/{id}/participate', [ChallengeController::class, 'participer'])->name('challenges.participate');
         Route::post('/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
+    Route::get('/create', [AdminController::class, 'challengesCreate'])->name('create');
 
         Route::prefix('association')->group(function () {
             Route::get('/create', [ChallengeController::class, 'create'])->name('challenges.create');
@@ -181,7 +191,7 @@ Route::prefix('challenges')->group(function () {
     Route::get('/{id}', [ChallengeController::class, 'show'])->name('challenges.show');
 });
 
-// Scores
+// Routes Scores
 Route::prefix('scores')->name('scores.')->middleware('auth')->group(function () {
     Route::post('/{participant}', [ScoreChallengeController::class, 'storeOrUpdate'])->name('update');
     Route::delete('/{score}', [ScoreChallengeController::class, 'destroy'])->name('destroy');
@@ -211,6 +221,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
+// ===== ROUTES ADMIN (application wide) =====
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Login Admin accessible sans auth
+    Route::get('/login', [AuthController::class, 'showAdminLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'adminLogin'])->name('login.submit'); 
+    Route::post('/logout', [AuthController::class, 'adminLogout'])->name('logout');
+
+    // Routes admin protégées
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    
     Route::prefix('utilisateurs')->name('utilisateurs.')->group(function () {
         Route::get('/', [AdminController::class, 'utilisateursIndex'])->name('index');
         Route::get('/create', [AdminController::class, 'utilisateursCreate'])->name('create');
@@ -227,6 +247,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'challengesIndex'])->name('index');
         Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])->name('participations');
         Route::get('/scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
+
+        // Participations d’un challenge
+        Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])
+            ->name('participations');
+
+        Route::get('/scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
+
+        // Toggle challenge (bloquer/débloquer)
         Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');
     });
 
@@ -246,6 +274,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'donationsIndex'])->name('index');
         Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
         Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
+        Route::get('/methodes', [AdminController::class, 'donationsMethodes'])->name('methodes');
+        Route::post('/methodes', [AdminController::class, 'donationsMethodesStore'])->name('methodes.store');
+        Route::get('/methodes/{key}', [AdminController::class, 'donationsMethodesGet'])->name('methodes.get');
+        Route::put('/methodes/{key}', [AdminController::class, 'donationsMethodesUpdate'])->name('methodes.update');
+
+        // Donation entries actions
+        Route::get('/entries/{id}', [AdminController::class, 'donationsShow'])->name('entries.show');
+        Route::post('/entries/{id}/send-receipt', [AdminController::class, 'donationsSendReceipt'])->name('entries.sendReceipt');
+        Route::delete('/entries/{id}', [AdminController::class, 'donationsDestroy'])->name('entries.destroy');
     });
 
     Route::prefix('ui-features')->name('ui-features.')->group(function () {
@@ -264,14 +301,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('tables')->name('tables.')->group(function () {
         Route::get('/basic', [AdminController::class, 'tablesBasic'])->name('basic');
     });
-
-    // 🔥 Gestion des alertes
-    Route::get('/alertes', [AdminController::class, 'alertesIndex'])->name('alertes.index');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Fallback
-|--------------------------------------------------------------------------
-*/
+// Paymee return/cancel (public)
+Route::get('/payments/paymee/return', [DonationController::class, 'paymeeReturn'])->name('payments.paymee.return');
+Route::get('/payments/paymee/cancel', [DonationController::class, 'paymeeCancel'])->name('payments.paymee.cancel');
+
+// TestPay checkout and cancel (public)
+if (config('services.testpay.enabled')) {
+    Route::get('/payments/test/checkout', [TestPaymentController::class, 'checkout'])->name('payments.test.checkout');
+    Route::get('/payments/test/cancel', [TestPaymentController::class, 'cancel'])->name('payments.test.cancel');
+}
+
+// Paymee webhook (public API, CSRF exempt via api middleware)
+Route::post('/webhooks/paymee', [DonationController::class, 'paymeeWebhook'])
+    ->name('webhooks.paymee')
+    ->middleware('api');
+
+// 404 fallback
 Route::fallback(fn () => abort(404));

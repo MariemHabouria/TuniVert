@@ -36,16 +36,12 @@ class DatabaseSeeder extends Seeder
             User::factory($target - $current)->create();
         }
 
-        // ✅ Appelle tous les seeders nécessaires
+        // Appelle tous les seeders nécessaires
         $this->call([
             ChallengeSeeder::class,
             DonationSeeder::class,
             GamificationSeeder::class,
             DemoDataSeeder::class,
-
-            // 👉 Ajoute tes seeders ici
-            ForumSeeder::class,
-            AlerteForumSeeder::class,
         ]);
     }
 }

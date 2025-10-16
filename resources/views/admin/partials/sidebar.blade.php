@@ -9,6 +9,7 @@
         </li>
         
         <li class="nav-item nav-category">Gestion du Site</li>
+
         <!-- Utilisateurs -->
         <li class="nav-item {{ request()->is('admin/utilisateurs*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#utilisateurs" aria-expanded="false">
@@ -30,6 +31,7 @@
                 </ul>
             </div>
         </li>
+
         <!-- Événements -->
         <li class="nav-item {{ request()->is('admin/evenements*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#evenements" aria-expanded="false">
@@ -51,7 +53,7 @@
                 </ul>
             </div>
         </li>
-        
+
         <!-- Challenges -->
         <li class="nav-item {{ request()->is('admin/challenges*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#challenges" aria-expanded="false">
@@ -63,27 +65,14 @@
                 <ul class="nav flex-column sub-menu">
                     <li class="nav-item {{ request()->is('admin/challenges') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.challenges.index') }}">Tous les challenges</a>
-                    </li>
-                    
-                 
+                   <li class="nav-item {{ request()->is('admin/challenges/scores/tous') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('admin.challenges.all_scores') }}">
+        Tous les scores
+    </a>
+</li>
                 </ul>
             </div>
         </li>
-        <!-- Alertes -->
-<li class="nav-item {{ request()->is('admin/alertes*') ? 'active' : '' }}">
-    <a class="nav-link" data-bs-toggle="collapse" href="#alertes" aria-expanded="false">
-        <i class="menu-icon mdi mdi-alert-circle-outline"></i>
-        <span class="menu-title">Alertes</span>
-        <i class="menu-arrow"></i>
-    </a>
-    <div class="collapse {{ request()->is('admin/alertes*') ? 'show' : '' }}" id="alertes">
-        <ul class="nav flex-column sub-menu">
-            <li class="nav-item {{ request()->is('admin/alertes') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.alertes.index') }}">Gestion des alertes</a>
-            </li>
-        </ul>
-    </div>
-</li>
 
         <!-- Forums -->
         <li class="nav-item {{ request()->is('admin/forums*') ? 'active' : '' }}">
@@ -97,11 +86,16 @@
                     <li class="nav-item {{ request()->is('admin/forums') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.forums.index') }}">Gestion des forums</a>
                     </li>
-                   
+                    <li class="nav-item {{ request()->is('admin/forums/categories') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.forums.categories') }}">Catégories</a>
+                    </li>
+                    <li class="nav-item {{ request()->is('admin/forums/moderations') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.forums.moderations') }}">Modération</a>
+                    </li>
                 </ul>
             </div>
         </li>
-        
+
         <!-- Formations -->
         <li class="nav-item {{ request()->is('admin/formations*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#formations" aria-expanded="false">
@@ -123,7 +117,7 @@
                 </ul>
             </div>
         </li>
-        
+
         <!-- Donations -->
         <li class="nav-item {{ request()->is('admin/donations*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#donations" aria-expanded="false">
@@ -142,13 +136,16 @@
                     <li class="nav-item {{ request()->is('admin/donations/rapports') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.donations.rapports') }}">Rapports</a>
                     </li>
+                    <li class="nav-item {{ request()->is('admin/donations/methodes') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ route('admin.donations.methodes') }}">Méthodes de Paiement</a>
+                    </li>
                 </ul>
             </div>
         </li>
-        
+
         <li class="nav-item nav-category">UI Elements</li>
-        
-        <!-- UI Elements (gardé pour référence) -->
+
+        <!-- UI Elements -->
         <li class="nav-item {{ request()->is('admin/ui-features*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false">
                 <i class="menu-icon mdi mdi-floor-plan"></i>
@@ -166,7 +163,7 @@
                 </ul>
             </div>
         </li>
-        
+
         <!-- Forms -->
         <li class="nav-item {{ request()->is('admin/forms*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false">
@@ -182,7 +179,7 @@
                 </ul>
             </div>
         </li>
-        
+
         <!-- Charts -->
         <li class="nav-item {{ request()->is('admin/charts*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#charts" aria-expanded="false">
@@ -198,7 +195,7 @@
                 </ul>
             </div>
         </li>
-        
+
         <!-- Tables -->
         <li class="nav-item {{ request()->is('admin/tables*') ? 'active' : '' }}">
             <a class="nav-link" data-bs-toggle="collapse" href="#tables" aria-expanded="false">

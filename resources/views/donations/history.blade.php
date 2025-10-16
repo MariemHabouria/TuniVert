@@ -29,37 +29,373 @@
   <body>
     @if (session('new_badges'))
       <div class="modal fade" id="badgeModal" tabindex="-1" aria-labelledby="badgeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white">
-              <h5 class="modal-title" id="badgeModalLabel">Badge unlocked!</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content border-0 shadow-lg badge-modal-content">
+            <div class="modal-header badge-modal-header">
+              <div class="badge-modal-title-container">
+                <div class="trophy-icon">🏆</div>
+                <h3 class="modal-title badge-modal-title" id="badgeModalLabel">
+                  <span class="badge-unlock-text">Badge Unlocked!</span>
+                  <div class="sparkles">✨ ✨ ✨</div>
+                </h3>
+              </div>
+              <button type="button" class="btn-close btn-close-white badge-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body badge-modal-body">
               @php $nb = (array) session('new_badges'); @endphp
               @foreach ($nb as $b)
-                <div class="d-flex align-items-center gap-3 p-3 mb-2 rounded bg-light">
-                  <div style="font-size:2rem">{{ $b['icon'] ?? '🏅' }}</div>
-                  <div>
-                    <div class="fw-bold">{{ $b['name'] ?? ($b['slug'] ?? 'New badge') }}</div>
-                    <div class="text-muted small">{{ $b['description'] ?? '' }}</div>
+                <div class="badge-card">
+                  <div class="badge-glow"></div>
+                  <div class="badge-icon-container">
+                    <div class="badge-icon">{{ $b['icon'] ?? '🏅' }}</div>
+                    <div class="badge-shine"></div>
                   </div>
+                  <div class="badge-details">
+                    <h4 class="badge-name">{{ $b['name'] ?? ($b['slug'] ?? 'New Badge') }}</h4>
+                    <p class="badge-description">{{ $b['description'] ?? 'Congratulations on your achievement!' }}</p>
+                  </div>
+                  <div class="badge-celebration">🎉</div>
                 </div>
               @endforeach
-              <div class="text-center mt-2">
-                <span class="badge bg-success-subtle text-success">Well done! Keep going 🎉</span>
+              <div class="celebration-message">
+                <div class="success-badge">
+                  <span class="success-text">Outstanding Achievement!</span>
+                  <div class="success-subtitle">Keep up the amazing work! �</div>
+                </div>
               </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-success" data-bs-dismiss="modal">Awesome</button>
+            <div class="modal-footer badge-modal-footer">
+              <button type="button" class="btn badge-awesome-btn" data-bs-dismiss="modal">
+                <span class="btn-text">Awesome!</span>
+                <span class="btn-icon">🚀</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
       <style>
-        /* Simple confetti effect */
-        .confetti { position: fixed; top: -10px; width: 10px; height: 14px; opacity: .9; animation: fall 2.5s linear forwards; }
-        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0.8; } }
+        /* Enhanced Badge Modal Styles */
+        .badge-modal-content {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 20px;
+          overflow: hidden;
+          position: relative;
+        }
+        
+        .badge-modal-content::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+          pointer-events: none;
+        }
+        
+        .badge-modal-header {
+          background: linear-gradient(135deg, #ff6b6b, #ffa500);
+          border: none;
+          padding: 2rem;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .badge-modal-header::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+          animation: pulse 2s ease-in-out infinite alternate;
+        }
+        
+        .badge-modal-title-container {
+          position: relative;
+          z-index: 2;
+        }
+        
+        .trophy-icon {
+          font-size: 3rem;
+          animation: bounce 1s ease-in-out infinite alternate;
+          margin-bottom: 0.5rem;
+        }
+        
+        .badge-modal-title {
+          color: white;
+          font-weight: 800;
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+          margin: 0;
+        }
+        
+        .badge-unlock-text {
+          font-size: 1.8rem;
+          display: block;
+          animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .sparkles {
+          font-size: 1.2rem;
+          margin-top: 0.5rem;
+          animation: twinkle 1.5s ease-in-out infinite;
+        }
+        
+        .badge-close-btn {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          z-index: 3;
+          opacity: 0.8;
+          transition: opacity 0.3s ease;
+        }
+        
+        .badge-close-btn:hover {
+          opacity: 1;
+        }
+        
+        .badge-modal-body {
+          padding: 2rem;
+          background: rgba(255,255,255,0.95);
+          margin: 0;
+        }
+        
+        .badge-card {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          padding: 1.5rem;
+          margin-bottom: 1rem;
+          border-radius: 15px;
+          background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+          position: relative;
+          overflow: hidden;
+          animation: slideInLeft 0.6s ease-out;
+          transition: transform 0.3s ease;
+        }
+        
+        .badge-card:hover {
+          transform: translateY(-5px);
+        }
+        
+        .badge-glow {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(45deg, rgba(255,215,0,0.1), rgba(255,140,0,0.1));
+          border-radius: 15px;
+          animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .badge-icon-container {
+          position: relative;
+          min-width: 80px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #ffd700, #ffb347);
+          border-radius: 50%;
+          box-shadow: 0 4px 15px rgba(255,215,0,0.4);
+        }
+        
+        .badge-icon {
+          font-size: 2.5rem;
+          animation: rotate 2s ease-in-out infinite;
+          z-index: 2;
+          position: relative;
+        }
+        
+        .badge-shine {
+          position: absolute;
+          top: 10%;
+          left: 10%;
+          width: 30%;
+          height: 30%;
+          background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: shine 2s ease-in-out infinite;
+        }
+        
+        .badge-details {
+          flex: 1;
+          z-index: 2;
+          position: relative;
+        }
+        
+        .badge-name {
+          font-size: 1.4rem;
+          font-weight: 700;
+          color: #2c3e50;
+          margin: 0 0 0.5rem 0;
+          text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .badge-description {
+          color: #6c757d;
+          margin: 0;
+          font-size: 1rem;
+          line-height: 1.4;
+        }
+        
+        .badge-celebration {
+          font-size: 2rem;
+          animation: party 1s ease-in-out infinite alternate;
+          z-index: 2;
+          position: relative;
+        }
+        
+        .celebration-message {
+          text-align: center;
+          margin-top: 1rem;
+        }
+        
+        .success-badge {
+          background: linear-gradient(135deg, #28a745, #20c997);
+          color: white;
+          padding: 1rem 2rem;
+          border-radius: 25px;
+          display: inline-block;
+          box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+          animation: fadeInUp 1s ease-out 0.5s both;
+        }
+        
+        .success-text {
+          font-size: 1.1rem;
+          font-weight: 600;
+          display: block;
+        }
+        
+        .success-subtitle {
+          font-size: 0.9rem;
+          margin-top: 0.25rem;
+          opacity: 0.9;
+        }
+        
+        .badge-modal-footer {
+          background: rgba(255,255,255,0.95);
+          border: none;
+          padding: 1.5rem 2rem;
+          text-align: center;
+        }
+        
+        .badge-awesome-btn {
+          background: linear-gradient(135deg, #ff6b6b, #ffa500);
+          color: white;
+          border: none;
+          padding: 0.75rem 2rem;
+          border-radius: 25px;
+          font-size: 1.1rem;
+          font-weight: 600;
+          box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin: 0 auto;
+        }
+        
+        .badge-awesome-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(255,107,107,0.6);
+          background: linear-gradient(135deg, #ff5252, #ff9800);
+        }
+        
+        .btn-icon {
+          animation: rocket 1s ease-in-out infinite alternate;
+        }
+        
+        /* Enhanced confetti effect */
+        .confetti { 
+          position: fixed; 
+          top: -10px; 
+          width: 12px; 
+          height: 16px; 
+          opacity: .9; 
+          animation: fall 3s linear forwards;
+          border-radius: 2px;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-30px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes bounce {
+          from { transform: translateY(0); }
+          to { transform: translateY(-10px); }
+        }
+        
+        @keyframes twinkle {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        @keyframes pulse {
+          from { transform: scale(1); opacity: 0.3; }
+          to { transform: scale(1.1); opacity: 0.1; }
+        }
+        
+        @keyframes glow {
+          from { opacity: 0.3; }
+          to { opacity: 0.6; }
+        }
+        
+        @keyframes rotate {
+          0%, 100% { transform: rotate(0deg) scale(1); }
+          25% { transform: rotate(-5deg) scale(1.05); }
+          75% { transform: rotate(5deg) scale(1.05); }
+        }
+        
+        @keyframes shine {
+          0%, 100% { opacity: 0.8; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        @keyframes party {
+          from { transform: rotate(-5deg) scale(1); }
+          to { transform: rotate(5deg) scale(1.1); }
+        }
+        
+        @keyframes rocket {
+          from { transform: translateY(0); }
+          to { transform: translateY(-3px); }
+        }
+        
+        @keyframes fall { 
+          to { 
+            transform: translateY(110vh) rotate(720deg); 
+            opacity: 0; 
+          } 
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+          .badge-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+          }
+          
+          .badge-modal-title {
+            font-size: 1.5rem;
+          }
+          
+          .trophy-icon {
+            font-size: 2.5rem;
+          }
+        }
       </style>
     @endif
     <!-- Spinner Start -->
@@ -69,178 +405,247 @@
     <!-- Spinner End -->
 
     <!-- Navbar start -->
-<div class="container-fluid fixed-top px-0">
-    <div class="container px-0">
+    <div class="container-fluid fixed-top px-0">
+      <div class="container px-0">
         <!-- Topbar -->
         <div class="topbar">
-            <div class="row align-items-center justify-content-center">
-                <div class="col-md-8">
-                    <div class="topbar-info d-flex flex-wrap">
-                        <a href="mailto:Tunivert@gmail.tn" class="text-light me-4">
-                            <i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn
-                        </a>
-                        <a href="tel:+21612345678" class="text-light">
-                            <i class="fas fa-phone-alt text-white me-2"></i>+216 12 345 678
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="topbar-icon d-flex align-items-center justify-content-end">
-                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
-                        <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
+          <div class="row align-items-center justify-content-center">
+            <div class="col-md-8">
+              <div class="topbar-info d-flex flex-wrap">
+                <a href="mailto:Tunivert@gmail.tn" class="text-light me-4">
+                  <i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn
+                </a>
+                <a href="tel:+21612345678" class="text-light">
+                  <i class="fas fa-phone-alt text-white me-2"></i>+216 12 345 678
+                </a>
+              </div>
             </div>
+            <div class="col-md-4">
+              <div class="topbar-icon d-flex align-items-center justify-content-end">
+                <a href="#" class="btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
+                <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Navbar -->
         <nav class="navbar navbar-light bg-light navbar-expand-xl">
-            <a href="{{ route('home') }}" class="navbar-brand ms-3">
-                <h1 class="text-primary display-5">Tunivert</h1>
-            </a>
-            <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="fa fa-bars text-primary"></span>
-            </button>
+          <a href="{{ route('home') }}" class="navbar-brand ms-3">
+            <h1 class="text-primary display-5">Tunivert</h1>
+          </a>
+          <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="fa fa-bars text-primary"></span>
+          </button>
 
-            <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
-                <div class="navbar-nav ms-auto">
-                    <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a>
-                    <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
-                        <a href="{{ route('events.index') }}" class="nav-item nav-link {{ request()->routeIs('events.index') ? 'active' : '' }}">Événements</a>
-                    <a href="{{ route('service') }}" class="nav-item nav-link {{ request()->routeIs('service') ? 'active' : '' }}">Formations</a>
-                    <a href="{{ route('donations.create') }}" class="nav-item nav-link {{ request()->routeIs('donations.create') ? 'active' : '' }}">Donations</a>
-<!-- ✅ Forums -->
-<a href="{{ route('forums.index') }}" class="nav-item nav-link {{ request()->is('forums*') ? 'active' : '' }}">Forums</a>
+          <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
+            <div class="navbar-nav ms-auto">
+              <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a>
+              <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
+              <a href="{{ route('events.browse') }}" class="nav-item nav-link {{ request()->routeIs('events.browse') ? 'active' : '' }}">Événements</a>
+              <a href="{{ route('service') }}" class="nav-item nav-link {{ request()->routeIs('service') ? 'active' : '' }}">Formations</a>
 
-<!-- ✅ Alertes -->
-<a href="{{ route('alertes.index') }}" class="nav-item nav-link {{ request()->is('alertes*') ? 'active' : '' }}">Alertes</a>
-                    <a href="{{ route('contact') }}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a>
+              <a href="{{ route('blog') }}" class="nav-item nav-link {{ request()->routeIs('blog') ? 'active' : '' }}">Forums</a>
+              <a href="{{ route('contact') }}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a>
 
-                    <!-- Challenge Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle {{ request()->is('challenges*') ? 'active' : '' }}" data-bs-toggle="dropdown">
-                            Challenges
-                        </a>
-                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                            @auth
-                                @if(Auth::user()->role === 'association')
-                                    <a href="{{ route('challenges.create') }}" class="dropdown-item {{ request()->routeIs('challenges.create') ? 'active' : '' }}">
-                                        <i class="fas fa-plus me-2"></i>Créer un Challenge
-                                    </a>
-                                    <a href="{{ route('challenges.crud') }}" class="dropdown-item {{ request()->routeIs('challenges.crud') ? 'active' : '' }}">
-                                        <i class="fas fa-cog me-2"></i>Gérer mes Challenges
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="{{ route('scores.classement', ['challenge' => 'current']) }}" class="dropdown-item">
-                                        <i class="fas fa-chart-bar me-2"></i>Statistiques
-                                    </a>
-                                @else
-                                    <a href="{{ route('challenges.index') }}" class="dropdown-item">
-                                        <i class="fas fa-trophy me-2"></i>Voir les Challenges
-                                    </a>
-                                    <a href="{{ route('challenges.profil') }}" class="dropdown-item">
-                                        <i class="fas fa-user-check me-2"></i>Mes Participations
-                                    </a>
-                                @endif
-                            @else
-                                <a href="{{ route('challenges.index') }}" class="dropdown-item">
-                                    <i class="fas fa-trophy me-2"></i>Voir les Challenges
-                                </a>
-                            @endauth
-                        </div>
-                    </div>
-
-                    <!-- Formation Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle {{ request()->is('formations*') ? 'active' : '' }}" data-bs-toggle="dropdown">
-                            Formations
-                        </a>
-                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                            <a href="{{ route('formations.index') }}" class="dropdown-item">Catalogue</a>
-                            @auth
-                                @if(Auth::user()->role === 'association')
-                                    <a href="{{ route('formations.create') }}" class="dropdown-item {{ request()->routeIs('formations.create') ? 'active' : '' }}">Créer une formation</a>
-                                    <a href="{{ route('formations.dashboard') }}" class="dropdown-item {{ request()->routeIs('formations.dashboard') ? 'active' : '' }}">Mes formations</a>
-                                @endif
-                            @endauth
-                        </div>
-                    </div>
+              <!-- Challenge Dropdown -->
+              <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle {{ request()->is('challenges*') ? 'active' : '' }}" data-bs-toggle="dropdown">
+                  Challenges
+                </a>
+                <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                  @auth
+                    @if(Auth::user()->role === 'association')
+                      <a href="{{ route('challenges.create') }}" class="dropdown-item {{ request()->routeIs('challenges.create') ? 'active' : '' }}">
+                        <i class="fas fa-plus me-2"></i>Créer un Challenge
+                      </a>
+                      <a href="{{ route('challenges.crud') }}" class="dropdown-item {{ request()->routeIs('challenges.crud') ? 'active' : '' }}">
+                        <i class="fas fa-cog me-2"></i>Gérer mes Challenges
+                      </a>
+                      <div class="dropdown-divider"></div>
+                      <a href="{{ route('scores.classement', ['challenge' => 'current']) }}" class="dropdown-item">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiques
+                      </a>
+                    @else
+                      <a href="{{ route('challenges.index') }}" class="dropdown-item">
+                        <i class="fas fa-trophy me-2"></i>Voir les Challenges
+                      </a>
+                      <a href="{{ route('challenges.profil') }}" class="dropdown-item">
+                        <i class="fas fa-user-check me-2"></i>Mes Participations
+                      </a>
+                    @endif
+                  @else
+                    <a href="{{ route('challenges.index') }}" class="dropdown-item">
+                      <i class="fas fa-trophy me-2"></i>Voir les Challenges
+                    </a>
+                  @endauth
                 </div>
+              </div>
 
-                <!-- Auth pour guest -->
-                <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">
-                    @guest
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
-                    @endguest
-
-                    @auth
-                        <div class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
-                                <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
-                                      style="width:38px;height:38px;">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                </span>
-                                @if(Auth::user()->role === 'association')
-                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Association</small>
-                                @endif
-                            </a>
-
-                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
-                                <li class="px-3 py-2">
-                                    <div class="fw-semibold">{{ Auth::user()->name }}</div>
-                                    <div class="small text-muted">{{ Auth::user()->email }}</div>
-                                    @if(Auth::user()->role === 'association')
-                                        <span class="badge bg-primary mt-1">Association</span>
-                                    @endif
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
-                                        <i class="fas fa-user"></i>
-                                        Profil
-                                    </a>
-                                </li>
-
-                                @if(Auth::user()->role === 'association')
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
-                                        <i class="fas fa-plus"></i>
-                                        Créer un Challenge
-                                    </a>
-                                </li>
-                                @else
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.profil') }}">
-                                        <i class="fas fa-trophy"></i>
-                                        Mes Participations
-                                    </a>
-                                </li>
-                                @endif
-
-                                <li>
-                                    <form action="{{ route('logout') }}" method="POST" class="d-inline w-100">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100">
-                                            <i class="fas fa-sign-out-alt"></i>
-                                            Se déconnecter
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    @endauth
+              <!-- Formation Dropdown -->
+              <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle {{ request()->is('formations*') ? 'active' : '' }}" data-bs-toggle="dropdown">
+                  Formations
+                </a>
+                <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                  <a href="{{ route('formations.index') }}" class="dropdown-item">Catalogue</a>
+                  @auth
+                    @if(Auth::user()->role === 'association')
+                      <a href="{{ route('formations.create') }}" class="dropdown-item {{ request()->routeIs('formations.create') ? 'active' : '' }}">Créer une formation</a>
+                      <a href="{{ route('formations.dashboard') }}" class="dropdown-item {{ request()->routeIs('formations.dashboard') ? 'active' : '' }}">Mes formations</a>
+                    @endif
+                  @endauth
                 </div>
+              </div>
             </div>
+
+            <!-- Donations Dropdown -->
+            <div class="nav-item dropdown">
+              <a href="#" class="nav-link dropdown-toggle {{ request()->is('donations*') || request()->is('donation') ? 'active' : '' }}" data-bs-toggle="dropdown">
+                Donations
+              </a>
+              <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                <!-- Page publique -->
+                <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                  <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+                </a>
+
+                @auth
+                  <!-- Créer un don -->
+                  <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
+                  </a>
+
+                  <!-- Historique des dons -->
+                  <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
+                    <i class="fas fa-history me-2"></i>Historique
+                  </a>
+                @else
+                  <div class="dropdown-divider"></div>
+                  <span class="dropdown-item text-muted">
+                    <i class="fas fa-lock me-2"></i>Connectez-vous pour donner
+                  </span>
+                @endauth
+              </div>
+            </div>
+
+            <!-- Auth pour guest -->
+            <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">
+              @guest
+                <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
+                <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
+              @endguest
+
+              @auth
+                <div class="nav-item dropdown position-relative">
+                  <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button"
+                     data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
+                    <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                          style="width:38px;height:38px;">
+                      {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                    </span>
+                    @if(session('new_badges'))
+                      <span class="position-absolute translate-middle badge rounded-pill bg-warning text-dark" style="top:0; right:-4px; font-size:.65rem;">
+                        +{{ count(session('new_badges')) }}
+                      </span>
+                    @endif
+                    @if(Auth::user()->role === 'association')
+                      <small class="text-muted d-block" style="font-size: 0.7rem;">Association</small>
+                    @endif
+                  </a>
+
+                  <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 260px;">
+                    <li class="px-3 py-2">
+                      <div class="fw-semibold d-flex align-items-center gap-1">
+                        {{ Auth::user()->name }}
+                        @php
+                          // Re-evaluate badges to ensure current eligibility
+                          try {
+                            app(\App\Services\GamificationService::class)->evaluateBadges(Auth::user());
+                          } catch (\Throwable $e) {}
+                          $userBadges = DB::table('user_badges as ub')
+                            ->join('badges as b', 'b.id', '=', 'ub.badge_id')
+                            ->where('ub.user_id', Auth::id())
+                            ->orderBy('ub.awarded_at', 'desc')
+                            ->limit(3)
+                            ->pluck('b.icon')
+                            ->toArray();
+                        @endphp
+                        @if(!empty($userBadges))
+                          <div class="d-flex align-items-center" style="font-size: 0.8rem;">
+                            @foreach($userBadges as $icon)
+                              <span style="margin-left: 2px;">{{ $icon }}</span>
+                            @endforeach
+                          </div>
+                        @endif
+                      </div>
+                      <div class="small text-muted">{{ Auth::user()->email }}</div>
+                      @if(Auth::user()->role === 'association')
+                        <span class="badge bg-primary mt-1">Association</span>
+                      @endif
+                      @if(session('new_badges'))
+                        <div class="mt-2 small">
+                          <div class="fw-bold text-success mb-1" style="font-size:.7rem; letter-spacing:.05em;">Nouveaux Badges</div>
+                          <div class="d-flex flex-wrap gap-2">
+                            @foreach(array_slice(session('new_badges'),0,3) as $b)
+                              <div class="d-flex align-items-center gap-1 px-2 py-1 rounded bg-light border" style="font-size:.7rem;">
+                                <span style="font-size:1rem; line-height:1;">{{ $b['icon'] ?? '🏅' }}</span>
+                                <span class="fw-semibold">{{ $b['name'] ?? $b['slug'] }}</span>
+                              </div>
+                            @endforeach
+                          </div>
+                          @if(count(session('new_badges'))>3)
+                            <div class="text-muted mt-1" style="font-size:.65rem;">+ {{ count(session('new_badges'))-3 }} autres…</div>
+                          @endif
+                        </div>
+                      @endif
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+
+                    <li>
+                      <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
+                        <i class="fas fa-user"></i>
+                        Profil
+                      </a>
+                    </li>
+
+                    @if(Auth::user()->role === 'association')
+                    <li>
+                      <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
+                        <i class="fas fa-plus"></i>
+                        Créer un Challenge
+                      </a>
+                    </li>
+                    @else
+                    <li>
+                      <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.profil') }}">
+                        <i class="fas fa-trophy"></i>
+                        Mes Participations
+                      </a>
+                    </li>
+                    @endif
+
+                    <li>
+                      <form action="{{ route('logout') }}" method="POST" class="d-inline w-100">
+                        @csrf
+                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100">
+                          <i class="fas fa-sign-out-alt"></i>
+                          Se déconnecter
+                        </button>
+                      </form>
+                    </li>
+                  </ul>
+                </div>
+              @endauth
+            </div>
+          </div>
         </nav>
+      </div>
     </div>
-</div>
-<!-- Navbar End -->
+    <!-- Navbar End -->
 
     <!-- Header Start -->
     <div class="container-fluid bg-breadcrumb">
@@ -248,9 +653,9 @@
         <h3 class="text-white display-3 mb-4">My Donations</h3>
         <p class="fs-5 text-white mb-4">Thank you for your generosity. Here is your donation history.</p>
         <ol class="breadcrumb justify-content-center mb-0">
-          <li class="breadcrumb-item"><a href="/index.html">Home</a></li>
-          <li class="breadcrumb-item"><a href="#">Pages</a></li>
-          <li class="breadcrumb-item active text-white">Donations History</li>
+          <li class="breadcrumb-item"><a href="{{ route('home') }}">Accueil</a></li>
+          <li class="breadcrumb-item"><a href="{{ route('donation') }}">Donations</a></li>
+          <li class="breadcrumb-item active text-white">Historique</li>
         </ol>
       </div>
     </div>
@@ -279,14 +684,27 @@
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body d-flex align-items-center justify-content-between">
               <div>
+                <div class="text-muted text-uppercase small">Total Donated</div>
+                <div class="display-6 fw-bold">{{ number_format((float)($donationSum ?? 0), 2) }}</div>
+                <div class="small text-muted">TND</div>
+              </div>
+              <i class="fas fa-hand-holding-heart text-success" style="font-size: 2rem;"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+              <div>
                 <div class="text-muted text-uppercase small">Total Points</div>
                 <div class="display-6 fw-bold">{{ (int)$totalPoints }}</div>
+                <div class="small text-muted">{{ (int)($donationPoints ?? 0) }} donation + {{ (int)($bonusPoints ?? 0) }} bonus</div>
               </div>
               <i class="fas fa-star text-warning" style="font-size: 2rem;"></i>
             </div>
           </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-4">
           <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
               <div class="d-flex align-items-center justify-content-between mb-2">
@@ -361,7 +779,7 @@
               <span class="badge bg-primary rounded-pill me-2"><i class="fas fa-list me-1"></i> {{ $dons->total() }} donations</span>
               <span class="text-muted">Showing page {{ $dons->currentPage() }} of {{ $dons->lastPage() }}</span>
             </div>
-            <a href="{{ url('donation.html#donate') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4">
+            <a href="{{ route('donation') }}#donate" class="btn-hover-bg btn btn-primary text-white py-2 px-4">
               <i class="fas fa-donate me-2"></i>Donate again
             </a>
           </div>
@@ -421,7 +839,7 @@
                   @if ($don->evenement_id)
                     <div class="d-flex align-items-center gap-2">
                       <span class="text-dark fw-semibold">{{ $eventLabels[$don->evenement_id] ?? ('Event #'.$don->evenement_id) }}</span>
-                      <a class="btn btn-sm btn-outline-primary" href="{{ url('donation.html?event='.$don->evenement_id.'#donate') }}">Donate again</a>
+                      <a class="btn btn-sm btn-outline-primary" href="{{ route('donation') }}?event={{ $don->evenement_id }}#donate">Donate again</a>
                     </div>
                   @else
                     <span class="text-muted">—</span>
@@ -435,7 +853,7 @@
                     <i class="fas fa-leaf text-primary" style="font-size: 2rem;"></i>
                   </div>
                   <p class="mb-3">You haven't made any donations yet.</p>
-                  <a href="{{ url('donation.html#donate') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4">Make your first donation</a>
+                  <a href="{{ route('donation') }}#donate" class="btn-hover-bg btn btn-primary text-white py-2 px-4">Make your first donation</a>
                 </td>
               </tr>
             @endforelse
@@ -444,7 +862,7 @@
       </div>
 
       <div class="mt-4 d-flex justify-content-center">
-        {{ $dons->links('pagination::bootstrap-5') }}
+        {{ $dons->links('pagination::bootstrap-5-sm') }}
       </div>
     </div>
     <!-- History Section End -->
@@ -590,18 +1008,67 @@
           if (modalEl) {
             var m = new bootstrap.Modal(modalEl); m.show();
           }
-          // quick confetti shower
-          var colors = ['#28a745','#ffc107','#17a2b8','#dc3545','#6610f2'];
-          for (var i=0;i<60;i++) {
-            var div = document.createElement('div');
-            div.className = 'confetti';
-            div.style.left = (Math.random()*100)+'vw';
-            div.style.background = colors[Math.floor(Math.random()*colors.length)];
-            div.style.transform = 'translateY(0) rotate('+(Math.random()*360)+'deg)';
-            div.style.animationDelay = (Math.random()*0.7)+'s';
-            document.body.appendChild(div);
-            setTimeout(function(d){ d.remove(); }, 3000, div);
+          
+          // Enhanced confetti celebration
+          var colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98d8c8', '#f7dc6f', '#bb8fce'];
+          var shapes = ['▲', '●', '■', '♦', '★', '♥', '♠', '♣'];
+          
+          // Create multiple waves of confetti
+          for (var wave = 0; wave < 3; wave++) {
+            setTimeout(function(w) {
+              for (var i = 0; i < 80; i++) {
+                var div = document.createElement('div');
+                div.className = 'confetti';
+                
+                // Random positioning and styling
+                div.style.left = (Math.random() * 100) + 'vw';
+                div.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Add shapes occasionally
+                if (Math.random() > 0.7) {
+                  div.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                  div.style.background = 'transparent';
+                  div.style.fontSize = '16px';
+                  div.style.display = 'flex';
+                  div.style.alignItems = 'center';
+                  div.style.justifyContent = 'center';
+                }
+                
+                div.style.transform = 'translateY(0) rotate(' + (Math.random() * 360) + 'deg)';
+                div.style.animationDelay = (Math.random() * 1.5) + 's';
+                div.style.animationDuration = (2 + Math.random() * 2) + 's';
+                
+                // Add some physics variety
+                div.style.setProperty('--random-x', (Math.random() - 0.5) * 100 + 'px');
+                
+                document.body.appendChild(div);
+                setTimeout(function(d) { 
+                  if (d && d.parentNode) d.remove(); 
+                }, 5000, div);
+              }
+            }, wave * 500, wave);
           }
+          
+          // Add some floating stars
+          setTimeout(function() {
+            for (var i = 0; i < 20; i++) {
+              var star = document.createElement('div');
+              star.textContent = '✨';
+              star.style.position = 'fixed';
+              star.style.left = (Math.random() * 100) + 'vw';
+              star.style.top = (Math.random() * 100) + 'vh';
+              star.style.fontSize = '20px';
+              star.style.pointerEvents = 'none';
+              star.style.animation = 'twinkle 2s ease-in-out infinite';
+              star.style.animationDelay = (Math.random() * 2) + 's';
+              star.style.zIndex = '9999';
+              
+              document.body.appendChild(star);
+              setTimeout(function(s) { 
+                if (s && s.parentNode) s.remove(); 
+              }, 4000, star);
+            }
+          }, 1000);
         })();
       </script>
     @endif

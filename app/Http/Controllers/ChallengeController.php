@@ -7,7 +7,6 @@ use App\Models\ParticipantChallenge;
 use App\Models\ScoreChallenge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class ChallengeController extends Controller
 {
@@ -254,7 +253,6 @@ class ChallengeController extends Controller
     {
         $challenge = Challenge::findOrFail($id);
         $challenge->delete();
-
         return redirect()->route('challenges.crud')->with('success', 'Challenge supprimé avec succès !');
     }
 

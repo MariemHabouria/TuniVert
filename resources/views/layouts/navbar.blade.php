@@ -20,79 +20,130 @@
                         <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
                         <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
                         <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
-                        <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Navbar -->
-        <nav class="navbar navbar-light bg-light navbar-expand-xl">
-            <a href="{{ route('home') }}" class="navbar-brand ms-3">
-                <h1 class="text-primary display-5">Tunivert</h1>
-            </a>
+        <nav class="navbar navbar-light bg-light navbar-expand-xl py-0">
+            <div class="container-fluid">
+                <a href="{{ route('home') }}" class="navbar-brand ms-2">
+                    <h1 class="text-primary display-5 mb-0">Tunivert</h1>
+                </a>
+                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="fa fa-bars text-primary"></span>
+                </button>
 
-            <!-- Hamburger -->
-            <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="fa fa-bars text-primary"></span>
-            </button>
+                <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
+                    <div class="navbar-nav mx-auto flex-grow-1 justify-content-center">
+                    <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a>
+                    <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
+                    <a href="{{ route('events.browse') }}" class="nav-item nav-link {{ request()->routeIs('events.browse') ? 'active' : '' }}">Événements</a>
+                    <a href="{{ route('service') }}" class="nav-item nav-link {{ request()->routeIs('service') ? 'active' : '' }}">Formations</a>
 
-            <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
-                <!-- ✅ Liens alignés -->
-                <ul class="navbar-nav ms-auto d-flex flex-row align-items-center gap-3">
-                    <li class="nav-item"><a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a></li>
-                    <li class="nav-item"><a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a></li>
-                    <li class="nav-item"><a href="{{ route('events.index') }}" class="nav-link {{ request()->routeIs('events.index') ? 'active' : '' }}">Événements</a></li>
-                    <li class="nav-item"><a href="{{ route('donations.history') }}" class="nav-link {{ request()->routeIs('donations.history') ? 'active' : '' }}">Donations</a></li>
-                    <li class="nav-item"><a href="{{ route('forums.index') }}" class="nav-link {{ request()->is('forums*') ? 'active' : '' }}">Forums</a></li>
-                    <li class="nav-item"><a href="{{ route('alertes.index') }}" class="nav-link {{ request()->is('alertes*') ? 'active' : '' }}">Alertes</a></li>
-                    <li class="nav-item"><a href="{{ route('contact') }}" class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a></li>
+                    <a href="{{ route('blog') }}" class="nav-item nav-link {{ request()->routeIs('blog') ? 'active' : '' }}">Forums</a>
+                    <a href="{{ route('contact') }}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a>
 
-                    <!-- Dropdown Challenges -->
-                    <li class="nav-item dropdown">
+                    <!-- Partie Challenge - Toujours visible -->
+                    <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle {{ request()->is('challenges*') ? 'active' : '' }}" data-bs-toggle="dropdown">
                             Challenges
                         </a>
-                        <ul class="dropdown-menu m-0 bg-secondary rounded-0">
+                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
                             @auth
                                 @if(Auth::user()->role === 'association')
-                                    <li><a href="{{ route('challenges.create') }}" class="dropdown-item">Créer un Challenge</a></li>
-                                    <li><a href="{{ route('challenges.crud') }}" class="dropdown-item">Gérer mes Challenges</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a href="{{ route('scores.classement', ['challenge' => 'current']) }}" class="dropdown-item">Statistiques</a></li>
+                                    <a href="{{ route('challenges.create') }}" class="dropdown-item {{ request()->routeIs('challenges.create') ? 'active' : '' }}">
+                                        <i class="fas fa-plus me-2"></i>Créer un Challenge
+                                    </a>
+                                    <a href="{{ route('challenges.crud') }}" class="dropdown-item {{ request()->routeIs('challenges.crud') ? 'active' : '' }}">
+                                        <i class="fas fa-cog me-2"></i>Gérer mes Challenges
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="{{ route('scores.classement', ['challenge' => 'current']) }}" class="dropdown-item">
+                                        <i class="fas fa-chart-bar me-2"></i>Statistiques
+                                    </a>
                                 @else
-                                    <li><a href="{{ route('challenges.index') }}" class="dropdown-item">Voir les Challenges</a></li>
-                                    <li><a href="{{ route('challenges.profil') }}" class="dropdown-item">Mes Participations</a></li>
+                                    <a href="{{ route('challenges.index') }}" class="dropdown-item">
+                                        <i class="fas fa-trophy me-2"></i>Voir les Challenges
+                                    </a>
+                                    <a href="{{ route('challenges.profil') }}" class="dropdown-item">
+                                        <i class="fas fa-user-check me-2"></i>Mes Participations
+                                    </a>
                                 @endif
                             @else
-                                <li><a href="{{ route('challenges.index') }}" class="dropdown-item">Voir les Challenges</a></li>
+                                <a href="{{ route('challenges.index') }}" class="dropdown-item">
+                                    <i class="fas fa-trophy me-2"></i>Voir les Challenges
+                                </a>
                             @endauth
-                        </ul>
-                    </li>
+                        </div>
+                    </div>
 
-                    <!-- Dropdown Formations -->
-                    <li class="nav-item dropdown">
+                    <!-- Partie Formations -->
+                    <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle {{ request()->is('formations*') ? 'active' : '' }}" data-bs-toggle="dropdown">
                             Formations
                         </a>
-                        <ul class="dropdown-menu m-0 bg-secondary rounded-0">
-                            <li><a href="{{ route('formations.index') }}" class="dropdown-item">Catalogue</a></li>
+                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                            <a href="{{ route('formations.index') }}" class="dropdown-item">Catalogue</a>
                             @auth
-                                @if(Auth::user()->role === 'association')
-                                    <li><a href="{{ route('formations.create') }}" class="dropdown-item">Créer une formation</a></li>
-                                    <li><a href="{{ route('formations.dashboard') }}" class="dropdown-item">Mes formations</a></li>
-                                @endif
+                                <a href="{{ route('formations.create') }}" class="dropdown-item {{ request()->routeIs('formations.create') ? 'active' : '' }}">Créer une formation</a>
+                                <a href="{{ route('formations.dashboard') }}" class="dropdown-item {{ request()->routeIs('formations.dashboard') ? 'active' : '' }}">Mes formations</a>
                             @endauth
-                        </ul>
-                    </li>
-                </ul>
+                        </div>
+                    </div>
+                </div>
+<!-- Donations Dropdown -->
+<div class="nav-item dropdown">
+    <a href="#" class="nav-link dropdown-toggle {{ request()->is('donations*') || request()->is('donation') ? 'active' : '' }}" data-bs-toggle="dropdown">
+        Donations
+    </a>
+    <div class="dropdown-menu m-0 bg-secondary rounded-0">
+        @auth
+            @if(Auth::user()->role === 'association')
+                <!-- Association Dashboard - Only for association users -->
+                <a href="{{ route('donations.dashboard') }}" class="dropdown-item bg-primary text-white {{ request()->routeIs('donations.dashboard') ? 'active' : '' }}">
+                    <i class="fas fa-tachometer-alt me-2"></i><strong>Dashboard Association</strong>
+                    <small class="d-block text-light">Gestion & Analytics</small>
+                </a>
+            @else
+                <!-- Regular user options -->
+                <!-- Page publique -->
+                <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                    <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+                </a>
+                
+                <!-- Créer un don -->
+                <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
+                </a>
 
-                <!-- ✅ Partie utilisateur -->
-                <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">
-                    @guest
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
-                    @endguest
+                <!-- Historique des dons -->
+                <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
+                    <i class="fas fa-history me-2"></i>Historique
+                </a>
+            @endif
+        @else
+            <!-- Guest user options -->
+            <!-- Page publique -->
+            <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+            </a>
+            <div class="dropdown-divider"></div>
+            <span class="dropdown-item text-muted">
+                <i class="fas fa-lock me-2"></i>Connectez-vous pour plus d'options
+            </span>
+        @endauth
+    </div>
+                    </div>
+
+                    <!-- Authentification -->
+                    <div class="d-flex align-items-center flex-nowrap ms-auto">
+                        @guest
+                            <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
+                            <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
+                        @endguest
 
                     @auth
                         <div class="nav-item dropdown">
@@ -102,6 +153,9 @@
                                       style="width:38px;height:38px;">
                                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                                 </span>
+                                @if(Auth::user()->role === 'association')
+                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Association</small>
+                                @endif
                             </a>
 
                             <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
@@ -116,45 +170,43 @@
 
                                 <li>
                                     <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
-                                        <i class="fas fa-user"></i> Profil
+                                        <i class="fas fa-user"></i>
+                                        Profil
                                     </a>
                                 </li>
 
                                 @if(Auth::user()->role === 'association')
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
-                                            <i class="fas fa-plus"></i> Créer un Challenge
-                                        </a>
-                                    </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
+                                        <i class="fas fa-plus"></i>
+                                        Créer un Challenge
+                                    </a>
+                                </li>
                                 @else
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.profil') }}">
-                                            <i class="fas fa-trophy"></i> Mes Participations
-                                        </a>
-                                    </li>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.profil') }}">
+                                        <i class="fas fa-trophy"></i>
+                                        Mes Participations
+                                    </a>
+                                </li>
                                 @endif
 
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST" class="d-inline w-100">
                                         @csrf
                                         <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100">
-                                            <i class="fas fa-sign-out-alt"></i> Se déconnecter
+                                            <i class="fas fa-sign-out-alt"></i>
+                                            Se déconnecter
                                         </button>
                                     </form>
                                 </li>
                             </ul>
                         </div>
                     @endauth
+                    </div>
                 </div>
             </div>
         </nav>
     </div>
 </div>
 <!-- Navbar End -->
-
-<!-- ✅ CSS rapide -->
-<style>
-.navbar-nav .nav-link {
-    white-space: nowrap; /* empêche retour à la ligne */
-}
-</style>
