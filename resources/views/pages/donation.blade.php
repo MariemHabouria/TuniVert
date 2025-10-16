@@ -388,8 +388,11 @@
                                                     $campaignEventIds = [ 'organic' => 1, 'ecosystem' => 2, 'recycling' => 3 ];
                                                     $eventParam = request('event');
                                                     $resolvedEventId = $eventParam ? (int)$eventParam : ($slug && isset($campaignEventIds[$slug]) ? $campaignEventIds[$slug] : null);
+                                                    // Try to load the real event model when possible
+                                                    $eventEntity = null;
+                                                    try { if ($resolvedEventId) { $eventEntity = \App\Models\Event::find($resolvedEventId); } } catch (\Throwable $e) { $eventEntity = null; }
                                                     $eventLabels = [ 1=>'Organic', 2=>'Ecosystem', 3=>'Recycling', 4=>'Awareness Day' ];
-                                                    $resolvedEventTitle = $sel['title'] ?? ($resolvedEventId ? ($eventLabels[$resolvedEventId] ?? ('Event #'.$resolvedEventId)) : null);
+                                                    $resolvedEventTitle = $sel['title'] ?? ($eventEntity?->title ?? ($resolvedEventId ? ($eventLabels[$resolvedEventId] ?? ('Event #'.$resolvedEventId)) : null));
                                                 @endphp
 
                                                 <h2 class="mb-3">Make a Donation</h2>
@@ -412,6 +415,37 @@
                                                                     </div>
                                                                     <p class="card-text mb-1 fw-semibold">{{ $sel['headline'] }}</p>
                                                                     <p class="card-text text-muted">{{ $sel['desc'] }}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @elseif ($eventEntity)
+                                                    <div class="card border-0 shadow-sm mb-4">
+                                                        <div class="row g-0 align-items-center">
+                                                            <div class="col-md-4">
+                                                                @php
+                                                                    $imgUrl = $eventEntity->image ? \Illuminate\Support\Facades\Storage::url($eventEntity->image) : asset('img/default-event.jpg');
+                                                                @endphp
+                                                                <img src="{{ $imgUrl }}" class="img-fluid rounded-start" alt="{{ $eventEntity->title }}">
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <div class="card-body">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <h5 class="card-title text-primary mb-1">{{ $eventEntity->title }}</h5>
+                                                                            <h6 class="card-subtitle mb-2">
+                                                                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $eventEntity->location ?? '—' }}
+                                                                            </h6>
+                                                                        </div>
+                                                                        <a href="{{ url('donation.html#donate') }}" class="small">changer</a>
+                                                                    </div>
+                                                                    <p class="card-text mb-1">
+                                                                        <i class="bi bi-calendar-event text-success me-1"></i>
+                                                                        {{ optional(\Carbon\Carbon::parse($eventEntity->date ?? null))->format('d M, Y') }}
+                                                                    </p>
+                                                                    @if (!empty($eventEntity->details))
+                                                                        <p class="card-text text-muted">{{ $eventEntity->details }}</p>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -680,13 +714,6 @@
                             </div>
                                                         @if ($resolvedEventId)
                                                             <div class="col-12">
-                                                                <div class="alert alert-info d-flex align-items-center justify-content-between" role="alert">
-                                                                    <div>
-                                                                        <i class="fas fa-calendar-alt me-2 text-primary"></i>
-                                                                        Donating to event {{ $resolvedEventTitle }}
-                                                                    </div>
-                                                                    <a href="{{ url('donation.html#donate') }}" class="small">change</a>
-                                                                </div>
                                                                 <input type="hidden" name="evenement_id" value="{{ $resolvedEventId }}">
                                                             </div>
                                                         @else

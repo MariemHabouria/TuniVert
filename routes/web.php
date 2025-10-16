@@ -85,6 +85,10 @@ Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('c
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('auth');
 // Liste des événements
 Route::get('events', [EventController::class, 'index'])->name('events.index');
+// Alias legacy: some views reference route('events.browse')
+Route::get('events/browse', function() {
+    return redirect()->route('events.index');
+})->name('events.browse');
 
 // Afficher un événement (dynamique)
 Route::get('events/{event}', [EventController::class, 'show'])->name('events.show');
@@ -115,6 +119,8 @@ Route::post('/chatbot/ask', [ChatbotEventController::class, 'ask'])->name('chatb
     Route::get('/mes-formations/stats', [FormationController::class, 'dashboard'])->name('formations.dashboard');
 
     // Donations
+    // Association dashboard
+    Route::get('/donations/dashboard', [DonationController::class, 'associationDashboard'])->name('donations.dashboard');
     Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
     Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
     Route::get('/donations/history', [DonationController::class, 'history'])->name('donations.history');
@@ -162,19 +168,11 @@ Route::get('/payments/test/cancel', [TestPaymentController::class, 'cancel'])->n
 Route::prefix('challenges')->group(function () {
     Route::get('/', [ChallengeController::class, 'index'])->name('challenges.index');
 
-// Catalogue accessible à tous
-Route::get('/formations',        [FormationController::class, 'index'])->name('formations.index');
-Route::get('/formations/{formation}', [FormationController::class, 'show'])->name('formations.show');
-
-// Routes Challenges
-Route::prefix('challenges')->group(function () {
-    Route::get('/', [ChallengeController::class, 'index'])->name('challenges.index');
-    
     Route::middleware('auth')->group(function () {
         Route::get('/profil', [ChallengeController::class, 'profil'])->name('challenges.profil');
         Route::post('/{id}/participate', [ChallengeController::class, 'participer'])->name('challenges.participate');
         Route::post('/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
-    Route::get('/create', [AdminController::class, 'challengesCreate'])->name('create');
+        Route::get('/create', [AdminController::class, 'challengesCreate'])->name('create');
 
         Route::prefix('association')->group(function () {
             Route::get('/create', [ChallengeController::class, 'create'])->name('challenges.create');
@@ -214,13 +212,6 @@ Route::resource('alertes', AlerteForumController::class)->only(['index','show'])
 | Admin
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/login', [AuthController::class, 'showAdminLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'adminLogin'])->name('login.submit');
-    Route::post('/logout', [AuthController::class, 'adminLogout'])->name('logout');
-
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-
 // ===== ROUTES ADMIN (application wide) =====
 Route::prefix('admin')->name('admin.')->group(function () {
     // Login Admin accessible sans auth
@@ -315,8 +306,7 @@ if (config('services.testpay.enabled')) {
 
 // Paymee webhook (public API, CSRF exempt via api middleware)
 Route::post('/webhooks/paymee', [DonationController::class, 'paymeeWebhook'])
-    ->name('webhooks.paymee')
-    ->middleware('api');
-
+        ->name('webhooks.paymee')
+            ->middleware('api');
 // 404 fallback
 Route::fallback(fn () => abort(404));

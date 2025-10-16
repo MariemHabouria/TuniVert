@@ -787,15 +787,6 @@
       </div>
 
       <div class="table-responsive">
-        @php
-          // Static event labels used on the public site; adjust as needed if real events are added
-          $eventLabels = [
-            1 => 'Organic',
-            2 => 'Ecosystem',
-            3 => 'Recycling',
-            4 => 'Awareness Day',
-          ];
-        @endphp
         <table class="table table-striped table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
@@ -838,7 +829,12 @@
                 <td>
                   @if ($don->evenement_id)
                     <div class="d-flex align-items-center gap-2">
-                      <span class="text-dark fw-semibold">{{ $eventLabels[$don->evenement_id] ?? ('Event #'.$don->evenement_id) }}</span>
+                      @php $ev = $don->event; @endphp
+                      @if ($ev)
+                        <a href="{{ route('events.show', $ev) }}" class="text-decoration-none text-dark fw-semibold">{{ $ev->title }}</a>
+                      @else
+                        <span class="text-dark fw-semibold">Événement #{{ $don->evenement_id }}</span>
+                      @endif
                       <a class="btn btn-sm btn-outline-primary" href="{{ route('donation') }}?event={{ $don->evenement_id }}#donate">Donate again</a>
                     </div>
                   @else

@@ -46,11 +46,14 @@ class DonationController extends Controller
         // Accept integrated methods and any admin-configured active methods
         $base = ['carte','paypal','paymee','virement_bancaire'];
         if (config('services.testpay.enabled')) { $base[] = 'test'; }
+        // Merge with custom active methods from DB (if available)
+        try {
+            $dynamic = PaymentMethod::where('active', true)->pluck('key')->all();
+        } catch (\Throwable $e) {
+            $dynamic = [];
+        }
         $allowedMethods = collect($base)
-            ->merge(function(){
-                try { return PaymentMethod::where('active', true)->pluck('key'); }
-                catch (\Throwable $e) { return collect(); }
-            })
+            ->merge($dynamic)
             ->unique()
             ->values()
             ->all();
@@ -231,7 +234,8 @@ class DonationController extends Controller
     public function history()
     {
         $userId = Auth::id();
-        $dons = Donation::where('utilisateur_id', $userId)
+        $dons = Donation::with('event')
+            ->where('utilisateur_id', $userId)
             ->orderByDesc('date_don')
             ->paginate(10);
         // Ensure base gamification data exists (idempotent)
