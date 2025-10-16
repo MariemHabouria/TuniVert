@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ScoreChallenge;
+
 class ScoreChallengeFactory extends Factory
 {
     protected $model = ScoreChallenge::class;
@@ -11,11 +12,11 @@ class ScoreChallengeFactory extends Factory
     public function definition(): array
     {
         return [
-            'participant_challenge_id' => ParticipantChallenge::factory(),
-            'points' => $this->faker->numberBetween(0, 100),
-            'rang'   => $this->faker->numberBetween(1, 10),
-            'badge'  => $this->faker->randomElement(['bronze', 'argent', 'or']),
-            'date_maj' => $this->faker->dateTime(),
+            'participant_challenge_id' => null, // sera fourni par afterCreating
+            'points' => $this->faker->numberBetween(10, 100),
+            'rang' => $this->faker->numberBetween(1, 10),
+            'badge' => $this->faker->randomElement(['Bronze','Argent','Or']),
+            'date_maj' => now(),
         ];
     }
 }

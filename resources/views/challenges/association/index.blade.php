@@ -53,7 +53,6 @@
                          style="border-radius: 15px; overflow: hidden; transition: all 0.3s ease;">
                         <!-- En-tête de la carte avec statut -->
                         <div class="card-header position-relative p-0" style="border: none;">
-                            <!-- Badge de statut -->
                             <div class="position-absolute top-0 start-0 m-3">
                                 @if(\Carbon\Carbon::now()->between(\Carbon\Carbon::parse($challenge->date_debut), \Carbon\Carbon::parse($challenge->date_fin)))
                                     <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #28a745, #20c997); font-size: 0.8rem;">
@@ -70,7 +69,6 @@
                                 @endif
                             </div>
                             
-                            <!-- Image/icône du challenge -->
                             <div style="height: 180px; background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-success) 100%); display: flex; align-items: center; justify-content: center;">
                                 <i class="fas fa-seedling" style="font-size: 4rem; color: white; opacity: 0.9;"></i>
                             </div>
@@ -78,7 +76,6 @@
 
                         <!-- Corps de la carte -->
                         <div class="card-body p-4 d-flex flex-column">
-                            <!-- Catégorie -->
                             <div class="mb-2">
                                 <span class="badge px-3 py-2" 
                                       style="background: rgba(0, 76, 33, 0.1); color: var(--bs-primary); border: 1px solid var(--bs-primary); font-size: 0.75rem;">
@@ -93,17 +90,14 @@
                                 </span>
                             </div>
 
-                            <!-- Titre -->
                             <h5 class="card-title mb-3" style="color: var(--bs-dark); font-weight: 600; line-height: 1.3;">
                                 {{ $challenge->titre }}
                             </h5>
 
-                            <!-- Description courte -->
                             <p class="card-text text-muted small mb-3 flex-grow-1" style="line-height: 1.5;">
                                 {{ Str::limit($challenge->description, 120) }}
                             </p>
 
-                            <!-- Informations du challenge -->
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <small class="fw-semibold" style="color: var(--bs-dark);">
@@ -119,12 +113,9 @@
                                         <i class="fas fa-chart-line me-1" style="color: var(--bs-primary);"></i>Difficulté:
                                     </small>
                                     <small class="text-muted">
-                                        @if($challenge->difficulte == 'facile')
-                                            ⭐ Facile
-                                        @elseif($challenge->difficulte == 'moyen')
-                                            ⭐⭐ Moyen
-                                        @else
-                                            ⭐⭐⭐ Difficile
+                                        @if($challenge->difficulte == 'facile') ⭐ Facile
+                                        @elseif($challenge->difficulte == 'moyen') ⭐⭐ Moyen
+                                        @else ⭐⭐⭐ Difficile
                                         @endif
                                     </small>
                                 </div>
@@ -133,59 +124,55 @@
                                     <small class="fw-semibold" style="color: var(--bs-dark);">
                                         <i class="fas fa-users me-1" style="color: var(--bs-primary);"></i>Participants:
                                     </small>
-                                    <small class="text-muted">
-                                        {{ $challenge->participations_count ?? 0 }}
-                                    </small>
+                                    <small class="text-muted">{{ $challenge->participants_count }}</small>
                                 </div>
                             </div>
 
                             <!-- Actions -->
                             <div class="mt-auto pt-3">
-                                <div class="d-grid gap-2 d-md-flex justify-content-md-between">
-                                    <a href="{{ route('challenges.edit', $challenge->id) }}" 
-                                       class="btn btn-warning btn-sm flex-fill me-md-1 mb-1"
-                                       style="border-radius: 8px; transition: all 0.3s ease;"
-                                       onmouseover="this.style.transform='translateY(-2px)'"
-                                       onmouseout="this.style.transform='translateY(0)'">
-                                        <i class="fas fa-edit me-1"></i>Modifier
-                                    </a>
-                                    
-                                    <a href="{{ route('challenges.participants', $challenge->id) }}" 
-                                       class="btn btn-info btn-sm flex-fill me-md-1 mb-1"
-                                       style="border-radius: 8px; transition: all 0.3s ease;"
-                                       onmouseover="this.style.transform='translateY(-2px)'"
-                                       onmouseout="this.style.transform='translateY(0)'">
-                                        <i class="fas fa-users me-1"></i>Participants
-                                    </a>
-                                    
-                                    <form action="{{ route('challenges.destroy', $challenge->id) }}" method="POST" 
-                                          class="d-inline flex-fill mb-1"
-                                          onsubmit="return confirm('Voulez-vous vraiment supprimer ce challenge ? Cette action est irréversible.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="btn btn-danger btn-sm w-100"
-                                                style="border-radius: 8px; transition: all 0.3s ease;"
-                                                onmouseover="this.style.transform='translateY(-2px)'"
-                                                onmouseout="this.style.transform='translateY(0)'">
-                                            <i class="fas fa-trash me-1"></i>Supprimer
-                                        </button>
-                                    </form>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <a href="{{ route('challenges.edit', $challenge->id) }}" 
+                                           class="btn btn-warning btn-sm w-100">
+                                            <i class="fas fa-edit me-1"></i>Modifier
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="{{ route('challenges.participants', $challenge->id) }}" 
+                                           class="btn btn-info btn-sm w-100">
+                                            <i class="fas fa-users me-1"></i>Participants
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <a href="{{ route('scores.classement', $challenge->id) }}" 
+                                           class="btn btn-primary btn-sm w-100">
+                                            <i class="fas fa-trophy me-1"></i>Classement
+                                        </a>
+                                    </div>
+                                    <div class="col-6">
+                                        <form action="{{ route('challenges.destroy', $challenge->id) }}" method="POST" 
+                                              onsubmit="return confirm('Voulez-vous vraiment supprimer ce challenge ? Cette action est irréversible.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" 
+                                                    class="btn btn-danger btn-sm w-100">
+                                                <i class="fas fa-trash me-1"></i>Supprimer
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             @empty
-                <!-- Carte vide avec message -->
                 <div class="col-12">
                     <div class="card border-0 shadow-sm text-center py-5" style="border-radius: 15px; background: var(--bs-light);">
                         <div class="card-body py-5">
                             <i class="fas fa-inbox" style="font-size: 4rem; color: var(--bs-primary); opacity: 0.5; margin-bottom: 1.5rem;"></i>
                             <h4 class="text-muted mb-3">Aucun challenge créé pour le moment</h4>
                             <p class="text-muted mb-4">Commencez par créer votre premier challenge écologique !</p>
-                            <a href="{{ route('challenges.create') }}" class="btn btn-success btn-lg px-4"
-                               style="border-radius: 10px; background: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-success) 100%); border: none;">
+                            <a href="{{ route('challenges.create') }}" class="btn btn-success btn-lg px-4">
                                <i class="fas fa-plus-circle me-2"></i>Créer mon premier challenge
                             </a>
                         </div>
@@ -193,8 +180,6 @@
                 </div>
             @endforelse
         </div>
-
-       
     </div>
 </div>
 <!-- Mes Challenges Section End -->
@@ -207,116 +192,20 @@
     background-size: cover !important;
 }
 
-.challenge-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background: white;
-}
+.challenge-card { transition: transform 0.3s ease, box-shadow 0.3s ease; background: white; }
+.challenge-card:hover { transform: translateY(-8px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important; }
 
-.challenge-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15) !important;
-}
+.btn { transition: all 0.3s ease; }
+.btn:hover { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
 
-.btn {
-    transition: all 0.3s ease;
-}
+.breadcrumb-item.active { color: var(--bs-primary) !important; font-weight: 600; }
 
-.btn:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+.badge { font-weight: 500; letter-spacing: 0.5px; }
 
-.breadcrumb-item.active {
-    color: var(--bs-primary) !important;
-    font-weight: 600;
-}
-
-/* Style pour les badges de statut */
-.badge {
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
-
-/* Style pour les cartes vides */
-.card-empty {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border: 2px dashed #dee2e6;
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
-    .d-md-flex {
-        flex-direction: column;
-    }
-    
-    .me-md-1 {
-        margin-right: 0 !important;
-        margin-bottom: 0.5rem;
-    }
-    
-    .challenge-card {
-        margin-bottom: 1.5rem;
-    }
+    .d-md-flex { flex-direction: column; }
+    .me-md-1 { margin-right: 0 !important; margin-bottom: 0.5rem; }
+    .challenge-card { margin-bottom: 1.5rem; }
 }
 </style>
-@endsection
-
-@section('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Animation au chargement des cartes
-    const cards = document.querySelectorAll('.challenge-card');
-    cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        
-        setTimeout(() => {
-            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 100);
-    });
-
-    // Confirmation de suppression avec animation
-    const deleteForms = document.querySelectorAll('form[onsubmit]');
-    deleteForms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            if (!confirm(this.getAttribute('onsubmit').replace("return confirm('", "").replace("');", ""))) {
-                e.preventDefault();
-                
-                // Animation de secousse sur le bouton
-                const button = this.querySelector('button');
-                button.style.animation = 'shake 0.5s ease-in-out';
-                setTimeout(() => {
-                    button.style.animation = '';
-                }, 500);
-            }
-        });
-    });
-});
-
-// Animation shake pour les boutons
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
-    }
-    
-    .pagination .page-link {
-        color: var(--bs-primary);
-        border: 1px solid var(--bs-primary);
-    }
-    
-    .pagination .page-item.active .page-link {
-        background-color: var(--bs-primary);
-        border-color: var(--bs-primary);
-    }
-    
-    .pagination .page-link:hover {
-        background-color: rgba(0, 76, 33, 0.1);
-    }
-`;
-document.head.appendChild(style);
-</script>
 @endsection
