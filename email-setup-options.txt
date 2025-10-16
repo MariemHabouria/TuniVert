@@ -1,0 +1,34 @@
+# ======================
+# REAL EMAIL CONFIGURATION
+# ======================
+# Replace the current MAIL_* settings in your .env with ONE of these options:
+
+# Option A: Gmail SMTP (if you have Gmail)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-gmail@gmail.com
+MAIL_PASSWORD=your-app-password  # Use App Password, not regular password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=your-gmail@gmail.com
+MAIL_FROM_NAME="TuniVert"
+
+# Option B: Yahoo SMTP (for your Yahoo email)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mail.yahoo.com
+MAIL_PORT=587
+MAIL_USERNAME=hamoudachkir@yahoo.fr
+MAIL_PASSWORD=your-yahoo-app-password  # Use App Password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=hamoudachkir@yahoo.fr
+MAIL_FROM_NAME="TuniVert"
+
+# Option C: Keep Mailtrap for testing (current setup)
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=84e5a379a66a7d
+MAIL_PASSWORD=0c6c351e759dcf
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@tunivert.test
+MAIL_FROM_NAME="TuniVert"
