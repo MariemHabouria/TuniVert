@@ -15,7 +15,7 @@ class ScoreChallengeFactory extends Factory
             'participant_challenge_id' => null, // sera fourni par afterCreating
             'points' => $this->faker->numberBetween(10, 100),
             'rang' => $this->faker->numberBetween(1, 10),
-            'badge' => $this->faker->randomElement(['bronze','argent','or']),
+            'badge' => $this->faker->randomElement(['Bronze','Argent','Or']),
             'date_maj' => now(),
         ];
     }

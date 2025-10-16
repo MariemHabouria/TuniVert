@@ -134,7 +134,8 @@ Route::prefix('challenges')->group(function () {
     Route::middleware('auth')->group(function () {
         Route::get('/profil', [ChallengeController::class, 'profil'])->name('challenges.profil');
         Route::post('/{id}/participate', [ChallengeController::class, 'participer'])->name('challenges.participate');
-        Route::post('/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
+        Route::post('/challenges/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
+
     Route::get('/create', [AdminController::class, 'challengesCreate'])->name('create');
 
         Route::prefix('association')->group(function () {
@@ -187,8 +188,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Participations d’un challenge
         Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])
             ->name('participations');
+Route::get('all-scores', [AdminController::class, 'allScores'])->name('allScores');
 
         Route::get('/scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
+
 
         // Toggle challenge (bloquer/débloquer)
         Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');

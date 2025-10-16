@@ -22,7 +22,7 @@ class ParticipantChallengeFactory extends Factory
         return [
             'challenge_id'   => Challenge::factory(),
             'utilisateur_id' => User::factory()->state(['role' => 'user']),
-            'statut'         => $this->faker->randomElement(['en_cours','complet','annule']),
+            'statut'         => $this->faker->randomElement(['en_cours','valide','rejete']),
             'preuve'         => $preuve,
         ];
     }
@@ -34,7 +34,7 @@ class ParticipantChallengeFactory extends Factory
                 'participant_challenge_id' => $participant->id,
                 'points' => rand(10, 100),
                 'rang' => 1,
-                'badge' => ['bronze','argent','or'][array_rand(['bronze','argent','or'])],
+                'badge' => ['Bronze','Argent','Or'][array_rand(['Bronze','Argent','Or'])],
                 'date_maj' => now(),
             ]);
 

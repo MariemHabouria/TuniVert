@@ -1,156 +1,358 @@
 @extends('layouts.admin')
 
-@section('title', 'Tableau de Bord des Scores - Statistiques Détaillées')
+@section('title', 'Statistiques des Scores')
+
+@section('plugin-css')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@endsection
+
+@section('styles')
+<style>
+    :root {
+        --primary: #5B67F1;
+        --secondary: #22C55E;
+        --accent: #06B6D4;
+        --warning: #FACC15;
+
+        --gradient-primary: linear-gradient(135deg, #5B67F1 0%, #7C8CFF 100%);
+        --gradient-secondary: linear-gradient(135deg, #22C55E 0%, #4ADE80 100%);
+        --gradient-accent: linear-gradient(135deg, #06B6D4 0%, #67E8F9 100%);
+        --gradient-warning: linear-gradient(135deg, #FACC15 0%, #FDE68A 100%);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #f8fafc;
+        color: #1e293b;
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    .floating-btn {
+        background: var(--gradient-primary);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        border-radius: 12px;
+        padding: 12px 22px;
+        box-shadow: 0 10px 20px rgba(91, 103, 241, 0.3);
+        transition: all 0.25s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .floating-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(91, 103, 241, 0.35);
+    }
+
+    /* --- Cards principales --- */
+    .stats-card {
+        border-radius: 18px;
+        padding: 28px;
+        color: #fff;
+        background: var(--gradient-primary);
+        box-shadow: 0 12px 24px rgba(91, 103, 241, 0.25);
+        transition: all 0.3s ease;
+        transform: translateY(0);
+    }
+
+    .stats-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 30px rgba(91, 103, 241, 0.35);
+    }
+
+    .stats-card-1 { background: var(--gradient-primary); }
+    .stats-card-2 { background: var(--gradient-secondary); }
+    .stats-card-3 { background: var(--gradient-accent); }
+    .stats-card-4 { background: var(--gradient-warning); }
+
+    .icon-wrapper {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 15px;
+    }
+
+    .stats-card h3 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .card-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    /* --- Chart Container --- */
+    .card-elevated {
+        background: #fff;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .card-elevated:hover {
+        transform: translateY(-4px);
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 10px;
+    }
+
+    .chart-header h4 {
+        color: #1e293b;
+        font-weight: 600;
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .chart-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: white;
+    }
+
+    /* --- Badges --- */
+    .badge-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(12px);
+        border-radius: 20px;
+        color: #fff;
+        box-shadow: inset 0 0 0.5px rgba(255, 255, 255, 0.4),
+                    0 10px 25px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        text-align: center;
+        padding: 30px;
+    }
+
+    .badge-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .badge-card-gold { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); }
+    .badge-card-silver { background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%); }
+    .badge-card-bronze { background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%); }
+
+    .badge-icon {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.25);
+        font-size: 40px;
+        margin-bottom: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .badge-count {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 10px 0;
+    }
+
+    /* --- Animation --- */
+    @keyframes fadeInUp {
+        from {opacity: 0; transform: translateY(20px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+
+    .stats-card, .badge-card, .card-elevated {
+        animation: fadeInUp 0.6s ease both;
+    }
+</style>
+@endsection
 
 @section('content')
-<div class="container-fluid px-4">
-    <!-- En-tête -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-primary">Tableau de Bord des Scores</h1>
-        <div class="d-flex">
-            <button class="btn btn-success me-2" onclick="exportToExcel()">
-                <i class="fas fa-file-excel me-2"></i>Exporter Excel
-            </button>
-            <button class="btn btn-danger" onclick="generatePDF()">
-                <i class="fas fa-file-pdf me-2"></i>Exporter PDF
+<div class="row">
+    <div class="col-12 grid-margin">
+        <div class="card">
+            <div class="card-body">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                        <h2 class="section-title">📊 Tableau de Bord des Scores</h2>
+                        <p class="text-muted">Analyse visuelle des performances et participations</p>
+                    </div>
+                    <a href="{{ route('admin.challenges.index') }}" class="floating-btn">
+                        <i class="mdi mdi-arrow-left"></i> Retour
+                    </a>
+                </div>
+
+                <!-- Alert -->
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="mdi mdi-check-circle-outline mr-2"></i>
+                        <strong>{{ session('success') }}</strong>
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    </div>
+                @endif
+<!-- Filtres -->
+<div class="card-elevated mb-5 p-4">
+    <form method="GET" action="{{ route('admin.challenges.allScores') }}" class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label for="challenge_id" class="form-label fw-semibold">Filtrer par Challenge</label>
+            <select name="challenge_id" id="challenge_id" class="form-select">
+                <option value="">-- Tous les challenges --</option>
+                @foreach($challenges as $ch)
+                    <option value="{{ $ch->id }}" {{ request('challenge_id') == $ch->id ? 'selected' : '' }}>
+                        {{ $ch->titre }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="badge" class="form-label fw-semibold">Badge</label>
+            <select name="badge" id="badge" class="form-select">
+                <option value="">-- Tous --</option>
+                <option value="or" {{ request('badge') == 'or' ? 'selected' : '' }}>Or</option>
+                <option value="argent" {{ request('badge') == 'argent' ? 'selected' : '' }}>Argent</option>
+                <option value="bronze" {{ request('badge') == 'bronze' ? 'selected' : '' }}>Bronze</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="periode" class="form-label fw-semibold">Période</label>
+            <select name="periode" id="periode" class="form-select">
+                <option value="">-- Toutes --</option>
+                <option value="7" {{ request('periode') == '7' ? 'selected' : '' }}>7 derniers jours</option>
+                <option value="30" {{ request('periode') == '30' ? 'selected' : '' }}>30 derniers jours</option>
+                <option value="90" {{ request('periode') == '90' ? 'selected' : '' }}>3 derniers mois</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 d-flex justify-content-end">
+            <button type="submit" class="floating-btn w-100">
+                <i class="mdi mdi-filter-outline"></i> Filtrer
             </button>
         </div>
-    </div>
+    </form>
+</div>
 
-    <!-- Cartes de Statistiques Principales -->
-    <div class="row mb-4">
-        @php
-            $cards = [
-                ['title' => 'Total Challenges', 'value' => $stats['total_challenges'], 'icon' => 'fa-trophy', 'border' => 'primary', 'color' => 'primary'],
-                ['title' => 'Total Participants', 'value' => $stats['total_participants'], 'icon' => 'fa-users', 'border' => 'success', 'color' => 'success'],
-                ['title' => 'Total Points', 'value' => number_format($stats['total_points'], 0, ',', ' '), 'icon' => 'fa-star', 'border' => 'info', 'color' => 'info'],
-                ['title' => 'Points Moyens', 'value' => $stats['points_moyens'], 'icon' => 'fa-chart-line', 'border' => 'warning', 'color' => 'warning'],
-            ];
-        @endphp
+                <!-- Statistiques principales -->
+                <div class="row mb-5">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stats-card stats-card-1">
+                            <div class="icon-wrapper"><i class="mdi mdi-trophy"></i></div>
+                            <h3>{{ $stats['total_challenges'] }}</h3>
+                            <p class="card-label">Challenges</p>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stats-card stats-card-2">
+                            <div class="icon-wrapper"><i class="mdi mdi-account-multiple"></i></div>
+                            <h3>{{ $stats['total_participants'] }}</h3>
+                            <p class="card-label">Participants</p>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stats-card stats-card-3">
+                            <div class="icon-wrapper"><i class="mdi mdi-star"></i></div>
+                            <h3>{{ $stats['total_points'] }}</h3>
+                            <p class="card-label">Total Points</p>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="stats-card stats-card-4">
+                            <div class="icon-wrapper"><i class="mdi mdi-chart-line"></i></div>
+                            <h3>{{ $stats['points_moyens'] }}</h3>
+                            <p class="card-label">Moyenne</p>
+                        </div>
+                    </div>
+                </div>
 
-        @foreach($cards as $card)
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-{{ $card['border'] }} shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-{{ $card['color'] }} text-uppercase mb-1">
-                                {{ $card['title'] }}
+                <!-- Graphiques -->
+                <div class="row mb-5">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card-elevated">
+                            <div class="chart-header">
+                                <h4>📈 Performance des Challenges</h4>
+                                <div class="chart-icon" style="background: var(--gradient-primary);">
+                                    <i class="mdi mdi-chart-bar"></i>
+                                </div>
                             </div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ $card['value'] }}</div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas {{ $card['icon'] }} fa-2x text-gray-300"></i>
+                            <canvas id="performanceChart" style="height:320px;"></canvas>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-        @endforeach
-    </div>
-
-    <!-- Première ligne de graphiques -->
-    <div class="row mb-4">
-        <!-- Distribution des Badges -->
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-header py-3 bg-primary text-white">
-                    <h6 class="m-0 font-weight-bold">Distribution des Badges</h6>
-                </div>
-                <div class="card-body text-center">
-                    <canvas id="badgesChart" style="height:250px;"></canvas>
-                    <div class="mt-3 small">
-                        <span class="me-3"><i class="fas fa-circle text-warning me-1"></i> Or</span>
-                        <span class="me-3"><i class="fas fa-circle text-secondary me-1"></i> Argent</span>
-                        <span class="me-3"><i class="fas fa-circle text-danger me-1"></i> Bronze</span>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card-elevated">
+                            <div class="chart-header">
+                                <h4>🎯 Popularité des Challenges</h4>
+                                <div class="chart-icon" style="background: var(--gradient-secondary);">
+                                    <i class="mdi mdi-chart-pie"></i>
+                                </div>
+                            </div>
+                            <canvas id="participantsChart" style="height:320px;"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Performance par Challenge -->
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-header py-3 bg-success text-white">
-                    <h6 class="m-0 font-weight-bold">Performance par Challenge</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="performanceChart" style="height:250px;"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Statistiques des Badges -->
-        <div class="col-xl-4 col-md-6 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-header py-3 bg-info text-white">
-                    <h6 class="m-0 font-weight-bold">Statistiques des Badges</h6>
-                </div>
-                <div class="card-body text-center">
-                    @foreach(['Or'=>'warning','Argent'=>'secondary','Bronze'=>'danger'] as $badge => $color)
-                    <div class="mb-3 p-3 border rounded bg-light">
-                        <i class="fas 
-                            @if($badge=='Or') fa-crown
-                            @elseif($badge=='Argent') fa-medal
-                            @else fa-award @endif fa-2x text-{{ $color }} mb-2"></i>
-                        <h4 class="font-weight-bold text-{{ $color }}">{{ $stats['badges_count'][$badge] ?? 0 }}</h4>
-                        <small class="text-muted">Badges {{ $badge }}</small>
+                <!-- Badges -->
+                <h3 class="section-title">🏆 Distribution des Badges</h3>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="badge-card badge-card-gold">
+                            <div class="badge-icon"><i class="mdi mdi-crown"></i></div>
+                            <h4>Badge Or</h4>
+                            <div class="badge-count">{{ $stats['badges_count']['Or'] ?? 0 }}</div>
+                            <p>Performances exceptionnelles</p>
+                        </div>
                     </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Deuxième ligne de graphiques -->
-    <div class="row mb-4">
-        <!-- Top Challenges par Participants -->
-        <div class="col-xl-6 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-header py-3 bg-primary text-white">
-                    <h6 class="m-0 font-weight-bold">Top Challenges par Participants</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="participantsChart" style="height:300px;"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Distribution des Points -->
-        <div class="col-xl-6 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-header py-3 bg-success text-white">
-                    <h6 class="m-0 font-weight-bold">Distribution des Points</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="pointsDistributionChart" style="height:300px;"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Troisième ligne de graphiques -->
-    <div class="row mb-4">
-        <!-- Évolution des Participations -->
-        <div class="col-xl-8 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-header py-3 bg-info text-white">
-                    <h6 class="m-0 font-weight-bold">Évolution des Participations</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="evolutionChart" style="height:250px;"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Score Moyen par Badge -->
-        <div class="col-xl-4 mb-4">
-            <div class="card shadow h-100">
-                <div class="card-header py-3 bg-warning text-white">
-                    <h6 class="m-0 font-weight-bold">Score Moyen par Badge</h6>
-                </div>
-                <div class="card-body">
-                    <canvas id="avgScoreChart" style="height:250px;"></canvas>
+                    <div class="col-md-4 mb-4">
+                        <div class="badge-card badge-card-silver">
+                            <div class="badge-icon"><i class="mdi mdi-medal"></i></div>
+                            <h4>Badge Argent</h4>
+                            <div class="badge-count">{{ $stats['badges_count']['Argent'] ?? 0 }}</div>
+                            <p>Excellentes performances</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="badge-card badge-card-bronze">
+                            <div class="badge-icon"><i class="mdi mdi-award"></i></div>
+                            <h4>Badge Bronze</h4>
+                            <div class="badge-count">{{ $stats['badges_count']['Bronze'] ?? 0 }}</div>
+                            <p>Bonnes performances</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -158,341 +360,67 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('plugin-js')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@endsection
+
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // CORRECTION : Définir les couleurs en JavaScript
-    const colors = {
-    primary: '#006D2C',     // Vert principal
-    secondary: '#F5F0E6',   // Beige clair
-    light: '#F8F9FA',       // Gris très clair
-    dark: '#212121',        // Gris foncé
-    success: '#28A745',     // Vert succès
-    info: '#1E88E5',        // Bleu clair
-    warning: '#F9A825',     // Jaune doré
-    danger: '#E53935'       // Rouge vif
-};
-
-    // Préparer les données pour les graphiques
-    @php
-        // Données pour Performance par Challenge
-        $performanceData = [];
-        $performanceLabels = [];
-        $performanceColors = [];
-        
-        foreach($challenges->take(8) as $challenge) {
-            $avgPoints = 0;
-            $totalParticipants = $challenge->participants->count();
-            
-            if ($totalParticipants > 0) {
-                $totalPoints = 0;
-                foreach($challenge->participants as $participant) {
-                    $totalPoints += $participant->score->points ?? 0;
-                }
-                $avgPoints = $totalPoints / $totalParticipants;
-            }
-            
-            $performanceData[] = round($avgPoints, 1);
-            $performanceLabels[] = Str::limit($challenge->titre, 20);
-            // On laisse JavaScript gérer les couleurs
-        }
-
-        // Données pour Top Challenges par Participants
-        $participantsData = [];
-        $participantsLabels = [];
-        
-        $popularChallenges = $challenges->sortByDesc(fn($c) => $c->participants->count())->take(6);
-        
-        foreach($popularChallenges as $challenge) {
-            $participantsData[] = $challenge->participants->count();
-            $participantsLabels[] = Str::limit($challenge->titre, 25);
-        }
-    @endphp
-
-    // 1. Pie Chart - Distribution des Badges
-    const badgesChart = new Chart(document.getElementById('badgesChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Or', 'Argent', 'Bronze'],
-            datasets: [{
-                data: [
-                    {{ $stats['badges_count']['Or'] ?? 0 }},
-                    {{ $stats['badges_count']['Argent'] ?? 0 }},
-                    {{ $stats['badges_count']['Bronze'] ?? 0 }}
-                ],
-                backgroundColor: [
-                    colors.warning,  // Or
-                    colors.secondary, // Argent
-                    colors.danger    // Bronze
-                ],
-                borderColor: colors.primary,
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label || '';
-                            const value = context.raw || 0;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                            const percentage = Math.round((value / total) * 100);
-                            return `${label}: ${value} (${percentage}%)`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // 2. Bar Chart - Performance par Challenge
-    const performanceChart = new Chart(document.getElementById('performanceChart'), {
+    // Chart : Performance
+    const ctx1 = document.getElementById('performanceChart').getContext('2d');
+    new Chart(ctx1, {
         type: 'bar',
         data: {
             labels: @json($performanceLabels),
             datasets: [{
                 label: 'Points Moyens',
                 data: @json($performanceData),
-                backgroundColor: @json($performanceData).map(points => 
-                    points >= 80 ? colors.success : 
-                    points >= 50 ? colors.warning : colors.danger
-                ),
-                borderColor: colors.primary,
-                borderWidth: 1
+                backgroundColor: 'rgba(91, 103, 241, 0.85)',
+                borderRadius: 10,
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Points Moyens'
-                    }
-                },
-                x: {
-                    ticks: {
-                        maxRotation: 45
-                    }
-                }
+                y: { beginAtZero: true, ticks: { color: '#64748b' } },
+                x: { ticks: { color: '#64748b' }, grid: { display: false } }
             }
         }
     });
 
-    // 3. Horizontal Bar Chart - Top Challenges par Participants
-    const participantsChart = new Chart(document.getElementById('participantsChart'), {
-        type: 'bar',
+    // Chart : Popularité
+    const ctx2 = document.getElementById('participantsChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
         data: {
             labels: @json($participantsLabels),
             datasets: [{
-                label: 'Nombre de Participants',
                 data: @json($participantsData),
-                backgroundColor: colors.primary,
-                borderColor: colors.dark,
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Nombre de Participants'
-                    }
-                }
-            }
-        }
-    });
-
-    // 4. Line Chart - Évolution des Participations (données simulées)
-    const evolutionChart = new Chart(document.getElementById('evolutionChart'), {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
-            datasets: [{
-                label: 'Participations',
-                data: [65, 59, 80, 81, 56, 55, 40, 45, 60, 75, 80, 90],
-                borderColor: colors.primary,
-                backgroundColor: colors.primary + '20',
-                tension: 0.4,
-                fill: true
-            }, {
-                label: 'Points Moyens',
-                data: [45, 52, 65, 70, 62, 58, 50, 55, 68, 72, 75, 82],
-                borderColor: colors.success,
-                backgroundColor: colors.success + '20',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // 5. Radar Chart - Score Moyen par Badge (données simulées)
-    const avgScoreChart = new Chart(document.getElementById('avgScoreChart'), {
-        type: 'radar',
-        data: {
-            labels: ['Or', 'Argent', 'Bronze'],
-            datasets: [{
-                label: 'Score Moyen',
-                data: [85, 65, 45],
-                backgroundColor: colors.primary + '40',
-                borderColor: colors.primary,
-                pointBackgroundColor: colors.primary,
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: colors.primary
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                r: {
-                    beginAtZero: true,
-                    max: 100
-                }
-            }
-        }
-    });
-
-    // 6. Histogram - Distribution des Points (données simulées)
-    const pointsDistributionChart = new Chart(document.getElementById('pointsDistributionChart'), {
-        type: 'bar',
-        data: {
-            labels: ['0-20', '21-40', '41-60', '61-80', '81-100'],
-            datasets: [{
-                label: 'Nombre de Participants',
-                data: [12, 19, 28, 24, 17],
                 backgroundColor: [
-                    colors.danger,
-                    colors.warning,
-                    colors.info,
-                    colors.success,
-                    colors.primary
+                    'rgba(91,103,241,0.85)',
+                    'rgba(34,197,94,0.85)',
+                    'rgba(6,182,212,0.85)',
+                    'rgba(250,204,21,0.85)',
+                    'rgba(244,114,182,0.85)'
                 ],
-                borderColor: colors.dark,
-                borderWidth: 1
+                borderWidth: 2,
+                borderColor: '#fff'
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
             plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Nombre de Participants'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Plage de Points'
-                    }
+                legend: {
+                    position: 'right',
+                    labels: { color: '#64748b', usePointStyle: true }
                 }
-            }
+            },
+            cutout: '65%'
         }
     });
-
-    // Fonctions d'export
-    function exportToExcel() {
-        alert('Fonction d\'export Excel à implémenter');
-    }
-
-    function generatePDF() {
-        alert('Fonction d\'export PDF à implémenter');
-    }
 });
 </script>
-@endpush
-
-@push('styles')
-<style>
-.card {
-    border: none;
-    border-radius: 10px;
-    transition: transform 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-}
-
-.card-header {
-    border-radius: 10px 10px 0 0 !important;
-}
-
-.bg-primary {
-    background-color: #006D2C !important;
-}
-
-.text-primary {
-    color: #006D2C !important;
-}
-
-.border-left-primary {
-    border-left: 4px solid #006D2C !important;
-}
-
-.bg-success {
-    background-color: #28A745 !important;
-}
-
-.bg-info {
-    background-color: #1E88E5 !important;
-}
-
-.bg-warning {
-    background-color: #F9A825 !important;
-}
-
-.border-left-success {
-    border-left: 4px solid #28A745 !important;
-}
-
-.border-left-info {
-    border-left: 4px solid #1E88E5 !important;
-}
-
-.border-left-warning {
-    border-left: 4px solid #F9A825 !important;
-}
-
-.chart-container {
-    position: relative;
-    height: 300px;
-    width: 100%;
-}
-</style>
-@endpush
+@endsection

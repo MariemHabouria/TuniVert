@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Challenge;
 use App\Models\ParticipantChallenge;
+use App\Models\ScoreChallenge;
 
 class ChallengeSeeder extends Seeder
 {
@@ -21,18 +22,52 @@ class ChallengeSeeder extends Seeder
                 'organisateur_id' => $association->id,
             ]);
 
-            // 3️⃣ Pour chaque challenge, créer 5 participants avec score automatique
+            // 3️⃣ Pour chaque challenge, créer 5 participants uniques avec score automatique
             $challenges->each(function ($challenge) use ($users) {
-                ParticipantChallenge::factory(5)->create()->each(function ($participant) use ($challenge, $users) {
-                    $participant->challenge_id = $challenge->id;
-                    $participant->utilisateur_id = $users->random()->id;
-                    $participant->preuve = rand(0,1) 
-                        ? 'https://via.placeholder.com/640x480.png?text=image' 
-                        : 'https://sample-videos.com/video123/mp4/240/big_buck_bunny_240p_1mb.mp4';
-                    $participant->save();
+                $participants = $users->random(5);
 
-                    // $participant->score est déjà créé via afterCreating
-                });
+                foreach ($participants as $user) {
+                    $participant = ParticipantChallenge::factory()->create([
+                        'challenge_id'   => $challenge->id,
+                        'utilisateur_id' => $user->id,
+                        'preuve'         => rand(0,1) 
+                                            ? 'https://via.placeholder.com/640x480.png?text=image' 
+                                            : 'https://sample-videos.com/video123/mp4/240/big_buck_bunny_240p_1mb.mp4',
+                        'statut'         => 'valide', // pour que le score soit pris en compte immédiatement
+                    ]);
+
+                    // Générer automatiquement un score pour ce participant
+                    $points = rand(10, 200);
+                    $badge = match(true) {
+                        $points >= 200 => 'Or',
+                        $points >= 100 => 'Argent',
+                        $points >= 50  => 'Bronze',
+                        default => null,
+                    };
+
+                    $score = ScoreChallenge::create([
+                        'participant_challenge_id' => $participant->id,
+                        'points' => $points,
+                        'rang' => 0, // sera mis à jour juste après
+                        'badge' => $badge,
+                        'date_maj' => now(),
+                    ]);
+                }
+
+                // 🔹 Calculer le rang pour chaque participant du challenge
+                $participantsScores = ParticipantChallenge::with('score')
+                    ->where('challenge_id', $challenge->id)
+                    ->whereHas('score')
+                    ->get()
+                    ->sortByDesc(fn($p) => $p->score->points)
+                    ->values();
+
+                foreach ($participantsScores as $index => $p) {
+                    $p->score->update([
+                        'rang' => $index + 1,
+                        'date_maj' => now(),
+                    ]);
+                }
             });
         });
     }

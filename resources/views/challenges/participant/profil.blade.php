@@ -24,7 +24,6 @@
 <!-- Dashboard Start -->
 <div class="container-fluid py-5">
     <div class="container py-5">
-        <!-- En-tête du dashboard -->
         <div class="row mb-5">
             <div class="col-12 text-center">
                 <h2 class="display-6 fw-bold" style="color: var(--bs-primary);">
@@ -64,13 +63,13 @@
                                             </div>
                                             
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <span class="badge px-3 py-2 {{ $p->statut == 'valide' ? 'bg-success' : ($p->statut == 'en_attente' ? 'bg-warning' : 'bg-danger') }}"
+                                                <span class="badge px-3 py-2 {{ $p->statut == 'valide' ? 'bg-success' : ($p->statut == 'en_cours' ? 'bg-warning' : 'bg-danger') }} "
                                                       style="font-size: 0.8rem;">
-                                                    <i class="fas fa-{{ $p->statut == 'valide' ? 'check' : ($p->statut == 'en_attente' ? 'clock' : 'times') }}-circle me-1"></i>
-                                                    {{ ucfirst($p->statut) }}
+                                                    <i class="fas fa-{{ $p->statut == 'valide' ? 'check' : ($p->statut == 'en_cours' ? 'clock' : 'times') }}-circle me-1"></i>
+                                                    {{ ucfirst($p->statut == 'en_cours' ? 'En cours' : $p->statut) }}
                                                 </span>
                                                 <small class="text-muted">
-                                                    Score: {{ $p->score->points ?? '0' }} pts
+                                                    Score: {{ $p->score->points ?? 0 }} pts
                                                 </small>
                                             </div>
                                         </div>
@@ -108,6 +107,7 @@
                                         default => 'rank-others'
                                     };
                                     $isCurrentUser = $entry->utilisateur_id == Auth::id();
+                                    $points = $entry->score_total ?? ($entry->score->points ?? 0);
                                 @endphp
                                 <div class="col-12">
                                     <div class="card border-0 shadow-sm rank-card {{ $isCurrentUser ? 'border-primary border-2' : '' }}" 
@@ -127,13 +127,13 @@
                                                         </h6>
                                                         <small class="text-muted">
                                                             <i class="fas fa-star me-1" style="color: var(--bs-warning);"></i>
-                                                            {{ $entry->score->points ?? 0 }} points
+                                                            {{ $points }} points
                                                         </small>
                                                     </div>
                                                 </div>
                                                 <div class="text-end">
                                                     <small class="text-muted d-block">Niveau</small>
-                                                    <span class="badge bg-primary">{{ floor(($entry->score->points ?? 0) / 100) + 1 }}</span>
+                                                    <span class="badge bg-primary">{{ floor($points / 100) + 1 }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -152,39 +152,37 @@
             </div>
 
             <!-- Sidebar - Mes Badges -->
-<div class="col-lg-4">
-    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
-        <div class="card-header py-3" style="background: linear-gradient(135deg, var(--bs-warning) 0%, var(--bs-danger) 100%); border-radius: 15px 15px 0 0;">
-            <h4 class="mb-0 text-white">
-                <i class="fas fa-medal me-2"></i>Mes Badges
-            </h4>
-        </div>
-        <div class="card-body p-4">
-            <div class="row g-3">
-                @forelse($badges as $badge)
-                    <div class="col-6 col-sm-4 text-center">
-                        <div class="badge-card p-3" style="border-radius: 10px; background: var(--bs-light); transition: all 0.3s ease;">
-                            <div class="mb-2">
-                                <i class="fas fa-medal fa-2x" style="color: var(--bs-warning);"></i>
-                            </div>
-                            <small class="fw-semibold d-block" style="color: var(--bs-dark);">
-                                {{ is_object($badge) ? $badge->badge : $badge }}
-                            </small>
-                            <small class="text-muted">Débloqué</small>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                    <div class="card-header py-3" style="background: linear-gradient(135deg, var(--bs-warning) 0%, var(--bs-danger) 100%); border-radius: 15px 15px 0 0;">
+                        <h4 class="mb-0 text-white">
+                            <i class="fas fa-medal me-2"></i>Mes Badges
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            @forelse($badges as $badge)
+                                <div class="col-6 col-sm-4 text-center">
+                                    <div class="badge-card p-3" style="border-radius: 10px; background: var(--bs-light); transition: all 0.3s ease;">
+                                        <div class="mb-2">
+                                            <i class="fas fa-medal fa-2x" style="color: var(--bs-warning);"></i>
+                                        </div>
+                                        <small class="fw-semibold d-block" style="color: var(--bs-dark);">
+                                            {{ is_object($badge) ? $badge->badge : $badge }}
+                                        </small>
+                                        <small class="text-muted">Débloqué</small>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-12 text-center py-4">
+                                    <i class="fas fa-medal display-1 text-muted mb-3" style="opacity: 0.5;"></i>
+                                    <h6 class="text-muted">Aucun badge pour le moment</h6>
+                                    <p class="text-muted small">Participez à des challenges pour débloquer des badges !</p>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
-                @empty
-                    <div class="col-12 text-center py-4">
-                        <i class="fas fa-medal display-1 text-muted mb-3" style="opacity: 0.5;"></i>
-                        <h6 class="text-muted">Aucun badge pour le moment</h6>
-                        <p class="text-muted small">Participez à des challenges pour débloquer des badges !</p>
-                    </div>
-                @endforelse
-            </div>
-        </div>
-    </div>
-</div>
-
+                </div>
 
                 <!-- Statistiques -->
                 <div class="card border-0 shadow-sm" style="border-radius: 15px;">
@@ -225,79 +223,9 @@
         </div>
     </div>
 </div>
-<!-- Dashboard End -->
+
 @endsection
 
-@section('styles')
-<style>
-.page-header {
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('{{ asset('img/carousel-1.jpg') }}') center center no-repeat !important;
-    background-size: cover !important;
-}
-
-.challenge-card, .badge-card, .rank-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background: white;
-}
-
-.challenge-card:hover, .badge-card:hover, .rank-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-}
-
-.rank-badge {
-    font-weight: bold;
-    font-size: 1rem;
-    padding: 0.5rem 0.8rem;
-    border-radius: 50%;
-    color: #fff;
-    min-width: 40px;
-    text-align: center;
-}
-
-.rank-1 { 
-    background: linear-gradient(135deg, #FFD700, #FFA500); /* Gold */
-    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
-}
-.rank-2 { 
-    background: linear-gradient(135deg, #C0C0C0, #A9A9A9); /* Silver */
-    box-shadow: 0 2px 8px rgba(192, 192, 192, 0.4);
-}
-.rank-3 { 
-    background: linear-gradient(135deg, #CD7F32, #8B4513); /* Bronze */
-    box-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
-}
-.rank-others { 
-    background: linear-gradient(135deg, #6c757d, #495057);
-}
-
-.breadcrumb-item.active {
-    color: var(--bs-primary) !important;
-    font-weight: 600;
-}
-
-.card-header {
-    border-bottom: none;
-}
-
-.badge {
-    font-weight: 500;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .display-6 {
-        font-size: 1.8rem;
-    }
-    
-    .rank-badge {
-        font-size: 0.9rem;
-        padding: 0.4rem 0.7rem;
-        min-width: 35px;
-    }
-}
-</style>
-@endsection
 
 @section('scripts')
 <script>

@@ -17,8 +17,24 @@ class ScoreChallenge extends Model
         'date_maj'
     ];
 
+    // Relation avec la participation
     public function participant()
     {
         return $this->belongsTo(ParticipantChallenge::class, 'participant_challenge_id');
+    }
+
+    // Accesseur pour obtenir l'utilisateur directement
+    public function utilisateur()
+    {
+        return $this->participant?->utilisateur();
+    }
+
+    // Déterminer automatiquement le badge selon les points
+    public static function determinerBadge(int $points): ?string
+    {
+        if ($points >= 200) return 'Or';
+        if ($points >= 100) return 'Argent';
+        if ($points >= 50)  return 'Bronze';
+        return null;
     }
 }

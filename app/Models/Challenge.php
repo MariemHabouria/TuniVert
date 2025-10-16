@@ -19,20 +19,30 @@ class Challenge extends Model
         'difficulte', 
         'objectif',
         'actif',
+        'slug',
     ];
 
+    // Relation avec l'organisateur
     public function organisateur()
     {
         return $this->belongsTo(User::class, 'organisateur_id');
     }
 
+    // Relation avec les participations
     public function participants()
     {
         return $this->hasMany(ParticipantChallenge::class);
     }
 
+    // Vérifie si le challenge est actif
     public function isActif()
     {
         return $this->actif;
+    }
+
+    // Retourne le nombre total de participants validés
+    public function participantsValides()
+    {
+        return $this->participants()->where('statut', 'valide');
     }
 }

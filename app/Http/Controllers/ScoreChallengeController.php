@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Challenge;
 use App\Models\ParticipantChallenge;
 use App\Models\ScoreChallenge;
 use Illuminate\Http\Request;
@@ -26,19 +25,19 @@ class ScoreChallengeController extends Controller
             abort(403, "Accès refusé");
         }
 
-        // CORRECTION : Vérifier que le participant est validé
+        // Vérification que le participant est validé
         if ($participant->statut !== 'valide') {
             return redirect()->back()->with('error', 'Le participant doit être validé avant de pouvoir avoir un score.');
         }
 
-        // CORRECTION : Utilisation de updateOrCreate avec tous les champs
+        // Créer ou mettre à jour le score
         $score = ScoreChallenge::updateOrCreate(
             ['participant_challenge_id' => $participantId],
             [
                 'points' => $request->points,
                 'badge' => $this->determinerBadge($request->points),
-                'date_maj' => now(),
-                'rang' => 0 // Sera recalculé après
+                'rang' => 0, // sera recalculé
+                'date_maj' => now()
             ]
         );
 
@@ -90,9 +89,7 @@ class ScoreChallengeController extends Controller
             ->where('challenge_id', $challengeId)
             ->where('statut', 'valide')
             ->get()
-            ->sortByDesc(function($participant) {
-                return $participant->score ? $participant->score->points : 0;
-            })
+            ->sortByDesc(fn($p) => $p->score ? $p->score->points : 0)
             ->values();
 
         foreach ($participants as $index => $participant) {
@@ -112,16 +109,14 @@ class ScoreChallengeController extends Controller
     {
         if ($challengeId) {
             $challenge = $challengeId === 'current'
-                ? Challenge::latest()->firstOrFail()
-                : Challenge::findOrFail($challengeId);
+                ? \App\Models\Challenge::latest()->firstOrFail()
+                : \App\Models\Challenge::findOrFail($challengeId);
 
             $participants = ParticipantChallenge::with(['utilisateur', 'score'])
                 ->where('challenge_id', $challenge->id)
-                ->where('statut', 'valide') // CORRECTION : seulement les validés
+                ->where('statut', 'valide')
                 ->get()
-                ->sortByDesc(function($participant) {
-                    return $participant->score ? $participant->score->points : 0;
-                })
+                ->sortByDesc(fn($p) => $p->score ? $p->score->points : 0)
                 ->values()
                 ->map(function($participant, $index) {
                     $participant->current_rang = $index + 1;
@@ -139,7 +134,6 @@ class ScoreChallengeController extends Controller
      */
     public function classementGlobal()
     {
-        // CORRECTION : Utiliser ScoreChallenge pour le classement global
         $scoresGrouped = ScoreChallenge::with('participant.utilisateur')
             ->get()
             ->groupBy('participant.utilisateur_id')

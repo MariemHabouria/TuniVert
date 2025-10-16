@@ -234,6 +234,11 @@
                                                     <span class="badge bg-danger">Rejeté</span>
                                                     @break
                                             @endswitch
+
+                                            <!-- Badge IA si disponible -->
+                                            @if($participantChallenge->ia_evaluation ?? false)
+                                                <span class="badge bg-primary ms-2">Évaluation IA: {{ ucfirst($participantChallenge->ia_evaluation) }}</span>
+                                            @endif
                                         </div>
 
                                         <!-- Score actuel -->
@@ -285,10 +290,17 @@
                                                 </a>
                                             </div>
                                         @endif
+                                        <!-- Résultat IA -->
+@if(session('ai_label'))
+    <div class="mt-3">
+        <strong>Évaluation IA :</strong>
+        <span class="badge bg-info">
+            {{ session('ai_label') }} ({{ number_format(session('ai_score') * 100, 1) }}%)
+        </span>
+    </div>
+@endif
                                     </div>
                                 @endif
-
-
 
                             @else
                                 <!-- Message pour les non-connectés -->
@@ -337,33 +349,15 @@
     font-weight: 600;
 }
 
-/* Style pour les badges */
-.badge {
-    font-weight: 500;
-    letter-spacing: 0.5px;
-}
+.badge { font-weight: 500; letter-spacing: 0.5px; }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
-    .challenge-detail-card {
-        margin: 0 -15px;
-        border-radius: 0;
-    }
-    
-    .card-body {
-        padding: 2rem !important;
-    }
-    
-    .btn-lg {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
+    .challenge-detail-card { margin: 0 -15px; border-radius: 0; }
+    .card-body { padding: 2rem !important; }
+    .btn-lg { width: 100%; margin-bottom: 1rem; }
 }
 
-/* Animation pour la barre de progression */
-.progress-bar {
-    transition: width 1.5s ease-in-out;
-}
+.progress-bar { transition: width 1.5s ease-in-out; }
 
 /* Styles pour les statuts */
 .badge.bg-warning { background: linear-gradient(135deg, #ffc107, #fd7e14) !important; }
@@ -376,58 +370,44 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Animation au chargement de la carte
     const card = document.querySelector('.challenge-detail-card');
     card.style.opacity = '0';
     card.style.transform = 'translateY(30px)';
-    
     setTimeout(() => {
         card.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
         card.style.opacity = '1';
         card.style.transform = 'translateY(0)';
     }, 200);
 
-    // Prévisualisation du nom du fichier
     const fileInput = document.getElementById('preuve');
     if (fileInput) {
         fileInput.addEventListener('change', function() {
             if (this.files.length > 0) {
-                const fileName = this.files[0].name;
-                // Vous pourriez afficher le nom du fichier dans un élément
-                console.log('Fichier sélectionné:', fileName);
+                console.log('Fichier sélectionné:', this.files[0].name);
             }
         });
     }
 
-    // Confirmation de participation
     const participateForm = document.querySelector('form[action*="participate"]');
     if (participateForm) {
         participateForm.addEventListener('submit', function(e) {
             if (!confirm('Êtes-vous sûr de vouloir participer à ce challenge ?')) {
                 e.preventDefault();
-                
-                // Animation de secousse
                 const button = this.querySelector('button');
                 button.style.animation = 'shake 0.5s ease-in-out';
-                setTimeout(() => {
-                    button.style.animation = '';
-                }, 500);
+                setTimeout(() => { button.style.animation = ''; }, 500);
             }
         });
     }
 
-    // Animation pour la barre de progression
     const progressBar = document.querySelector('.progress-bar');
     if (progressBar) {
         const width = progressBar.style.width;
         progressBar.style.width = '0%';
-        setTimeout(() => {
-            progressBar.style.width = width;
-        }, 500);
+        setTimeout(() => { progressBar.style.width = width; }, 500);
     }
 });
 
-// Animation shake
 const style = document.createElement('style');
 style.textContent = `
     @keyframes shake {

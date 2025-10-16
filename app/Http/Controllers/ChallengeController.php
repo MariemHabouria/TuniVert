@@ -7,7 +7,8 @@ use App\Models\ParticipantChallenge;
 use App\Models\ScoreChallenge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 class ChallengeController extends Controller
 {
     // Liste des challenges pour les participants
@@ -47,50 +48,103 @@ class ChallengeController extends Controller
 
         $challenge = Challenge::findOrFail($id);
 
-        $participant = ParticipantChallenge::create([
+        ParticipantChallenge::create([
             'challenge_id'   => $challenge->id,
             'utilisateur_id' => Auth::id(),
             'statut'         => 'en_cours',
         ]);
-
-        // CORRECTION : Ne pas créer le score immédiatement, seulement après validation
-        // $this->createScore($participant, $challenge);
 
         return redirect()->route('challenges.show', $id)
                          ->with('success', 'Vous participez maintenant à ce challenge !');
     }
 
     // Soumettre une preuve
-    public function soumettrePreuve(Request $request, $challengeId)
-    {
-        $request->validate([
-            'preuve' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
+public function soumettrePreuve(Request $request, $challengeId)
+{
+    $request->validate([
+        'preuve' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
+    ]);
+
+    $participant = ParticipantChallenge::where('challenge_id', $challengeId)
+                    ->where('utilisateur_id', Auth::id())
+                    ->firstOrFail();
+
+    if ($request->hasFile('preuve')) {
+        $file = $request->file('preuve');
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->storeAs('preuves', $fileName, 'public');
+
+        // Mettre à jour la preuve
+        $participant->update([
+            'preuve' => $filePath,
+            'statut' => 'en_cours', // temporaire avant évaluation IA
         ]);
 
-        $participant = ParticipantChallenge::where('challenge_id', $challengeId)
-                        ->where('utilisateur_id', Auth::id())
-                        ->firstOrFail();
+        // Évaluer la preuve avec HuggingFace
+        $scorePourcentage = $this->evaluateProof(storage_path('app/public/' . $filePath));
 
-        if ($request->hasFile('preuve')) {
-            $file = $request->file('preuve');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('preuves', $fileName, 'public');
+        // Mettre à jour le statut selon IA
+        $participant->update([
+            'statut' => $scorePourcentage >= 50 ? 'valide' : 'rejete',
+        ]);
 
-            // CORRECTION : utiliser 'en_cours' puisque 'en_attente' n'existe pas
-            $participant->update([
-                'preuve' => $filePath,
-                'statut' => 'en_cours', // Changé de 'en_attente' à 'en_cours'
-            ]);
+        // Créer le score si valide
+        if ($scorePourcentage >= 50) {
+    $participant->update(['statut' => 'valide']);
+    $challenge = $participant->challenge;
+    $this->createScore($participant, $challenge);
+    $this->recalculerClassementChallenge($challengeId);
+} else {
+    $participant->update(['statut' => 'rejete']);
+}
 
-            return redirect()->back()->with('success', 'Preuve soumise avec succès ! En attente de validation.');
-        }
+// Mettre le score IA et le label dans la session pour affichage Blade
+session()->flash('ai_score', $scorePourcentage / 100); // pourcentage en fraction (0-1)
+session()->flash('ai_label', $scorePourcentage >= 50 ? 'valide' : 'rejete');
 
-        return redirect()->back()->with('error', 'Erreur lors du téléchargement de la preuve.');
+return redirect()->back()->with('success', 
+    'Preuve soumise avec succès ! Statut : ' . ucfirst($participant->statut)
+);
     }
 
-    // Crée ou met à jour le score et le badge
+    return redirect()->back()->with('error', 'Erreur lors du téléchargement de la preuve.');
+}
+
+/**
+ * Fonction privée pour évaluer la preuve avec HuggingFace
+ */
+private function evaluateProof($filePath)
+{
+    $hfToken = env('HUGGINGFACE_API_KEY');
+
+    // Lire le fichier en base64
+    $fileContent = base64_encode(file_get_contents($filePath));
+
+    // Appel API HuggingFace (exemple avec modèle image: vit-base-patch16-224)
+    $response = Http::withHeaders([
+        'Authorization' => "Bearer $hfToken",
+    ])->post('https://api-inference.huggingface.co/models/google/vit-base-patch16-224', [
+        'inputs' => $fileContent
+    ]);
+
+    $result = $response->json();
+
+    // Vérifie que la réponse contient bien un score
+    if (isset($result[0]['score'])) {
+        $score = floatval($result[0]['score']); // score entre 0 et 1
+        $pourcentage = round($score * 100, 2); // convertir en pourcentage
+        return $pourcentage; // retourne le pourcentage exact
+    }
+
+    return 0; // si erreur
+}
+
+
+    // Créer ou mettre à jour le score et badge
     private function createScore(ParticipantChallenge $participant, Challenge $challenge)
     {
+        if ($participant->statut !== 'valide') return;
+
         $points = match($challenge->difficulte) {
             'facile' => 50,
             'moyen' => 100,
@@ -105,18 +159,12 @@ class ChallengeController extends Controller
             default => null,
         };
 
-        // CORRECTION : Vérification que le participant est validé
-        if ($participant->statut !== 'valide') {
-            return;
-        }
-
-        // CORRECTION : Utilisation de updateOrCreate avec tous les champs
         ScoreChallenge::updateOrCreate(
             ['participant_challenge_id' => $participant->id],
             [
                 'points' => $points,
                 'badge' => $badge,
-                'rang' => 0, // Le rang sera calculé plus tard
+                'rang' => 0,
                 'date_maj' => now(),
             ]
         );
@@ -133,7 +181,6 @@ class ChallengeController extends Controller
 
         $classement = $this->calculerClassementGeneral();
 
-        // CORRECTION : Récupérer les badges depuis ScoreChallenge
         $badges = ScoreChallenge::whereHas('participant', function($query) use ($userId) {
                 $query->where('utilisateur_id', $userId);
             })
@@ -145,10 +192,8 @@ class ChallengeController extends Controller
         return view('challenges.participant.profil', compact('participations', 'badges', 'classement'));
     }
 
-    // Calcul du classement général avec rang
     private function calculerClassementGeneral()
     {
-        // CORRECTION : Utiliser ScoreChallenge pour calculer les scores totaux
         $scoresUtilisateurs = ScoreChallenge::with('participant.utilisateur')
             ->get()
             ->groupBy('participant.utilisateur_id')
@@ -169,22 +214,17 @@ class ChallengeController extends Controller
         return $scoresUtilisateurs;
     }
 
-    // Classement d'un challenge avec mise à jour des rangs
     public function classement($id)
     {
         $challenge = Challenge::findOrFail($id);
 
-        // CORRECTION : Récupérer les participants avec leurs scores
         $participants = ParticipantChallenge::with(['utilisateur', 'score'])
             ->where('challenge_id', $id)
-            ->where('statut', 'valide') // CORRECTION : seulement les validés
+            ->where('statut', 'valide')
             ->get()
-            ->sortByDesc(function($participant) {
-                return $participant->score ? $participant->score->points : 0;
-            })
+            ->sortByDesc(fn($p) => $p->score ? $p->score->points : 0)
             ->values();
 
-        // Mise à jour des rangs dans la base de données
         foreach ($participants as $index => $participant) {
             $rang = $index + 1;
             if ($participant->score) {
@@ -193,56 +233,38 @@ class ChallengeController extends Controller
                     'date_maj' => now()
                 ]);
             }
-            // Pour l'affichage immédiat
             $participant->current_rang = $rang;
         }
 
         return view('challenges.participant.classement', compact('challenge', 'participants'));
     }
 
-    // Actions sur participants
     public function actionParticipant(Request $request, $participantId)
     {
         $participant = ParticipantChallenge::with(['challenge', 'score'])->findOrFail($participantId);
 
-        if ($participant->challenge->organisateur_id != Auth::id()) {
-            abort(403, "Accès refusé");
-        }
+        if ($participant->challenge->organisateur_id != Auth::id()) abort(403);
 
         if ($request->action === 'valider') {
-            $participant->statut = 'valide';
-            $participant->save();
-
-            // CORRECTION : Crée le score seulement après validation
+            $participant->update(['statut' => 'valide']);
             $this->createScore($participant, $participant->challenge);
-
-            // Recalculer le classement après validation
             $this->recalculerClassementChallenge($participant->challenge_id);
-
         } elseif ($request->action === 'rejeter') {
-            $participant->statut = 'rejete';
-            $participant->save();
-            
-            if ($participant->score) {
-                $participant->score->delete();
-                // Recalculer le classement après suppression
-                $this->recalculerClassementChallenge($participant->challenge_id);
-            }
+            $participant->update(['statut' => 'rejete']);
+            if ($participant->score) $participant->score->delete();
+            $this->recalculerClassementChallenge($participant->challenge_id);
         }
 
         return redirect()->back()->with('success', 'Action effectuée avec succès !');
     }
 
-    // Recalculer le classement d'un challenge
     private function recalculerClassementChallenge($challengeId)
     {
         $participants = ParticipantChallenge::with('score')
             ->where('challenge_id', $challengeId)
             ->where('statut', 'valide')
             ->get()
-            ->sortByDesc(function($participant) {
-                return $participant->score ? $participant->score->points : 0;
-            })
+            ->sortByDesc(fn($p) => $p->score ? $p->score->points : 0)
             ->values();
 
         foreach ($participants as $index => $participant) {
@@ -255,7 +277,7 @@ class ChallengeController extends Controller
         }
     }
 
-    // ... (les autres méthodes CRUD restent inchangées)
+    // Les méthodes CRUD et listes association
     public function create() { return view('challenges.association.create'); }
 
     public function store(Request $request)
@@ -278,7 +300,7 @@ class ChallengeController extends Controller
 
     public function crud()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $challenges = Challenge::where('organisateur_id', $user->id)
                         ->withCount('participants')
                         ->get();
@@ -325,10 +347,11 @@ class ChallengeController extends Controller
 
     public function associationIndex()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $challenges = Challenge::where('organisateur_id', $user->id)
                     ->withCount('participants')
                     ->get();
         return view('challenges.association.index', compact('challenges'));
     }
+    
 }
