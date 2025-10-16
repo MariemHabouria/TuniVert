@@ -216,8 +216,11 @@
                                                     $campaignEventIds = [ 'organic' => 1, 'ecosystem' => 2, 'recycling' => 3 ];
                                                     $eventParam = request('event');
                                                     $resolvedEventId = $eventParam ? (int)$eventParam : ($slug && isset($campaignEventIds[$slug]) ? $campaignEventIds[$slug] : null);
+                                                    // Try to load the real event model when possible
+                                                    $eventEntity = null;
+                                                    try { if ($resolvedEventId) { $eventEntity = \App\Models\Event::find($resolvedEventId); } } catch (\Throwable $e) { $eventEntity = null; }
                                                     $eventLabels = [ 1=>'Organic', 2=>'Ecosystem', 3=>'Recycling', 4=>'Awareness Day' ];
-                                                    $resolvedEventTitle = $sel['title'] ?? ($resolvedEventId ? ($eventLabels[$resolvedEventId] ?? ('Event #'.$resolvedEventId)) : null);
+                                                    $resolvedEventTitle = $sel['title'] ?? ($eventEntity?->title ?? ($resolvedEventId ? ($eventLabels[$resolvedEventId] ?? ('Event #'.$resolvedEventId)) : null));
                                                 @endphp
 
                                                 <h2 class="mb-3">Make a Donation</h2>
@@ -240,6 +243,37 @@
                                                                     </div>
                                                                     <p class="card-text mb-1 fw-semibold">{{ $sel['headline'] }}</p>
                                                                     <p class="card-text text-muted">{{ $sel['desc'] }}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @elseif ($eventEntity)
+                                                    <div class="card border-0 shadow-sm mb-4">
+                                                        <div class="row g-0 align-items-center">
+                                                            <div class="col-md-4">
+                                                                @php
+                                                                    $imgUrl = $eventEntity->image ? \Illuminate\Support\Facades\Storage::url($eventEntity->image) : asset('img/default-event.jpg');
+                                                                @endphp
+                                                                <img src="{{ $imgUrl }}" class="img-fluid rounded-start" alt="{{ $eventEntity->title }}">
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <div class="card-body">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <h5 class="card-title text-primary mb-1">{{ $eventEntity->title }}</h5>
+                                                                            <h6 class="card-subtitle mb-2">
+                                                                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ $eventEntity->location ?? '—' }}
+                                                                            </h6>
+                                                                        </div>
+                                                                        <a href="{{ url('donation.html#donate') }}" class="small">changer</a>
+                                                                    </div>
+                                                                    <p class="card-text mb-1">
+                                                                        <i class="bi bi-calendar-event text-success me-1"></i>
+                                                                        {{ optional(\Carbon\Carbon::parse($eventEntity->date ?? null))->format('d M, Y') }}
+                                                                    </p>
+                                                                    @if (!empty($eventEntity->details))
+                                                                        <p class="card-text text-muted">{{ $eventEntity->details }}</p>
+                                                                    @endif
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -488,22 +522,26 @@
                             </div>
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Payment method</label>
+                                @php
+                                    try { 
+                                        $methods = \App\Models\PaymentMethod::where('active', true)
+                                            ->whereNotIn('key', ['virement_bancaire','test'])
+                                            ->orderBy('sort_order')
+                                            ->get();
+                                    } catch (\Throwable $e) { $methods = collect(); }
+                                @endphp
                                 <select name="moyen_paiement" class="form-select" required>
-                                    @if (config('services.testpay.enabled'))
-                                    <option value="test">e‑DINAR</option>
-                                    @endif
                                     <option value="virement_bancaire">Bank transfer</option>
+                                    @if (config('services.testpay.enabled'))
+                                        <option value="test">e‑DINAR (test)</option>
+                                    @endif
+                                    @foreach($methods as $m)
+                                        <option value="{{ $m->key }}" data-type="{{ $m->type }}" data-icon="{{ $m->icon_path ?? $m->icon }}">{{ $m->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                                                         @if ($resolvedEventId)
                                                             <div class="col-12">
-                                                                <div class="alert alert-info d-flex align-items-center justify-content-between" role="alert">
-                                                                    <div>
-                                                                        <i class="fas fa-calendar-alt me-2 text-primary"></i>
-                                                                        Donating to event {{ $resolvedEventTitle }}
-                                                                    </div>
-                                                                    <a href="{{ url('donation.html#donate') }}" class="small">change</a>
-                                                                </div>
                                                                 <input type="hidden" name="evenement_id" value="{{ $resolvedEventId }}">
                                                             </div>
                                                         @else
@@ -591,6 +629,22 @@
                                                     </div>
                                                 </div>
                                                 @endauth
+
+                                {{-- Custom Payment Methods --}}
+                                @php
+                                    try {
+                                        $customMethods = \App\Models\PaymentMethod::where('active', true)
+                                            ->whereNotIn('key', ['virement_bancaire','test'])
+                                            ->orderBy('sort_order')
+                                            ->get();
+                                    } catch (\Throwable $e) {
+                                        $customMethods = collect();
+                                    }
+                                @endphp
+                                @foreach($customMethods as $cm)
+                                    <x-custom-payment-method :method="$cm" />
+                                @endforeach
+
                         @endauth
 
                         @guest
@@ -1110,26 +1164,34 @@
 
                                 if (methodSelect){
                                     methodSelect.addEventListener('change', async ()=>{
-                                        if (methodSelect.value === 'carte'){
+                                        // Hide all payment wrappers
+                                        toggleCardUI(false);
+                                        togglePayPalUI(false);
+                                        togglePaymeeUI(false);
+                                        if (bankWrapper) bankWrapper.style.display = 'none';
+                                        if (testpayWrapper) testpayWrapper.style.display = 'none';
+                                        document.querySelectorAll('.custom-payment-method-wrapper').forEach(el => el.style.display = 'none');
+
+                                        const selectedMethod = methodSelect.value;
+                                        const selectedOption = methodSelect.options[methodSelect.selectedIndex];
+                                        const methodType = selectedOption?.dataset?.type || null;
+
+                                        // Handle built-in methods
+                                        if (selectedMethod === 'carte' || methodType === 'card'){
                                             if (donateSubmit) donateSubmit.style.display = 'none';
                                             try{
                                                 toggleCardUI(true);
-                                                togglePayPalUI(false);
-                                                togglePaymeeUI(false);
                                                 const { clientSecret } = await createIntent();
                                                 await mountPaymentElement(clientSecret);
                                             }catch(e){
                                                 toggleCardUI(false);
                                                 alert(e.message || 'Card payment unavailable');
                                             }
-                                        } else if (methodSelect.value === 'paypal'){
+                                        } else if (selectedMethod === 'paypal' || methodType === 'paypal'){
                                             if (donateSubmit) donateSubmit.style.display = 'none';
-                                            toggleCardUI(false);
                                             togglePayPalUI(true);
-                                            togglePaymeeUI(false);
                                             try { await renderPayPalButtons(); } catch(e){ alert(e.message || 'PayPal unavailable'); togglePayPalUI(false); }
-                                            if (bankWrapper) bankWrapper.style.display = 'none';
-                                        } else if (methodSelect.value === 'paymee'){
+                                        } else if (selectedMethod === 'paymee' || methodType === 'paymee'){
                                             if (!PAYMEE_ENABLED){
                                                 alert('e‑DINAR (Paymee) is not configured. Please set PAYMEE_API_KEY in .env and restart the server.');
                                                 methodSelect.value = 'virement_bancaire';
@@ -1137,11 +1199,8 @@
                                                 return;
                                             }
                                             if (donateSubmit) donateSubmit.style.display = 'none';
-                                            toggleCardUI(false);
-                                            togglePayPalUI(false);
                                             togglePaymeeUI(true);
-                                            if (bankWrapper) bankWrapper.style.display = 'none';
-                                        } else if (methodSelect.value === 'test'){
+                                        } else if (selectedMethod === 'test' || methodType === 'test'){
                                             if (!TESTPAY_ENABLED){
                                                 alert('Test payments are disabled.');
                                                 methodSelect.value = 'virement_bancaire';
@@ -1149,25 +1208,20 @@
                                                 return;
                                             }
                                             if (donateSubmit) donateSubmit.style.display = 'none';
-                                            toggleCardUI(false);
-                                            togglePayPalUI(false);
-                                            togglePaymeeUI(false);
                                             toggleTestPayUI(true);
-                                            if (bankWrapper) bankWrapper.style.display = 'none';
-                                        } else if (methodSelect.value === 'virement_bancaire'){
+                                        } else if (selectedMethod === 'virement_bancaire' || methodType === 'bank_transfer'){
                                             if (donateSubmit) donateSubmit.style.display = '';
-                                            toggleCardUI(false);
-                                            togglePayPalUI(false);
-                                            togglePaymeeUI(false);
-                                            toggleTestPayUI(false);
                                             if (bankWrapper) bankWrapper.style.display = '';
                                         } else {
-                                            if (donateSubmit) donateSubmit.style.display = '';
-                                            toggleCardUI(false);
-                                            togglePayPalUI(false);
-                                            togglePaymeeUI(false);
-                                            toggleTestPayUI(false);
-                                            if (bankWrapper) bankWrapper.style.display = 'none';
+                                            // Check if it's a custom method
+                                            const customWrapper = document.querySelector(`.custom-payment-method-wrapper[data-method-key="${selectedMethod}"]`);
+                                            if (customWrapper) {
+                                                if (donateSubmit) donateSubmit.style.display = 'none';
+                                                customWrapper.style.display = 'block';
+                                            } else {
+                                                // Unknown method, fallback to default submit
+                                                if (donateSubmit) donateSubmit.style.display = '';
+                                            }
                                         }
                                     });
                                 }

@@ -35,7 +35,7 @@
         </tbody>
       </table>
     </div>
-    <div class="mt-3">{{ $dons->links() }}</div>
+  <div class="mt-3">{{ $dons->links('pagination::bootstrap-5-sm') }}</div>
   </div>
 </div>
 @endsection

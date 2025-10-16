@@ -24,6 +24,29 @@
     <link href="{{ asset('css/bootstrap.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
 
+    <!-- Association Dashboard Navbar Styling -->
+    <style>
+    .dropdown-item.bg-primary {
+        border-radius: 8px !important;
+        margin: 4px 8px;
+        padding: 10px 16px !important;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+    }
+    
+    .dropdown-item.bg-primary:hover {
+        background-color: #0056b3 !important;
+        transform: translateX(3px);
+        box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+    }
+    
+    .dropdown-item.bg-primary:focus {
+        background-color: #004085 !important;
+    }
+    
+
+    </style>
+
     @stack('styles')
 </head>
 

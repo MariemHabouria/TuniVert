@@ -4,11 +4,6 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\ScoreChallenge;
-use App\Models\ParticipantChallenge;
-
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ScoreChallenge>
- */
 class ScoreChallengeFactory extends Factory
 {
     protected $model = ScoreChallenge::class;
