@@ -69,4 +69,11 @@ return [
         'note' => env('BANK_TRANSFER_NOTE', 'Utilisez la référence reçue par email comme motif du virement.'),
     ],
 
+
+    'openai' => [
+    'key'   => env('OPENAI_API_KEY'),
+    'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+],
+
+
 ];

@@ -53,7 +53,6 @@
                         3 => 'rank-3',
                         default => 'rank-others'
                     };
-
                     $medalIcon = match($participant->rang) {
                         1 => 'fas fa-trophy',
                         2 => 'fas fa-medal',

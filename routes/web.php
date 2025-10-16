@@ -19,6 +19,7 @@ use App\Http\Controllers\AlerteForumController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ChatbotEventController;
+use App\Http\Controllers\QuizController;
 
 
 
@@ -104,7 +105,7 @@ Route::post('/chatbot/ask', [ChatbotEventController::class, 'ask'])->name('chatb
     Route::put('events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
 
-    // Formations
+   // Formations
     Route::get('/organisateur/formations/create', [FormationController::class, 'create'])->name('formations.create');
     Route::post('/organisateur/formations', [FormationController::class, 'store'])->name('formations.store');
     Route::post('/organisateur/formations/{formation}/ressources', [FormationController::class, 'storeResource'])->name('formations.resources.store');
@@ -112,10 +113,26 @@ Route::post('/chatbot/ask', [ChatbotEventController::class, 'ask'])->name('chatb
     Route::delete('/formations/{formation}/desinscrire', [FormationInscriptionController::class, 'destroy'])->name('formations.desinscrire');
     Route::post('/formations/{formation}/avis', [AvisFormationController::class, 'store'])->name('formations.avis.store');
     Route::post('/formations/{formation}/ressources', [RessourceFormationController::class, 'store'])->name('formations.ressources.store');
+
+  Route::post('/formations/{formation}/chat', [FormationChatController::class, 'chat'])
+    ->name('formations.chat');
+     Route::get('/formations/{formation}/chat/history', [FormationChatController::class, 'history'])->name('formations.chat.history');
+    Route::delete('/formations/{formation}/chat/history', [FormationChatController::class, 'clear'])->name('formations.chat.clear');
+    Route::post('/formations/chat/{message}/feedback', [FormationChatController::class, 'feedback'])->name('formations.chat.feedback');
+
+    Route::prefix('formations/{formation}/quiz')->name('quiz.')->group(function () {
+    Route::get('/',            [QuizController::class,'show'])->name('show');              // Voir/générer/jouer
+    Route::post('/generate',   [QuizController::class,'generate'])->middleware('auth')->name('generate'); // orga
+    Route::post('/submit',     [QuizController::class,'submit'])->middleware('auth')->name('submit');     // envoyer réponses
+    Route::get('/history',     [QuizController::class,'history'])->middleware('auth')->name('history');   // tentatives
+});    
+
+
     Route::get('organisateur/formations/{formation}/edit', [FormationController::class, 'edit'])->name('formations.edit');
     Route::put('organisateur/formations/{formation}', [FormationController::class, 'update'])->name('formations.update');
     Route::delete('organisateur/formations/{formation}', [FormationController::class, 'destroy'])->name('formations.destroy');
     Route::get('/mes-formations/stats', [FormationController::class, 'dashboard'])->name('formations.dashboard');
+
 
     // Donations
     // Association dashboard

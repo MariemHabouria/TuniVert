@@ -43,5 +43,8 @@ public function noteMoyenne(): ?float {
     $avg = $this->avis()->avg('note');
     return $avg ? round($avg, 1) : null;
 }
+public function quizAttempts() {
+    return $this->hasMany(\App\Models\QuizAttempt::class);
+}
 
 }
