@@ -165,10 +165,13 @@
                         <!-- Barre de progression du temps -->
                         <div class="mb-4">
                             @php
-                                $totalDays = $dateDebut->diffInDays($dateFin);
-                                $daysPassed = $now->diffInDays($dateDebut);
-                                $progressPercentage = $totalDays > 0 ? min(100, max(0, ($daysPassed / $totalDays) * 100)) : 0;
-                            @endphp
+    $totalDays = $dateDebut->diffInDays($dateFin);
+    $daysPassed = $dateDebut->lessThanOrEqualTo($now) 
+                  ? min($totalDays, $dateDebut->diffInDays($now)) 
+                  : 0;
+    $progressPercentage = $totalDays > 0 ? min(100, max(0, ($daysPassed / $totalDays) * 100)) : 0;
+@endphp
+
                             <div class="d-flex justify-content-between mb-2">
                                 <small class="text-muted">Début: {{ $dateDebut->format('d/m/Y') }}</small>
                                 <small class="text-muted">Fin: {{ $dateFin->format('d/m/Y') }}</small>

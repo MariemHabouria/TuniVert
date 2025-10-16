@@ -98,10 +98,7 @@
                                     <a href="{{ route('challenges.crud') }}" class="dropdown-item {{ request()->routeIs('challenges.crud') ? 'active' : '' }}">
                                         <i class="fas fa-cog me-2"></i>Gérer mes Challenges
                                     </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="{{ route('scores.classement', ['challenge' => 'current']) }}" class="dropdown-item">
-                                        <i class="fas fa-chart-bar me-2"></i>Statistiques
-                                    </a>
+                                    
                                 @else
                                     <a href="{{ route('challenges.index') }}" class="dropdown-item">
                                         <i class="fas fa-trophy me-2"></i>Voir les Challenges
