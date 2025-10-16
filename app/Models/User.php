@@ -31,4 +31,14 @@ class User extends Authenticatable
     public function participations() { return $this->hasMany(\App\Models\ParticipantChallenge::class, 'utilisateur_id'); }
     public function scoresChallenges() { return $this->hasManyThrough(\App\Models\ScoreChallenge::class, \App\Models\ParticipantChallenge::class, 'utilisateur_id', 'participant_challenge_id', 'id', 'id'); }
     public function donations() { return $this->hasMany(Donation::class, 'utilisateur_id'); }
+    public function events()
+    {
+        return $this->hasMany(Event::class, 'organizer_id');
+    }
+
+    public function comments()
+{
+    return $this->hasMany(Comment::class);
+}
+
 }

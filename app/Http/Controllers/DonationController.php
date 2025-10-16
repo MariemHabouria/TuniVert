@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Mail;
 use Stripe\StripeClient;
 use App\Services\GamificationService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use App\Models\PaymentMethod;
 
 class DonationController extends Controller
 {
@@ -40,9 +42,24 @@ class DonationController extends Controller
 
     public function store(Request $request)
     {
+        // Accept integrated methods and any admin-configured active methods
+        $base = ['carte','paypal','paymee','virement_bancaire'];
+        if (config('services.testpay.enabled')) { $base[] = 'test'; }
+        // Merge with custom active methods from DB (if available)
+        try {
+            $dynamic = PaymentMethod::where('active', true)->pluck('key')->all();
+        } catch (\Throwable $e) {
+            $dynamic = [];
+        }
+        $allowedMethods = collect($base)
+            ->merge($dynamic)
+            ->unique()
+            ->values()
+            ->all();
+
         $validated = $request->validate([
             'montant' => ['required','numeric','min:1'],
-            'moyen_paiement' => ['required','in:carte,paypal,paymee,virement_bancaire'],
+            'moyen_paiement' => ['required', Rule::in($allowedMethods)],
             'evenement_id' => ['nullable','integer'],
             'is_anonymous' => ['nullable','boolean'],
         ]);
@@ -201,7 +218,8 @@ class DonationController extends Controller
     public function history()
     {
         $userId = Auth::id();
-        $dons = Donation::where('utilisateur_id', $userId)
+        $dons = Donation::with('event')
+            ->where('utilisateur_id', $userId)
             ->orderByDesc('date_don')
             ->paginate(10);
         // Ensure base gamification data exists (idempotent)

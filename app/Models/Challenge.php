@@ -34,3 +34,4 @@ public function challengesIndex()
     return view('admin.challenges.index', compact('challenges'));
 }
 }
+}

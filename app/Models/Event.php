@@ -9,22 +9,33 @@ class Event extends Model
 {
     use HasFactory;
 
-    protected $table = 'events';
-
+    // Champs qu’on autorise au remplissage en masse
     protected $fillable = [
-        'nom', 'title', 'description', 'date_debut', 'date_fin', 
-        'lieu', 'capacite_max', 'prix', 'image', 'status'
+        'title',
+        'location',
+        'date',
+        'category',
+        'details',
+        'image',
+        'organizer_id'
     ];
 
-    protected $casts = [
-        'date_debut' => 'datetime',
-        'date_fin' => 'datetime',
-        'prix' => 'decimal:2',
-        'capacite_max' => 'integer',
+        protected $casts = [
+        'date' => 'date',
     ];
 
-    public function donations()
+    // Relation : un événement appartient à un utilisateur (organisateur)
+    public function organizer()
     {
-        return $this->hasMany(Donation::class, 'evenement_id');
+        return $this->belongsTo(User::class, 'organizer_id');
     }
+
+    public function participants()
+{
+    return $this->hasMany(Participant::class);
+}
+public function comments()
+{
+    return $this->hasMany(Comment::class);
+}
 }

@@ -14,9 +14,13 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\DonationAdminController;
 use App\Http\Controllers\DonationOrganizerController;
 use App\Http\Controllers\TestPaymentController;
-use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\AlerteForumController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ChatbotEventController;
+
+
 
 // QR verification
 require __DIR__ . '/qr-verify.php';
@@ -35,8 +39,6 @@ foreach ($pages as $page) {
 }
 
 // Events
-Route::get('/events', [EventsController::class, 'index'])->name('events.browse');
-Route::get('/events/{id}', [EventsController::class, 'show'])->name('events.show');
 
 // Alias
 Route::view('/index', 'pages.index');
@@ -62,9 +64,45 @@ Route::middleware('guest')->group(function () {
     Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
+
+// Routes événements
+// chatBot
+Route::post('/chatbot/ask', [ChatbotEventController::class, 'ask'])->name('chatbot.ask');
+
+// Créer un événement (statique, avant la route dynamique)
+Route::get('events/create', [EventController::class, 'create'])->name('events.create')->middleware('auth');
+// Recommandation d'événements
+Route::get('/recommendations/{user}', [EventController::class, 'showRecommendations'])
+     ->name('events.recommendations');
+//participation aux événements
+Route::post('/events/{event}/participate', [EventController::class, 'participate'])->name('events.participate')->middleware('auth');
+// commentaire 
+Route::post('/events/{event}/comments', [CommentController::class, 'store'])->name('comments.store')->middleware('auth');
+
+Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update')->middleware('auth');
+
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy')->middleware('auth');
+// Liste des événements
+Route::get('events', [EventController::class, 'index'])->name('events.index');
+// Alias legacy: some views reference route('events.browse')
+Route::get('events/browse', function() {
+    return redirect()->route('events.index');
+})->name('events.browse');
+
+// Afficher un événement (dynamique)
+Route::get('events/{event}', [EventController::class, 'show'])->name('events.show');
 // Routes protégées
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+// event
+
+Route::post('events', [EventController::class, 'store'])->name('events.store');
+// chatBot
+Route::post('/chatbot/ask', [ChatbotEventController::class, 'ask'])->name('chatbot.ask');
+    // Modifier / Supprimer un événement
+    Route::get('events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
+    Route::put('events/{event}', [EventController::class, 'update'])->name('events.update');
+    Route::delete('events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
 
     // Formations
     Route::get('/organisateur/formations/create', [FormationController::class, 'create'])->name('formations.create');
@@ -80,13 +118,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/mes-formations/stats', [FormationController::class, 'dashboard'])->name('formations.dashboard');
 
     // Donations
+    // Association dashboard
+    Route::get('/donations/dashboard', [DonationController::class, 'associationDashboard'])->name('donations.dashboard');
     Route::get('/donations/create', [DonationController::class, 'create'])->name('donations.create');
     Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
     Route::get('/donations/history', [DonationController::class, 'history'])->name('donations.history');
-    
-    // Association dashboard
-    Route::get('/donations/dashboard', [DonationController::class, 'associationDashboard'])
-        ->name('donations.dashboard');
 
     // Déconnexion
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -114,6 +150,11 @@ Route::get('/payments/paymee/return', [DonationController::class, 'paymeeReturn'
 Route::get('/payments/paymee/cancel', [DonationController::class, 'paymeeCancel'])->name('payments.paymee.cancel');
 Route::post('/webhooks/paymee', [DonationController::class, 'paymeeWebhook'])->middleware('api')->name('webhooks.paymee');
 
+// TestPay (mock) — POST endpoints utilisés par donation.blade.php
+Route::post('/payments/test/create',   [TestPaymentController::class, 'create'])->name('payments.test.create');
+Route::post('/payments/test/complete', [TestPaymentController::class, 'complete'])->name('payments.test.complete');
+
+
 // TestPay public
 Route::get('/payments/test/checkout', [TestPaymentController::class, 'checkout'])->name('payments.test.checkout');
 Route::get('/payments/test/cancel', [TestPaymentController::class, 'cancel'])->name('payments.test.cancel');
@@ -130,6 +171,7 @@ Route::prefix('challenges')->group(function () {
         Route::get('/profil', [ChallengeController::class, 'profil'])->name('challenges.profil');
         Route::post('/{id}/participate', [ChallengeController::class, 'participer'])->name('challenges.participate');
         Route::post('/{id}/submit-proof', [ChallengeController::class, 'soumettrePreuve'])->name('challenges.submit');
+        Route::get('/create', [AdminController::class, 'challengesCreate'])->name('create');
 
         Route::prefix('association')->group(function () {
             Route::get('/create', [ChallengeController::class, 'create'])->name('challenges.create');
@@ -169,6 +211,7 @@ Route::resource('alertes', AlerteForumController::class)->only(['index','show'])
 | Admin
 |--------------------------------------------------------------------------
 */
+// ===== ROUTES ADMIN (application wide) =====
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AuthController::class, 'showAdminLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'adminLogin'])->name('login.submit');
@@ -192,6 +235,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'challengesIndex'])->name('index');
         Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])->name('participations');
         Route::get('/scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
+
+        // Participations d’un challenge
+        Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])
+            ->name('participations');
+
+        Route::get('/scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
         Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');
     });
 
@@ -212,6 +261,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
         Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
         Route::get('/methodes', [AdminController::class, 'donationsMethodes'])->name('methodes');
+        Route::post('/methodes', [AdminController::class, 'donationsMethodesStore'])->name('methodes.store');
+        Route::get('/methodes/{key}', [AdminController::class, 'donationsMethodesGet'])->name('methodes.get');
+        Route::put('/methodes/{key}', [AdminController::class, 'donationsMethodesUpdate'])->name('methodes.update');
+
+        // Donation entries actions
+        Route::get('/entries/{id}', [AdminController::class, 'donationsShow'])->name('entries.show');
+        Route::post('/entries/{id}/send-receipt', [AdminController::class, 'donationsSendReceipt'])->name('entries.sendReceipt');
+        Route::delete('/entries/{id}', [AdminController::class, 'donationsDestroy'])->name('entries.destroy');
     });
 
     Route::prefix('ui-features')->name('ui-features.')->group(function () {
@@ -235,9 +292,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/alertes', [AdminController::class, 'alertesIndex'])->name('alertes.index');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Fallback
-|--------------------------------------------------------------------------
-*/
+// Paymee return/cancel (public)
+Route::get('/payments/paymee/return', [DonationController::class, 'paymeeReturn'])->name('payments.paymee.return');
+Route::get('/payments/paymee/cancel', [DonationController::class, 'paymeeCancel'])->name('payments.paymee.cancel');
+
+// TestPay checkout and cancel (public)
+if (config('services.testpay.enabled')) {
+    Route::get('/payments/test/checkout', [TestPaymentController::class, 'checkout'])->name('payments.test.checkout');
+    Route::get('/payments/test/cancel', [TestPaymentController::class, 'cancel'])->name('payments.test.cancel');
+}
+
+// Paymee webhook (public API, CSRF exempt via api middleware)
+Route::post('/webhooks/paymee', [DonationController::class, 'paymeeWebhook'])
+        ->name('webhooks.paymee')
+            ->middleware('api');
+// 404 fallback
 Route::fallback(fn () => abort(404));

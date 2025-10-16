@@ -85,9 +85,9 @@
                         <a href="{{ route('admin.donations.rapports') }}" class="btn btn-outline-primary btn-sm">
                             <i class="mdi mdi-chart-bar me-1"></i>Rapports
                         </a>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
+                        <a href="{{ route('admin.donations.methodes') }}" class="btn btn-primary btn-sm">
                             <i class="mdi mdi-plus me-1"></i>Ajouter Méthode
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -209,11 +209,11 @@
                                                 <li><a class="dropdown-item" href="#" onclick="viewDonation({{ $don->id }})">
                                                     <i class="mdi mdi-eye me-1"></i>Voir détails
                                                 </a></li>
-                                                <li><a class="dropdown-item" href="#">
+                                                <li><a class="dropdown-item" href="#" onclick="sendReceipt({{ $don->id }})">
                                                     <i class="mdi mdi-email me-1"></i>Envoyer reçu
                                                 </a></li>
                                                 <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#">
+                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteDonation({{ $don->id }})">
                                                     <i class="mdi mdi-delete me-1"></i>Supprimer
                                                 </a></li>
                                             </ul>
@@ -236,7 +236,7 @@
                 
                 @if($dons->hasPages())
                     <div class="mt-3 d-flex justify-content-center">
-                        {{ $dons->withQueryString()->links() }}
+                        {{ $dons->withQueryString()->links('pagination::bootstrap-5-sm') }}
                     </div>
                 @endif
             </div>
@@ -244,55 +244,153 @@
     </div>
 </div>
 
-<!-- Modal pour ajouter une méthode de paiement -->
-<div class="modal fade" id="addPaymentMethodModal" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Modal: Détails de la donation -->
+<div class="modal fade" id="donationDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Ajouter une Méthode de Paiement</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title">
+                    <i class="mdi mdi-eye-outline me-2"></i>
+                    Détails de la donation <span class="text-muted" id="detail-id"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="addPaymentMethodForm">
-                    <div class="mb-3">
-                        <label for="method_name" class="form-label">Nom de la méthode</label>
-                        <input type="text" class="form-control" id="method_name" name="method_name" required>
+                <div id="details-loading" class="text-center my-4 d-none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="small text-muted mt-2">Chargement…</div>
+                </div>
+
+                <div id="details-content">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded h-100">
+                                <h6 class="mb-3"><i class="mdi mdi-account-circle-outline me-1"></i>Donateur</h6>
+                                <div><span class="text-muted">Nom:</span> <span id="detail-user-name">—</span></div>
+                                <div><span class="text-muted">Email:</span> <span id="detail-user-email">—</span></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded h-100">
+                                <h6 class="mb-3"><i class="mdi mdi-cash me-1"></i>Paiement</h6>
+                                <div><span class="text-muted">Montant:</span> <span id="detail-amount">—</span></div>
+                                <div><span class="text-muted">Moyen:</span> <span id="detail-method">—</span></div>
+                                <div><span class="text-muted">Date:</span> <span id="detail-date">—</span></div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="mb-3"><i class="mdi mdi-clipboard-text-outline me-1"></i>Références</h6>
+                                <div><span class="text-muted">Transaction ID:</span> <code id="detail-transaction">—</code></div>
+                                <div><span class="text-muted">Événement:</span> <span id="detail-event">—</span></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="method_key" class="form-label">Clé technique</label>
-                        <input type="text" class="form-control" id="method_key" name="method_key" required>
-                        <div class="form-text">Ex: crypto_bitcoin, mobile_money, etc.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="method_description" class="form-label">Description</label>
-                        <textarea class="form-control" id="method_description" name="method_description" rows="3"></textarea>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="method_active" name="method_active" checked>
-                        <label class="form-check-label" for="method_active">
-                            Activer cette méthode
-                        </label>
-                    </div>
-                </form>
+                </div>
+
+                <div id="details-error" class="alert alert-danger d-none mt-3"></div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                <button type="button" class="btn btn-primary" onclick="savePaymentMethod()">Ajouter</button>
+            <div class="modal-footer d-flex justify-content-between">
+                <div class="text-muted small">ID: <span id="detail-id-footer">—</span></div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-primary" id="btn-send-receipt-modal">
+                        <i class="mdi mdi-email"></i> Envoyer reçu
+                    </button>
+                    <button type="button" class="btn btn-outline-danger" id="btn-delete-modal">
+                        <i class="mdi mdi-delete"></i> Supprimer
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+    </div>
 
 <script>
-function viewDonation(id) {
-    // Implémenter la vue des détails
-    alert('Voir donation #' + id);
+let donationDetailsModal;
+async function viewDonation(id) {
+    const modalEl = document.getElementById('donationDetailsModal');
+    donationDetailsModal = donationDetailsModal || new bootstrap.Modal(modalEl);
+    // Reset UI
+    document.getElementById('details-error').classList.add('d-none');
+    document.getElementById('details-content').classList.add('d-none');
+    document.getElementById('details-loading').classList.remove('d-none');
+    document.getElementById('detail-id').textContent = `#${id}`;
+    document.getElementById('detail-id-footer').textContent = `#${id}`;
+    donationDetailsModal.show();
+
+    try {
+        const res = await fetch(`{{ route('admin.donations.index') }}`.replace('/admin/donations','/admin/donations/entries/') + id, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        const json = await res.json();
+        if (!res.ok || !json.ok) throw new Error(json.error || 'Erreur');
+
+        const d = json.donation || {};
+        const name = d.user?.name ?? 'Anonyme';
+        const email = d.user?.email ?? '—';
+        const eventStr = d.event ? (d.event.nom || d.evenement_id) : '—';
+        const amount = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2 }).format(parseFloat(d.montant || 0)) + ' TND';
+        const method = (d.moyen_paiement || '—').toString().replaceAll('_',' ');
+        const date = d.date_don ?? '—';
+
+        document.getElementById('detail-user-name').textContent = name;
+        document.getElementById('detail-user-email').textContent = email;
+        document.getElementById('detail-amount').textContent = amount;
+        document.getElementById('detail-method').textContent = method.charAt(0).toUpperCase() + method.slice(1);
+        document.getElementById('detail-date').textContent = date;
+        document.getElementById('detail-transaction').textContent = d.transaction_id || '—';
+        document.getElementById('detail-event').textContent = eventStr;
+
+        // Wire modal action buttons
+        const sendBtn = document.getElementById('btn-send-receipt-modal');
+        const delBtn = document.getElementById('btn-delete-modal');
+        sendBtn.onclick = () => sendReceipt(d.id);
+        delBtn.onclick = () => deleteDonation(d.id);
+
+        document.getElementById('details-loading').classList.add('d-none');
+        document.getElementById('details-content').classList.remove('d-none');
+    } catch (e) {
+        document.getElementById('details-loading').classList.add('d-none');
+        const err = document.getElementById('details-error');
+        err.textContent = 'Erreur: ' + (e?.message || e);
+        err.classList.remove('d-none');
+    }
 }
 
-function savePaymentMethod() {
-    // Implémenter l'ajout de méthode de paiement
-    alert('Fonctionnalité à implémenter');
-    $('#addPaymentMethodModal').modal('hide');
+async function sendReceipt(id) {
+    if (!confirm('Envoyer le reçu par email au donateur ?')) return;
+    try {
+        const url = `{{ route('admin.donations.index') }}`.replace('/admin/donations','/admin/donations/entries/') + id + '/send-receipt';
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+        });
+        const json = await res.json();
+        if (!res.ok || !json.ok) throw new Error(json.error || 'Erreur lors de l\'envoi');
+        alert('Reçu envoyé');
+    } catch (e) {
+        alert('Erreur: ' + (e?.message || e));
+    }
 }
+
+async function deleteDonation(id) {
+    if (!confirm('Supprimer définitivement cette donation ?')) return;
+    try {
+        const url = `{{ route('admin.donations.index') }}`.replace('/admin/donations','/admin/donations/entries/') + id;
+        const res = await fetch(url, {
+            method: 'DELETE',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+        });
+        const json = await res.json();
+        if (!res.ok || !json.ok) throw new Error(json.error || 'Erreur lors de la suppression');
+        location.reload();
+    } catch (e) {
+        alert('Erreur: ' + (e?.message || e));
+    }
+}
+
+// Navigation vers la gestion des méthodes de paiement
+function savePaymentMethod() { window.location.href = '{{ route('admin.donations.methodes') }}'; }
 </script>
 @endsection
