@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <title>Environs - Environmental & Nature Website Template</title>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport">
+        <meta content="" name="keywords">
+        <meta content="" name="description">
+
+        <!-- Google Web Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600&family=Roboto&display=swap" rel="stylesheet"> 
+
+        <!-- Icon Font Stylesheet -->
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+        <!-- Libraries Stylesheet -->
+        <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+        <link href="lib/lightbox/css/lightbox.min.css" rel="stylesheet">
+
+
+          <!-- Customized Bootstrap Stylesheet -->
+<link href="css/bootstrap.css" rel="stylesheet">      <!-- ← remplace .min.css par .css -->
+<link href="css/style.css" rel="stylesheet">
+    </head>
+
+    <body>
+
+        <!-- Spinner Start -->
+        <div id="spinner" class="show w-100 vh-100 bg-white position-fixed translate-middle top-50 start-50  d-flex align-items-center justify-content-center">
+            <div class="spinner-grow text-primary" role="status"></div>
+        </div>
+        <!-- Spinner End -->
+
+
+        <!-- Navbar start -->
+        <div class="container-fluid fixed-top px-0">
+            <div class="container px-0">
+                <div class="topbar">
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col-md-8">
+                            <div class="topbar-info d-flex flex-wrap">
+                                <a href="#" class="text-light me-4"><i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn</a>
+                                <a href="#" class="text-light"><i class="fas fa-phone-alt text-white me-2"></i>+01234567890</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="topbar-icon d-flex align-items-center justify-content-end">
+                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
+                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
+                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
+                                <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <nav class="navbar navbar-light bg-light navbar-expand-xl">
+                    <a href="index.html" class="navbar-brand ms-3">
+                        <h1 class="text-primary display-5">Environs</h1>
+                    </a>
+                    <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                        <span class="fa fa-bars text-primary"></span>
+                    </button>
+                    <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
+                        <div class="navbar-nav ms-auto">
+                            <a href="index.html" class="nav-item nav-link">Home</a>
+                            <a href="about.html" class="nav-item nav-link">About</a>
+                            <a href="service.html" class="nav-item nav-link">Services</a>
+                            <a href="causes.html" class="nav-item nav-link">Causes</a>
+                            <a href="events.html" class="nav-item nav-link">Events</a>
+                            <div class="nav-item dropdown">
+                                <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Pages</a>
+                                <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                                    <a href="blog.html" class="dropdown-item">Blog</a>
+                                    <a href="gallery.html" class="dropdown-item">Gallery</a>
+                                    <a href="volunteer.html" class="dropdown-item">Volunteers</a>
+                                    <a href="donation.html" class="dropdown-item active">Donation</a>
+                                    <a href="404.html" class="dropdown-item">404 Error</a>
+                                </div>
+                            </div>
+                            <a href="contact.html" class="nav-item nav-link">Contact</a>
+                        </div>
+                                                <div class="d-flex align-items-center flex-nowrap pt-xl-0" style="margin-left: 15px;">
+@guest
+  <a href="{{ route('login') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4 me-2">Log In</a>
+  <a href="{{ route('register') }}" class="btn btn-outline-primary py-2 px-4">Sign Up</a>
+@endguest
+
+@auth
+    <a href="{{ route('donations.history') }}" class="btn btn-outline-primary me-3">My Donations</a>
+    <div class="d-inline-flex align-items-center gap-2">
+    <span class="fw-semibold text-dark">Bonjour, {{ Auth::user()->name }}</span>
+    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+      @csrf
+      <button type="submit" class="btn btn-danger py-2 px-4">Logout</button>
+    </form>
+  </div>
+@endauth                        </div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        <!-- Navbar End -->
+
+        <!-- Header Start -->
+        <div class="container-fluid bg-breadcrumb">
+            <div class="container text-center py-5" style="max-width: 900px;">
+                <h3 class="text-white display-3 mb-4">Donation</h1>
+                <p class="fs-5 text-white mb-4">Help today because tomorrow you may be the one who needs more helping!</p>
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item"><a href="#">Pages</a></li>
+                    <li class="breadcrumb-item active text-white">Donation</li>
+                </ol>    
+            </div>
+        </div>
+        <!-- Header End -->
+
+        <!-- Donation Start -->
+        <div class="container-fluid donation py-5">
+            <div class="container py-5">
+                <div class="text-center mx-auto pb-5" style="max-width: 800px;">
+                    <h5 class="text-uppercase text-primary">Donation</h5>
+                    <h1 class="mb-0">Your money will save our life</h1>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="donation-item">
+                            <img src="img/donation-1.jpg" class="img-fluid w-100" alt="Image">
+                            <div class="donation-content d-flex flex-column">
+                                <h5 class="text-uppercase text-primary mb-4">Organic</h5>
+                                <a href="{{ url('donation.html?campaign=organic#donate') }}" class="btn-hover-color display-6 text-white">Help Us More</a>
+                                <h4 class="text-white mb-4">Protect Environments</h4>
+                                <p class="text-white mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's</p>
+                                <div class="donation-btn d-flex align-items-center justify-content-start">
+                                    <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="{{ url('donation.html?campaign=organic#donate') }}">Donate !</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="donation-item">
+                            <img src="img/service-2.jpg" class="img-fluid w-100" alt="Image">
+                            <div class="donation-content d-flex flex-column">
+                                <h5 class="text-uppercase text-primary mb-4">Ecosystem</h5>
+                                <a href="{{ url('donation.html?campaign=ecosystem#donate') }}" class="btn-hover-color display-6 text-white">Help Us More</a>
+                                <h4 class="text-white mb-4">Protect Environments</h4>
+                                <p class="text-white mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's</p>
+                                <div class="donation-btn d-flex align-items-center justify-content-start">
+                                    <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="{{ url('donation.html?campaign=ecosystem#donate') }}">Donate !</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="donation-item">
+                            <img src="img/donation-3.jpg" class="img-fluid w-100" alt="Image">
+                            <div class="donation-content d-flex flex-column">
+                                <h5 class="text-uppercase text-primary mb-4">Recycling</h5>
+                                <a href="{{ url('donation.html?campaign=recycling#donate') }}" class="btn-hover-color display-6 text-white">Help Us More</a>
+                                <h4 class="text-white mb-4">Protect Environments</h4>
+                                <p class="text-white mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's</p>
+                                <div class="donation-btn d-flex align-items-center justify-content-start">
+                                    <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="{{ url('donation.html?campaign=recycling#donate') }}">Donate !</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="{{ route('donations.history') }}">All Donation</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Donation End -->
+
+
+                <!-- Inline Donation Form Start -->
+        <div id="donate" class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="p-4 p-md-5 bg-light rounded shadow-sm">
+                                                @php
+                                                    $campaigns = [
+                                                        'organic' => [
+                                                            'title' => 'Organic',
+                                                            'headline' => 'Help Us More',
+                                                            'subtitle' => 'Protect Environments',
+                                                            'desc' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's",
+                                                            'img' => 'img/donation-1.jpg',
+                                                        ],
+                                                        'ecosystem' => [
+                                                            'title' => 'Ecosystem',
+                                                            'headline' => 'Help Us More',
+                                                            'subtitle' => 'Protect Environments',
+                                                            'desc' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's",
+                                                            'img' => 'img/service-2.jpg',
+                                                        ],
+                                                        'recycling' => [
+                                                            'title' => 'Recycling',
+                                                            'headline' => 'Help Us More',
+                                                            'subtitle' => 'Protect Environments',
+                                                            'desc' => "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's",
+                                                            'img' => 'img/donation-3.jpg',
+                                                        ],
+                                                    ];
+                                                    $slug = request('campaign');
+                                                    $sel = $slug && isset($campaigns[$slug]) ? $campaigns[$slug] : null;
+                                                    // Resolve an event id from either explicit ?event or from selected campaign
+                                                    $campaignEventIds = [ 'organic' => 1, 'ecosystem' => 2, 'recycling' => 3 ];
+                                                    $eventParam = request('event');
+                                                    $resolvedEventId = $eventParam ? (int)$eventParam : ($slug && isset($campaignEventIds[$slug]) ? $campaignEventIds[$slug] : null);
+                                                    $eventLabels = [ 1=>'Organic', 2=>'Ecosystem', 3=>'Recycling', 4=>'Awareness Day' ];
+                                                    $resolvedEventTitle = $sel['title'] ?? ($resolvedEventId ? ($eventLabels[$resolvedEventId] ?? ('Event #'.$resolvedEventId)) : null);
+                                                @endphp
+
+                                                <h2 class="mb-3">Make a Donation</h2>
+                                                <p class="text-muted mb-4">Support Tunivert with a one-time or recurring donation.</p>
+
+                                                @if ($sel)
+                                                    <div class="card border-0 shadow-sm mb-4">
+                                                        <div class="row g-0 align-items-center">
+                                                            <div class="col-md-4">
+                                                                <img src="/{{ $sel['img'] }}" class="img-fluid rounded-start" alt="{{ $sel['title'] }}">
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <div class="card-body">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <h5 class="card-title text-primary mb-1">{{ $sel['title'] }}</h5>
+                                                                            <h6 class="card-subtitle mb-2">{{ $sel['subtitle'] }}</h6>
+                                                                        </div>
+                                                                        <a href="{{ url('donation.html#donate') }}" class="small">change</a>
+                                                                    </div>
+                                                                    <p class="card-text mb-1 fw-semibold">{{ $sel['headline'] }}</p>
+                                                                    <p class="card-text text-muted">{{ $sel['desc'] }}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                        @if (session('status'))
+                          <div class="alert alert-success small">{{ session('status') }}</div>
+                        @endif
+                        @if ($errors->any())
+                          <div class="alert alert-danger small">
+                            <ul class="mb-0 ps-3">
+                              @foreach ($errors->all() as $e) <li>{{ $e }}</li> @endforeach
+                            </ul>
+                          </div>
+                        @endif
+
+                        @auth
+                                                <form method="POST" action="{{ route('donations.store') }}" class="row g-3">
+                            @csrf
+                                                        @if ($sel)
+                                                            <input type="hidden" name="campaign" value="{{ $slug }}">
+                                                        @endif
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Amount (TND)</label>
+                                                                <input type="number" step="0.01" min="1" name="montant" class="form-control" value="{{ request('amount') ?? old('montant') }}" required>
+                                                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                                                    @foreach ([10,20,50,100] as $s)
+                                                                        <button type="button" class="btn btn-sm btn-outline-secondary amount-suggest" data-amount="{{ $s }}">{{ $s }} TND</button>
+                                                                    @endforeach
+                                                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label">Payment method</label>
+                                <select name="moyen_paiement" class="form-select" required>
+                                    @if (config('services.testpay.enabled'))
+                                    <option value="test">e‑DINAR (Mock) Test</option>
+                                    @endif
+                                </select>
+                                <small class="text-muted mt-1">Academic testing without a merchant account. Simulates the e‑DINAR redirect flow.</small>
+                            </div>
+                                                        @if ($resolvedEventId)
+                                                            <div class="col-12">
+                                                                <div class="alert alert-info d-flex align-items-center justify-content-between" role="alert">
+                                                                    <div>
+                                                                        <i class="fas fa-calendar-alt me-2 text-primary"></i>
+                                                                        Donating to event {{ $resolvedEventTitle }}
+                                                                    </div>
+                                                                    <a href="{{ url('donation.html#donate') }}" class="small">change</a>
+                                                                </div>
+                                                                <input type="hidden" name="evenement_id" value="{{ $resolvedEventId }}">
+                                                            </div>
+                                                        @else
+                                                            <div class="col-12">
+                                                                <label for="evenement_id" class="form-label">Événement (optionnel)</label>
+                                                                <select class="form-select" id="evenement_id" name="evenement_id">
+                                                                    <option value="">Don général</option>
+                                                                    <option value="1" {{ request('event') == '1' ? 'selected' : '' }}>Campagne Organique - Tunis</option>
+                                                                    <option value="2" {{ request('event') == '2' ? 'selected' : '' }}>Écosystème Durable - Sousse</option>
+                                                                    <option value="3" {{ request('event') == '3' ? 'selected' : '' }}>Recyclage Communautaire - Sfax</option>
+                                                                    <option value="4" {{ request('event') == '4' ? 'selected' : '' }}>Journée de Sensibilisation - Monastir</option>
+                                                                    <option value="5" {{ request('event') == '5' ? 'selected' : '' }}>Forêts Urbaines - Tunis</option>
+                                                                    <option value="6" {{ request('event') == '6' ? 'selected' : '' }}>Nettoyage des Plages - Sousse</option>
+                                                                </select>
+                                                                <small class="text-muted">Choisissez un événement spécifique ou laissez vide pour un don général</small>
+                                                            </div>
+                                                        @endif
+                            <div class="col-12">
+                                <button id="donate-submit" class="btn-hover-bg btn btn-primary text-white py-2 px-4" data-method="test">Faire un don (Test e‑DINAR)</button>
+                            </div>
+                        </form>
+                                                @auth
+                                                @if (config('services.testpay.enabled'))
+                                                <div id="testpay-wrapper" class="mt-4">
+                                                    <div class="card border-0 shadow-sm">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title mb-3"><i class="fas fa-university me-2 text-primary"></i>e‑DINAR (Mock Test)</h5>
+                                                            <p class="text-muted small">Academic testing without a merchant account. Simulates the e‑DINAR redirect flow.</p>
+                                                            <button id="testpay-btn" class="btn btn-primary">Continue to Test Payment</button>
+                                                            <div id="testpay-error" class="text-danger small mt-2" style="display:none;"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
+                                                            <h5 class="card-title mb-1"><i class="fas fa-university me-2 text-primary"></i>e‑DINAR (Mock) Test</h5>
+                                                            <p class="text-muted small mb-3">Academic testing without a merchant account. Simulates the e‑DINAR redirect flow.</p>
+                                                            <button id="testpay-pay-btn" class="btn btn-primary">Continue to TestPay</button>
+                                                            <div id="testpay-message" class="text-danger small mt-2" style="display:none;"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
+                                                @endauth
+                        @endauth
+
+                        @guest
+                        <div class="alert alert-info d-flex align-items-center justify-content-between" role="alert">
+                            <div>
+                                Please log in to make a donation.
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('login') }}" class="btn btn-primary">Log In</a>
+                                <a href="{{ route('register') }}" class="btn btn-outline-primary">Sign Up</a>
+                            </div>
+                        </div>
+                        @endguest
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Inline Donation Form End -->
+
+
+        <!-- Footer Start -->
+        <div class="container-fluid footer bg-dark text-body py-5">
+            <div class="container py-5">
+                <div class="row g-5">
+                    <div class="col-md-6 col-lg-6 col-xl-3">
+                        <div class="footer-item">
+                            <h4 class="mb-4 text-white">Newsletter</h4>
+                            <p class="mb-4">Dolor amet sit justo amet elitr clita ipsum elitr est.Lorem ipsum dolor sit amet, consectetur adipiscing elit consectetur adipiscing elit.</p>
+                            <div class="position-relative mx-auto">
+                                <input class="form-control border-0 bg-secondary w-100 py-3 ps-4 pe-5" type="text" placeholder="Enter your email">
+                                <button type="button" class="btn-hover-bg btn btn-primary position-absolute top-0 end-0 py-2 mt-2 me-2">SignUp</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-6 col-xl-3">
+                        <div class="footer-item d-flex flex-column">
+                            <h4 class="mb-4 text-white">Our Services</h4>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Ocean Turtle</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> White Tiger</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Social Ecology</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Loneliness</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Beauty of Life</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Present for You</a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-6 col-xl-3">
+                        <div class="footer-item d-flex flex-column">
+                            <h4 class="mb-4 text-white">Volunteer</h4>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Karen Dawson</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Jack Simmons</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Michael Linden</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Simon Green</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Natalie Channing</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Caroline Gerwig</a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-6 col-xl-3">
+                        <div class="footer-item">
+                            <h4 class="mb-4 text-white">Our Gallery</h4>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <div class="footer-gallery">
+                                        <img src="img/gallery-footer-1.jpg" class="img-fluid w-100" alt="">
+                                        <div class="footer-search-icon">
+                                            <a href="img/gallery-footer-1.jpg" data-lightbox="footerGallery-1" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
+                                        </div>
+                                    </div>
+                               </div>
+                               <div class="col-4">
+                                    <div class="footer-gallery">
+                                        <img src="img/gallery-footer-2.jpg" class="img-fluid w-100" alt="">
+                                        <div class="footer-search-icon">
+                                            <a href="img/gallery-footer-2.jpg" data-lightbox="footerGallery-2" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
+                                        </div>
+                                    </div>
+                               </div>
+                                <div class="col-4">
+                                    <div class="footer-gallery">
+                                        <img src="img/gallery-footer-3.jpg" class="img-fluid w-100" alt="">
+                                        <div class="footer-search-icon">
+                                            <a href="img/gallery-footer-3.jpg" data-lightbox="footerGallery-3" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
+                                        </div>
+                                    </div>
+                               </div>
+                                <div class="col-4">
+                                    <div class="footer-gallery">
+                                        <img src="img/gallery-footer-4.jpg" class="img-fluid w-100" alt="">
+                                        <div class="footer-search-icon">
+                                            <a href="img/gallery-footer-4.jpg" data-lightbox="footerGallery-4" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
+                                        </div>
+                                    </div>
+                               </div>
+                                <div class="col-4">
+                                    <div class="footer-gallery">
+                                        <img src="img/gallery-footer-5.jpg" class="img-fluid w-100" alt="">
+                                        <div class="footer-search-icon">
+                                            <a href="img/gallery-footer-5.jpg" data-lightbox="footerGallery-5" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
+                                        </div>
+                                    </div>
+                               </div>
+                               <div class="col-4">
+									<div class="footer-gallery">
+										<img src="img/gallery-footer-6.jpg" class="img-fluid w-100" alt="">
+                                        <div class="footer-search-icon">
+                                            <a href="img/gallery-footer-6.jpg" data-lightbox="footerGallery-6" class="my-auto"><i class="fas fa-search-plus text-white"></i></a>
+                                        </div>
+									</div>
+								</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer End -->
+        
+
+        <!-- Copyright Start -->
+        <div class="container-fluid copyright py-4">
+            <div class="container">
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-4 text-center text-md-start mb-md-0">
+                        <span class="text-body"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Your Site Name</a>, All right reserved.</span>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="btn-hover-color btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
+                            <a href="#" class="btn-hover-color btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center text-md-end text-body">
+                        <!--/*** This template is free as long as you keep the below author’s credit link/attribution link/backlink. ***/-->
+                        <!--/*** If you'd like to use the template without the below author’s credit link/attribution link/backlink, ***/-->
+                        <!--/*** you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". ***/-->
+                        Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a> Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Copyright End -->
+
+
+        <!-- Back to Top -->
+        <a href="#" class="btn btn-primary btn-primary-outline-0 btn-md-square back-to-top"><i class="fa fa-arrow-up"></i></a>   
+
+        
+        <!-- JavaScript Libraries -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="lib/easing/easing.min.js"></script>
+        <script src="lib/waypoints/waypoints.min.js"></script>
+        <script src="lib/counterup/counterup.min.js"></script>
+        <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+        <script src="lib/lightbox/js/lightbox.min.js"></script>
+        
+
+        <!-- Template Javascript -->
+                        <script src="js/main.js"></script>
+                        @if (config('services.stripe.key'))
+                        <script src="https://js.stripe.com/v3/"></script>
+                        @endif
+                        
+                                                @if (config('services.testpay.enabled'))
+                                                <!-- TestPay Modal (e‑DINAR Mock) -->
+                                                                        <div class="modal fade" id="testpayModal" tabindex="-1" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <form method="POST" action="{{ route('payments.test.complete') }}" id="testpay-form">
+                                                                @csrf
+                                                                <input type="hidden" name="token" id="testpay-token" />
+                                                                <div class="modal-header">
+                                                                                            <div class="d-flex align-items-center gap-2">
+                                                                                                <span class="badge bg-success-subtle text-success border border-success">e‑DINAR</span>
+                                                                                                <h5 class="modal-title mb-0">Paiement — <span id="testpay-amount-label"></span></h5>
+                                                                                            </div>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                                            <div class="p-2 mb-3 rounded" style="background: #ffffff url('{{ asset('img/d17.png') }}') center/contain no-repeat; border:1px solid #fde68a; min-height: 90px;"></div>
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label" for="tp_card">Numéro de carte</label>
+                                                                        <input type="text" class="form-control" id="tp_card" name="card_number" placeholder="1234 5678 9012 3456" maxlength="23" inputmode="numeric" autocomplete="off" required>
+                                                                        <div class="form-text">12 à 19 chiffres (simulation).</div>
+                                                                    </div>
+                                                                    <div class="row g-3">
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label" for="tp_exp">Date d’expiration</label>
+                                                                            <input type="text" class="form-control" id="tp_exp" name="expiry" placeholder="MM/YY" maxlength="5" autocomplete="off">
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label" for="tp_cvv">CVV</label>
+                                                                            <input type="password" class="form-control" id="tp_cvv" name="cvv" placeholder="***" maxlength="4" autocomplete="off">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row g-3 mt-1">
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label" for="tp_pin">Code PIN</label>
+                                                                            <input type="password" class="form-control" id="tp_pin" name="pin" placeholder="****" maxlength="6" inputmode="numeric" autocomplete="off" required>
+                                                                            <div class="form-text">4 à 6 chiffres (simulation).</div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <label class="form-label" for="tp_cin">CIN</label>
+                                                                            <input type="text" class="form-control" id="tp_cin" name="cin" placeholder="01234567" maxlength="12" inputmode="numeric" autocomplete="off" required>
+                                                                            <div class="form-text">8 chiffres (simulation).</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div id="testpay-modal-error" class="text-danger small mt-2" style="display:none;"></div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-outline-secondary" id="testpay-cancel-btn" data-bs-dismiss="modal">Annuler</button>
+                                                                    <button type="submit" class="btn btn-primary" id="testpay-submit-btn">Payer</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
+                <script>
+                    const TESTPAY_ENABLED = {{ config('services.testpay.enabled') ? 'true' : 'false' }};
+                    
+                    document.addEventListener('DOMContentLoaded', function(){
+                        const btns = document.querySelectorAll('.amount-suggest');
+                        const input = document.querySelector('input[name="montant"]');
+                        const donateSubmit = document.getElementById('donate-submit');
+                        const testpayBtn = document.getElementById('testpay-btn');
+                        
+                        // Amount suggestion buttons
+                        btns.forEach(b=> b.addEventListener('click', ()=> { 
+                            if(input){ 
+                                input.value = b.dataset.amount; 
+                                input.focus(); 
+                            } 
+                        }));
+
+                        // Main donate button - redirect to test payment
+                        if (donateSubmit){
+                            donateSubmit.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                
+                                const amount = parseFloat(input?.value || '0');
+                                if (!amount || amount < 1) {
+                                    alert('Veuillez entrer un montant valide');
+                                    return;
+                                }
+                                
+                                // For test payment, proceed with standard form submission
+                                const form = document.querySelector('form');
+                                if (form) {
+                                    form.submit();
+                                }
+                            });
+                        }
+
+                        // TestPay modal variables
+                        let testpayToken = null, testpaySubmitted = false;
+                        const testModal = document.getElementById('testpay-modal');
+                        const tpForm = testModal?.querySelector('form');
+                        const tpSubmit = testModal?.querySelector('button[type="submit"]');
+
+                        // TestPay button handler
+                        if (testpayBtn){
+                            testpayBtn.addEventListener('click', async (e)=>{
+                                e.preventDefault();
+                                const errorDiv = document.getElementById('testpay-error');
+                                if (errorDiv) {
+                                    errorDiv.style.display = 'none'; 
+                                    errorDiv.textContent = '';
+                                }
+                                
+                                testpaySubmitted = false; 
+                                testpayToken = null;
+                                
+                                try{
+                                    const amount = parseFloat(input?.value || '0');
+                                    if (!amount || amount < 1) throw new Error('Veuillez entrer un montant valide');
+                                    
+                                    const event = document.querySelector('input[name="evenement_id"]')?.value || 
+                                                  document.querySelector('select[name="evenement_id"]')?.value ||
+                                                  new URLSearchParams(window.location.search).get('event') || null;
+                                    
+                                    const res = await fetch("{{ route('payments.test.create') }}", {
+                                        method:'POST', 
+                                        headers:{
+                                            'Content-Type':'application/json',
+                                            'X-CSRF-TOKEN':'{{ csrf_token() }}'
+                                        },
+                                        body: JSON.stringify({ amount, evenement_id: event })
+                                    });
+                                    
+                                    const data = await res.json();
+                                    if (!res.ok || !data?.token) {
+                                        throw new Error(data?.error || 'Échec de l\'initialisation du paiement test');
+                                    }
+                                    
+                                    testpayToken = data.token;
+                                    // Open modal
+                                    const modal = new bootstrap.Modal(document.getElementById('testpay-modal'));
+                                    modal.show();
+                                } catch(err){ 
+                                    if (errorDiv) {
+                                        errorDiv.textContent = err.message || 'Erreur de paiement test'; 
+                                        errorDiv.style.display = 'block'; 
+                                    }
+                                }
+                            });
+                        }
+
+                        // TestPay modal handlers
+                        if (testModal){
+                            testModal.addEventListener('shown.bs.modal', ()=>{
+                                if (tpForm) tpForm.reset();
+                                if (tpSubmit){ 
+                                    tpSubmit.disabled = false; 
+                                    tpSubmit.textContent = 'Payer'; 
+                                }
+                                const errorEl = document.getElementById('testpay-modal-error');
+                                if (errorEl) errorEl.style.display = 'none';
+                            });
+                            
+                            testModal.addEventListener('hidden.bs.modal', async ()=>{
+                                // Cancel payment if user closes modal without submitting
+                                if (!testpaySubmitted && testpayToken){
+                                    try{ 
+                                        await fetch("{{ route('payments.test.cancel') }}" + '?t=' + encodeURIComponent(testpayToken), { method:'GET' }); 
+                                    }catch(_){ }
+                                }
+                                testpayToken = null; 
+                                testpaySubmitted = false;
+                                if (tpSubmit){ 
+                                    tpSubmit.disabled = false; 
+                                    tpSubmit.textContent = 'Payer'; 
+                                }
+                                const errorEl = document.getElementById('testpay-modal-error');
+                                if (errorEl) errorEl.style.display = 'none';
+                                if (tpForm) tpForm.reset();
+                            });
+                        }
+
+                        // TestPay form submit
+                        if (tpForm){
+                            tpForm.addEventListener('submit', async (e)=>{
+                                e.preventDefault();
+                                const err = document.getElementById('testpay-modal-error');
+                                if (err) {
+                                    err.style.display = 'none'; 
+                                    err.textContent = '';
+                                }
+                                
+                                if (tpSubmit){ 
+                                    tpSubmit.disabled = true; 
+                                    tpSubmit.textContent = 'Traitement...'; 
+                                }
+                                
+                                try{
+                                    if (!testpayToken) throw new Error('Aucun token de paiement');
+                                    
+                                    const formData = new FormData(tpForm);
+                                    formData.append('token', testpayToken);
+                                    
+                                    const res = await fetch("{{ route('payments.test.complete') }}", { 
+                                        method:'POST', 
+                                        headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}'}, 
+                                        body: formData 
+                                    });
+                                    
+                                    const data = await res.json();
+                                    if (!res.ok) throw new Error(data?.error || 'Échec du paiement');
+                                    
+                                    testpaySubmitted = true;
+                                    bootstrap.Modal.getInstance(document.getElementById('testpay-modal')).hide();
+                                    window.location.href = "{{ route('donations.history') }}";
+                                } catch(err){ 
+                                    if (err) {
+                                        err.textContent = err.message || 'Erreur de paiement'; 
+                                        err.style.display = 'block'; 
+                                    }
+                                    if (tpSubmit){ 
+                                        tpSubmit.disabled = false; 
+                                        tpSubmit.textContent = 'Payer'; 
+                                    } 
+                                }
+                            });
+                        }
+                    });
+                </script>
+
+    </body>
+
+</html>
+                                                const { clientSecret } = await createIntent();
+                                                if (paymentElement){ try{ paymentElement.unmount(); }catch(e){} }
+                                                await mountPaymentElement(clientSecret);
+                                            }catch(e){ /* silently ignore typing-time errors */ }
+                                        }, 450);
+                                    });
+                                }
+
+                                const payBtn = document.getElementById('card-pay-btn');
+                                const msg = document.getElementById('payment-message');
+                                const standardSubmit = document.getElementById('donate-submit');
+                                if (payBtn){
+                                    payBtn.addEventListener('click', async (e)=>{
+                                        e.preventDefault();
+                                        msg.style.display='none';
+                                        try{
+                                            if (!stripe || !elements) throw new Error('Payment not initialized');
+                                                const {error} = await stripe.confirmPayment({
+                                                elements,
+                                                confirmParams: { return_url: window.location.origin + '/donations/history' },
+                                                redirect: 'if_required'
+                                            });
+                                            if (error){ throw error; }
+                                            // Use stored PaymentIntent id from init
+                                            const pi = currentPaymentIntentId;
+                                            if (!pi) throw new Error('Missing payment intent reference');
+                                            const amount = parseFloat(input?.value || '0');
+                                            const event = document.querySelector('input[name="evenement_id"]')?.value || new URLSearchParams(window.location.search).get('event') || null;
+                                            const resp = await fetch("{{ route('payments.stripe.confirm') }}", {
+                                                method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+                                                body: JSON.stringify({ paymentIntentId: pi, montant: amount, evenement_id: event })
+                                            });
+                                            if (!resp.ok){ const data = await resp.json().catch(()=>({})); throw new Error(data?.error || 'Confirm failed'); }
+                                            window.location.href = "{{ route('donations.history') }}";
+                                        } catch(err){ msg.textContent = err.message || 'Payment failed'; msg.style.display='block'; }
+                                    });
+                                }
+
+                                // Paymee redirect
+                                const paymeeBtn = document.getElementById('paymee-pay-btn');
+                                const paymeeMsg = document.getElementById('paymee-message');
+                                if (paymeeBtn){
+                                    paymeeBtn.addEventListener('click', async (e)=>{
+                                        e.preventDefault();
+                                        paymeeMsg.style.display='none'; paymeeMsg.textContent='';
+                                        try{
+                                            const amount = parseFloat(input?.value || '0');
+                                            if (!amount || amount < 1) throw new Error('Please enter a valid amount');
+                                            const params = new URLSearchParams(window.location.search);
+                                            const event = document.querySelector('input[name="evenement_id"]')?.value || params.get('event') || null;
+                                            const res = await fetch("{{ route('payments.paymee.create') }}", {
+                                                method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+                                                body: JSON.stringify({ amount, evenement_id: event })
+                                            });
+                                            const data = await res.json();
+                                            if (!res.ok || !data?.payment_url) throw new Error(data?.error || 'Failed to initialize Paymee');
+                                            window.location.href = data.payment_url;
+                                        } catch(err){ paymeeMsg.textContent = err.message || 'Paymee error'; paymeeMsg.style.display='block'; }
+                                    });
+                                }
+
+                                // Hide standard submit for hosted methods, show only for bank transfer
+                                function refreshStandardSubmit(){
+                                    if (!standardSubmit) return;
+                                    const m = methodSelect?.value;
+                                    standardSubmit.style.display = (m === 'virement_bancaire') ? '' : 'none';
+                                }
+                                // TestPay redirect
+                                const testBtn = document.getElementById('testpay-pay-btn');
+                                const testMsg = document.getElementById('testpay-message');
+                                let testpayToken = null;
+                                let testpaySubmitted = false;
+                                if (testBtn){
+                                    testBtn.addEventListener('click', async (e)=>{
+                                        e.preventDefault();
+                                        testMsg.style.display='none'; testMsg.textContent='';
+                                        try{
+                                            const amount = parseFloat(input?.value || '0');
+                                            if (!amount || amount < 1) throw new Error('Please enter a valid amount');
+                                            const params = new URLSearchParams(window.location.search);
+                                            const event = document.querySelector('input[name="evenement_id"]')?.value || params.get('event') || null;
+                                            const res = await fetch("{{ route('payments.test.create') }}", {
+                                                method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+                                                body: JSON.stringify({ amount, evenement_id: event })
+                                            });
+                                            const data = await res.json();
+                                            if (!res.ok || !data?.token) throw new Error(data?.error || 'Failed to initialize TestPay');
+                                            testpayToken = data.token;
+                                            document.getElementById('testpay-token').value = testpayToken;
+                                            document.getElementById('testpay-amount-label').textContent = amount.toFixed(3) + ' TND';
+                                            // Show modal
+                                            const modalEl = document.getElementById('testpayModal');
+                                            const modal = new bootstrap.Modal(modalEl);
+                                            modal.show();
+                                        } catch(err){ testMsg.textContent = err.message || 'TestPay error'; testMsg.style.display='block'; }
+                                    });
+                                }
+
+                                // Modal helpers (formatting and cleanup)
+                                function tpFormatCard(val){
+                                    const v = (val||'').replace(/\s+/g,'').replace(/[^0-9]/g,'');
+                                    return (v.match(/.{1,4}/g) || []).join(' ').substring(0,23);
+                                }
+                                function tpFormatExpiry(val){
+                                    let v = (val||'').replace(/[^0-9]/g,'');
+                                    if (v.length >= 3) v = v.substring(0,2) + '/' + v.substring(2,4);
+                                    return v.substring(0,5);
+                                }
+                                const tpCard = document.getElementById('tp_card');
+                                const tpExp = document.getElementById('tp_exp');
+                                tpCard?.addEventListener('input', (e)=>{ e.target.value = tpFormatCard(e.target.value); });
+                                tpExp?.addEventListener('input', (e)=>{ e.target.value = tpFormatExpiry(e.target.value); });
+
+                                const tpForm = document.getElementById('testpay-form');
+                                const tpSubmit = document.getElementById('testpay-submit-btn');
+                                tpForm?.addEventListener('submit', ()=>{
+                                    testpaySubmitted = true;
+                                    if (tpSubmit){ tpSubmit.disabled = true; tpSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Paiement…'; }
+                                });
+
+                                const tpModalEl = document.getElementById('testpayModal');
+                                tpModalEl?.addEventListener('hidden.bs.modal', async ()=>{
+                                    // If closed without submitting, clear server-side test session
+                                    if (!testpaySubmitted && testpayToken){
+                                        try{ await fetch("{{ route('payments.test.cancel') }}" + '?t=' + encodeURIComponent(testpayToken), { method:'GET' }); }catch(_){ }
+                                    }
+                                    testpayToken = null; testpaySubmitted = false;
+                                    if (tpSubmit){ tpSubmit.disabled = false; tpSubmit.textContent = 'Payer'; }
+                                    document.getElementById('testpay-modal-error')?.style?.setProperty('display','none');
+                                    tpForm?.reset();
+                                });
+                                methodSelect?.addEventListener('change', refreshStandardSubmit);
+                                refreshStandardSubmit();
+                    });
+                </script>
+
+    </body>
+
+</html>
