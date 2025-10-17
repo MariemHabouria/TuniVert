@@ -18,6 +18,7 @@
 </head>
 <body>
     @include('layouts.navbar')
+    <div style="height: 112px"></div>
 <!-- Contenu principal -->
 <div class="container py-5" style="margin-top: 120px;">
     <div class="card shadow-lg border-0 rounded-3">

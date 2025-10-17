@@ -46,6 +46,7 @@
     </div>
     <!-- Spinner End -->
     @include('layouts.navbar')
+    <div style="height: 112px"></div>
 
 <h1 class="text-center my-5">Créer un événement</h1>
 

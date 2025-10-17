@@ -1,4 +1,56 @@
 <!-- Navbar start -->
+<style>
+    /* Compact, single-line navbar that visually pairs with the topbar */
+    .topbar {
+        background: #212529; /* consistent dark topbar across pages */
+        padding: 6px 0; /* match spacing across pages */
+        font-size: .95rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .topbar a { color: rgba(255,255,255,0.9); }
+    .topbar a:hover { color: #ffffff; }
+    .topbar .btn-square{
+        width: 32px; height: 32px; border-radius: 6px;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: transparent; border: 1px solid rgba(255,255,255,0.25);
+        transition: background .15s ease, border-color .15s ease;
+    }
+    .topbar .btn-square:hover{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); }
+    .tunivert-nav { 
+        background: #ffffff; 
+        border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        transition: box-shadow .2s ease;
+    }
+    .tunivert-nav.scrolled { box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08); }
+    .tunivert-nav .navbar-brand h1 { font-size: 2rem; margin: 0; letter-spacing: .3px; }
+    .tunivert-nav #navbarCollapse { display: flex; align-items: center; }
+    .tunivert-nav .navbar-nav { gap: .25rem; }
+    .tunivert-nav .nav-link { 
+        padding: 16px 12px; 
+        color: #1f2937; 
+        font-weight: 500; 
+        position: relative; 
+        transition: color .15s ease;
+    }
+    .tunivert-nav .nav-link:hover, .tunivert-nav .nav-link.active { color: #0d6efd; }
+    .tunivert-nav .nav-link::after { 
+        content: ""; position: absolute; left: 10px; right: 10px; bottom: 8px; height: 2px; 
+        background: transparent; transition: background .15s ease;
+    }
+    .tunivert-nav .nav-link:hover::after, .tunivert-nav .nav-link.active::after { background: #0d6efd; }
+    .tunivert-nav .dropdown-menu { 
+        border-radius: 10px; border: 1px solid rgba(15, 23, 42, 0.06); 
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+    }
+    .tunivert-nav .dropdown-item { padding: .6rem .9rem; }
+    .tunivert-nav .dropdown-item.active, .tunivert-nav .dropdown-item:active { background: #0d6efd; }
+    .tunivert-nav .btn.btn-outline-primary.btn-sm { padding: .4rem .7rem; border-radius: 8px; }
+    .tunivert-nav .btn.btn-primary.btn-sm { padding: .45rem .8rem; border-radius: 8px; }
+    @media (min-width: 1200px) {
+        .tunivert-nav .navbar-nav { justify-content: center; }
+    }
+</style>
 <div class="container-fluid fixed-top px-0">
     <div class="container px-0">
         <!-- Topbar -->
@@ -27,7 +79,7 @@
         </div>
 
         <!-- Navbar -->
-        <nav class="navbar navbar-light bg-light navbar-expand-xl py-0">
+    <nav class="navbar navbar-light bg-light navbar-expand-xl py-0 tunivert-nav" id="tunivertNavbar">
             <div class="container-fluid">
                 <a href="{{ route('home') }}" class="navbar-brand ms-2">
                     <h1 class="text-primary display-5 mb-0">Tunivert</h1>
@@ -41,8 +93,6 @@
                     <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a>
                     <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
                     <a href="{{ route('events.browse') }}" class="nav-item nav-link {{ request()->routeIs('events.browse') ? 'active' : '' }}">Événements</a>
-                    <a href="{{ route('service') }}" class="nav-item nav-link {{ request()->routeIs('service') ? 'active' : '' }}">Formations</a>
-                    <a href="{{ route('causes') }}" class="nav-item nav-link {{ request()->routeIs('causes') ? 'active' : '' }}">Donations</a>
   <a href="{{ route('forums.index') }}" 
    class="nav-item nav-link {{ request()->is('forums*') ? 'active' : '' }}">
    Forums
@@ -100,50 +150,51 @@
                             @endauth
                         </div>
                     </div>
-                </div>
-<!-- Donations Dropdown -->
-<div class="nav-item dropdown">
-    <a href="#" class="nav-link dropdown-toggle {{ request()->is('donations*') || request()->is('donation') ? 'active' : '' }}" data-bs-toggle="dropdown">
-        Donations
-    </a>
-    <div class="dropdown-menu m-0 bg-secondary rounded-0">
-        @auth
-            @if(Auth::user()->role === 'association')
-                <!-- Association Dashboard - Only for association users -->
-                <a href="{{ route('donations.dashboard') }}" class="dropdown-item bg-primary text-white {{ request()->routeIs('donations.dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-tachometer-alt me-2"></i><strong>Dashboard Association</strong>
-                    <small class="d-block text-light">Gestion & Analytics</small>
-                </a>
-            @else
-                <!-- Regular user options -->
-                <!-- Page publique -->
-                <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
-                    <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
-                </a>
-                
-                <!-- Créer un don -->
-                <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
-                    <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
-                </a>
 
-                <!-- Historique des dons -->
-                <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
-                    <i class="fas fa-history me-2"></i>Historique
-                </a>
-            @endif
-        @else
-            <!-- Guest user options -->
-            <!-- Page publique -->
-            <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
-                <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
-            </a>
-            <div class="dropdown-divider"></div>
-            <span class="dropdown-item text-muted">
-                <i class="fas fa-lock me-2"></i>Connectez-vous pour plus d'options
-            </span>
-        @endauth
-    </div>
+                    <!-- Donations Dropdown -->
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle {{ request()->is('donations*') || request()->is('donation') ? 'active' : '' }}" data-bs-toggle="dropdown">
+                            Donations
+                        </a>
+                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
+                            @auth
+                                @if(Auth::user()->role === 'association')
+                                    <!-- Association Dashboard - Only for association users -->
+                                    <a href="{{ route('donations.dashboard') }}" class="dropdown-item bg-primary text-white {{ request()->routeIs('donations.dashboard') ? 'active' : '' }}">
+                                        <i class="fas fa-tachometer-alt me-2"></i><strong>Dashboard Association</strong>
+                                        <small class="d-block text-light">Gestion & Analytics</small>
+                                    </a>
+                                @else
+                                    <!-- Regular user options -->
+                                    <!-- Page publique -->
+                                    <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                                        <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+                                    </a>
+                                    
+                                    <!-- Créer un don -->
+                                    <a href="{{ route('donations.create') }}" class="dropdown-item {{ request()->routeIs('donations.create') ? 'active' : '' }}">
+                                        <i class="fas fa-plus-circle me-2"></i>Nouvelle Donation
+                                    </a>
+
+                                    <!-- Historique des dons -->
+                                    <a href="{{ route('donations.history') }}" class="dropdown-item {{ request()->routeIs('donations.history') ? 'active' : '' }}">
+                                        <i class="fas fa-history me-2"></i>Historique
+                                    </a>
+                                @endif
+                            @else
+                                <!-- Guest user options -->
+                                <!-- Page publique -->
+                                <a href="{{ route('donation') }}" class="dropdown-item {{ request()->routeIs('donation') ? 'active' : '' }}">
+                                    <i class="fas fa-hand-holding-heart me-2"></i>Faire un Don
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <span class="dropdown-item text-muted">
+                                    <i class="fas fa-lock me-2"></i>Connectez-vous pour plus d'options
+                                </span>
+                            @endauth
+                        </div>
                     </div>
+                </div>
 
                     <!-- Authentification -->
                     <div class="d-flex align-items-center flex-nowrap ms-auto">
@@ -214,6 +265,16 @@
                 </div>
             </div>
         </nav>
+        <script>
+            // Add a subtle shadow when scrolling to visually separate from topbar
+            (function(){
+                var n = document.getElementById('tunivertNavbar');
+                if(!n) return;
+                function onScroll(){ if(window.scrollY > 8) n.classList.add('scrolled'); else n.classList.remove('scrolled'); }
+                window.addEventListener('scroll', onScroll, { passive: true });
+                onScroll();
+            })();
+        </script>
     </div>
 </div>
 <!-- Navbar End -->

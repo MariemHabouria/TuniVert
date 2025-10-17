@@ -44,6 +44,7 @@
 
 
     @include('layouts.navbar')
+    <div style="height: 112px"></div>
 
 <!-- Header Start -->
 <div class="container-fluid bg-breadcrumb">

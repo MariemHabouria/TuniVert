@@ -84,63 +84,8 @@
                             <a href="contact.html" class="nav-item nav-link">Contact</a>
                         </div>
                         <div class="d-flex align-items-center flex-nowrap pt-xl-0" style="margin-left: 15px;">
-@guest
-  <a href="{{ route('login') }}" class="btn-hover-bg btn btn-primary text-white py-2 px-4 me-2">Log In</a>
-  <a href="{{ route('register') }}" class="btn btn-outline-primary py-2 px-4">Sign Up</a>
-@endguest
-
- @auth
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button"
-         data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
-        <span class="avatar bg-success text-white rounded-circle d-inline-flex
-                     align-items-center justify-content-center"
-              style="width:38px;height:38px;">
-          {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-        </span>
-      </a>
-
-      <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
-        <li class="px-3 py-2">
-          <div class="fw-semibold">{{ Auth::user()->name }}</div>
-          <div class="small text-muted">{{ Auth::user()->email }}</div>
-        </li>
-        <li><hr class="dropdown-divider"></li>
-
-        <li>
-          <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
-            {{-- icône profil --}}
-            <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor"
-            d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-5 0-9 2.69-9 6v1h18v-1c0-3.31-4-6-9-6z"/></svg>
-            Profil
-          </a>
-        </li>
-
-        <li>
-          <form action="{{ route('logout') }}" method="POST" class="d-inline">
-            @csrf
-            <button type="submit" class="dropdown-item d-flex align-items-center gap-2 text-danger">
-              {{-- icône power --}}
-              <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor"
-              d="M12 2v10M7 4.9A8 8 0 1 0 17 4.9" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
-              Se déconnecter
-            </button>
-          </form>
-        </li>
-      </ul>
-    </li>
-  @endauth                      </div>
-                    </div>
-                </nav>
-            </div>
-        </div>
-        <!-- Navbar End -->
-
-        <!-- Header Start -->
-        <div class="container-fluid bg-breadcrumb">
-            <div class="container text-center py-5" style="max-width: 900px;">
-                <h3 class="text-white display-3 mb-4">Upcoming Events</h1>
-                <p class="fs-5 text-white mb-4">Help today because tomorrow you may be the one who needs more helping!</p>
+        @include('layouts.navbar')
+        <div style="height: 112px"></div>
                 <ol class="breadcrumb justify-content-center mb-0">
                     <li class="breadcrumb-item"><a href="index.html">Home</a></li>
                     <li class="breadcrumb-item"><a href="#">Pages</a></li>

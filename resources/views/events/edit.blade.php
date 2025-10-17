@@ -26,9 +26,7 @@
 </head>
 <body>
         @include('layouts.navbar')
-    </div>
-</div>
-<!-- Navbar End -->
+        <div style="height: 112px"></div>
 
 <h1 class="text-center my-5">Modifier l'événement</h1>
 
