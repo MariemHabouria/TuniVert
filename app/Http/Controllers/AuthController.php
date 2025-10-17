@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
 
@@ -31,39 +32,65 @@ class AuthController extends Controller
      * Inscription
      */
     public function register(Request $request)
-    {
-        // 1) Règles de base
-        $rules = [
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'terms'    => ['nullable', 'accepted'],
-            'role'     => ['required', 'in:user,association'],
+{
+    // 1) Règles de base
+    $rules = [
+        'name'     => ['required', 'string', 'max:255'],
+        'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
+        'password' => ['required', 'string', 'min:8', 'confirmed'],
+        'terms'    => ['nullable', 'accepted'],
+        'role'     => ['required', 'in:user,association'],
+    ];
+
+    // 2) Si association, le matricule est requis (format : 7 chiffres + 1 lettre majuscule)
+    if ($request->input('role') === 'association') {
+        $rules['matricule'] = [
+            'required',
+            'regex:/^\d{7}[A-Z]$/',
+            'unique:users,matricule'
         ];
+    } else {
+        $rules['matricule'] = ['nullable'];
+    }
 
-        // 2) Si association, le matricule est requis (format : 7 chiffres + 1 lettre majuscule)
-        if ($request->input('role') === 'association') {
-            $rules['matricule'] = ['required', 'regex:/^\d{7}[A-Z]$/', 'unique:users,matricule'];
-        } else {
-            $rules['matricule'] = ['nullable'];
-        }
+    $data = $request->validate($rules, [
+        'matricule.required' => 'Le matricule RNE est obligatoire pour les associations.',
+        'matricule.regex' => 'Le format du matricule est invalide (7 chiffres + 1 lettre majuscule).',
+        'matricule.unique' => 'Ce matricule est déjà utilisé par une autre association.',
+        'terms.accepted' => 'Vous devez accepter les conditions d\'utilisation.',
+    ]);
 
-        $data = $request->validate($rules);
+    // 3) Déterminer si le compte doit être bloqué
+    $isAssociation = ($data['role'] === 'association');
 
-        $user = User::create([
-            'name'      => $data['name'],
-            'email'     => $data['email'],
-            'password'  => Hash::make($data['password']),
-            'role'      => $data['role'],
-            'matricule' => $data['role'] === 'association' ? $data['matricule'] : null,
-        ]);
+    // 4) Créer l'utilisateur
+    $user = User::create([
+        'name'      => $data['name'],
+        'email'     => $data['email'],
+        'password'  => Hash::make($data['password']),
+        'role'      => $data['role'],
+        'matricule' => $isAssociation ? $data['matricule'] : null,
+        'is_blocked' => $isAssociation, // 🔒 BLOQUÉ SI ASSOCIATION
+        'email_verified_at' => null, // Non vérifié par défaut
+    ]);
 
+    // 5) Traitement selon le type de compte
+    if ($isAssociation) {
+        // Association - redirection vers login sans envoi d'email
+        return redirect()->route('login')->with('info',
+            '✅ Votre compte association a été créé avec succès ! ' .
+            '⏳ Il sera activé après vérification de vos informations par un administrateur (24-48h).'
+        );
+    } else {
+        // Utilisateur normal - Connexion automatique
         Auth::login($user);
         $request->session()->regenerate();
 
         return redirect()->intended(route('home'))
-            ->with('status', 'Bienvenue, ' . $user->name . ' !');
+            ->with('success', '🎉 Bienvenue sur Tunivert, ' . $user->name . ' !');
     }
+}
+
 
     /**
      * Connexion
@@ -77,15 +104,36 @@ class AuthController extends Controller
 
         $remember = $request->boolean('remember');
 
+        // 1) Vérifier les identifiants
         if (!Auth::attempt($credentials, $remember)) {
             return back()->withErrors([
                 'email' => 'Identifiants invalides.',
             ])->onlyInput('email');
         }
 
+        // 2) Vérifier si le compte est bloqué
+        $user = Auth::user();
+        
+        if ($user->is_blocked) {
+            Auth::logout(); // Déconnecter immédiatement
+            
+            // Message personnalisé selon le rôle
+            if ($user->role === 'association') {
+                return back()->withErrors([
+                    'email' => '⏳ Votre compte association est en attente de vérification par un administrateur. Vous recevrez un email dès que votre compte sera activé.',
+                ])->onlyInput('email');
+            } else {
+                return back()->withErrors([
+                    'email' => '🔒 Votre compte a été bloqué. Veuillez contacter l\'administrateur.',
+                ])->onlyInput('email');
+            }
+        }
+
+        // 3) Connexion réussie
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home'));
+        return redirect()->intended(route('home'))
+            ->with('success', 'Bienvenue, ' . $user->name . ' !');
     }
 
     /**
@@ -97,7 +145,8 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('home');
+        return redirect()->route('home')
+            ->with('info', 'Vous avez été déconnecté avec succès.');
     }
 
     // ====== MOT DE PASSE OUBLIÉ / RESET ======
@@ -177,6 +226,8 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
+        
+        // Vérifier si c'est un admin
         if (!$user->isAdmin()) {
             Auth::logout();
             return back()->withErrors([
@@ -184,10 +235,18 @@ class AuthController extends Controller
             ])->withInput($request->except('password'));
         }
 
+        // Vérifier si le compte admin est bloqué
+        if ($user->is_blocked) {
+            Auth::logout();
+            return back()->withErrors([
+                'email' => 'Votre compte administrateur a été suspendu. Contactez le super admin.'
+            ])->withInput($request->except('password'));
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('admin.dashboard'))
-            ->with('status', 'Connexion admin réussie !');
+            ->with('success', 'Connexion admin réussie !');
     }
 
     public function adminLogout(Request $request)
@@ -197,6 +256,6 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login')
-            ->with('status', 'Déconnexion réussie.');
+            ->with('info', 'Déconnexion réussie.');
     }
 }

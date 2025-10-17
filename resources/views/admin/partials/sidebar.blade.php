@@ -9,25 +9,24 @@
         </li>
         
         <li class="nav-item nav-category">Gestion du Site</li>
-        <!-- Utilisateurs -->
-        <li class="nav-item {{ request()->is('admin/utilisateurs*') ? 'active' : '' }}">
-            <a class="nav-link" data-bs-toggle="collapse" href="#utilisateurs" aria-expanded="false">
-                <i class="menu-icon mdi mdi-account-multiple"></i>
-                <span class="menu-title">Utilisateurs</span>
-                <i class="menu-arrow"></i>
-            </a>
-            <div class="collapse {{ request()->is('admin/utilisateurs*') ? 'show' : '' }}" id="utilisateurs">
-                <ul class="nav flex-column sub-menu">
-                    <li class="nav-item {{ request()->is('admin/utilisateurs') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.utilisateurs.index') }}">Liste des utilisateurs</a>
-                    </li>
-                    <li class="nav-item {{ request()->is('admin/utilisateurs/create') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.utilisateurs.create') }}">Créer un utilisateur</a>
-                    </li>
-                    <li class="nav-item {{ request()->is('admin/utilisateurs/roles') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.utilisateurs.roles') }}">Gestion des rôles</a>
-                    </li>
-                </ul>
+ <!-- Utilisateurs -->
+<li class="nav-item {{ request()->is('admin/utilisateurs*') ? 'active' : '' }}">
+    <a class="nav-link" data-bs-toggle="collapse" href="#utilisateurs" aria-expanded="{{ request()->is('admin/utilisateurs*') ? 'true' : 'false' }}">
+        <i class="menu-icon mdi mdi-account-multiple"></i>
+        <span class="menu-title">Utilisateurs</span>
+        <i class="menu-arrow"></i>
+    </a>
+    <div class="collapse {{ request()->is('admin/utilisateurs*') ? 'show' : '' }}" id="utilisateurs">
+        <ul class="nav flex-column sub-menu">
+            <li class="nav-item {{ request()->is('admin/utilisateurs') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.utilisateurs.index') }}">Liste des utilisateurs</a>
+            </li>
+            <li class="nav-item {{ request()->is('admin/utilisateurs/create') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.utilisateurs.create') }}">Créer un utilisateur</a>
+            </li>
+
+
+                            </ul>
             </div>
         </li>
         <!-- Événements -->

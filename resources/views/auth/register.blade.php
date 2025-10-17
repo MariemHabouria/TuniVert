@@ -26,21 +26,44 @@
 
           {{-- Choix du rôle --}}
           <div class="mb-3 text-white">
-            <label class="form-label d-block mb-2">Je m’inscris en tant que :</label>
+            <label class="form-label d-block mb-2">Je m'inscris en tant que :</label>
 
             <div class="btn-group w-100" role="group" aria-label="Choix du type de compte">
               <input type="radio" class="btn-check" name="role" id="role_user" value="user"
                      {{ old('role','user') === 'user' ? 'checked' : '' }}>
-              <label class="btn btn-outline-light" for="role_user">Utilisateur</label>
+              <label class="btn btn-outline-light" for="role_user">
+                <i class="fas fa-user me-2"></i>Utilisateur
+              </label>
 
               <input type="radio" class="btn-check" name="role" id="role_asso" value="association"
                      {{ old('role') === 'association' ? 'checked' : '' }}>
-              <label class="btn btn-outline-light" for="role_asso">Association</label>
+              <label class="btn btn-outline-light" for="role_asso">
+                <i class="fas fa-building me-2"></i>Association
+              </label>
             </div>
 
             @error('role')
               <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
+          </div>
+
+          {{-- Alerte pour les associations --}}
+          <div id="assoAlert" class="alert-association mb-3" style="display:none;">
+            <div class="alert-icon">
+              <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="alert-content">
+              <strong>Information importante pour les associations</strong>
+              <p class="mb-2 mt-1">
+                Votre compte sera <strong>temporairement bloqué</strong> après l'inscription 
+                jusqu'à ce qu'un administrateur vérifie vos informations et votre matricule RNE.
+              </p>
+              <ul class="mb-0 small">
+                <li>Vous recevrez un email de confirmation après validation</li>
+                <li>La vérification prend généralement 24-48h</li>
+                <li>Assurez-vous de fournir un matricule RNE valide</li>
+              </ul>
+            </div>
           </div>
 
           {{-- Si association : Matricule RNE --}}
@@ -60,6 +83,7 @@
               <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
             <small class="text-white-75 d-block mt-1">
+              <i class="fas fa-exclamation-circle me-1"></i>
               Format attendu : <strong>7 chiffres + 1 lettre majuscule</strong> (RNE).
             </small>
           </div>
@@ -108,13 +132,15 @@
               {{ old('terms') ? 'checked' : '' }}
               required
             >
-            <label class="form-check-label" for="terms">J’accepte les conditions d’utilisation</label>
+            <label class="form-check-label" for="terms">J'accepte les conditions d'utilisation</label>
             @error('terms')
               <div class="invalid-feedback d-block">{{ $message }}</div>
             @enderror
           </div>
 
-          <button class="btn btn-white w-100">Créer mon compte</button>
+          <button class="btn btn-white w-100">
+            <i class="fas fa-user-plus me-2"></i>Créer mon compte
+          </button>
 
           <p class="mt-3 mb-0 text-center">
             <span class="text-white-75">Déjà un compte ?</span>
@@ -124,6 +150,7 @@
       </div>
     </div>
   </div>
+
 @push('scripts')
 <script>
   (function(){
@@ -163,24 +190,113 @@
   })();
 </script>
 @endpush
-  </div>
-</div>
 
-{{-- Petit JS pour afficher/masquer le champ matricule --}}
+{{-- JS pour afficher/masquer le champ matricule et l'alerte --}}
 @push('scripts')
 <script>
   (function() {
     const rUser = document.getElementById('role_user');
     const rAsso = document.getElementById('role_asso');
-    const wrap = document.getElementById('matriculeWrap');
+    const matriculeWrap = document.getElementById('matriculeWrap');
+    const assoAlert = document.getElementById('assoAlert');
 
-    function toggleMatricule() {
-      wrap.style.display = rAsso.checked ? 'block' : 'none';
+    function toggleAssociationFields() {
+      const isAssociation = rAsso && rAsso.checked;
+      
+      if (matriculeWrap) {
+        matriculeWrap.style.display = isAssociation ? 'block' : 'none';
+      }
+      
+      if (assoAlert) {
+        assoAlert.style.display = isAssociation ? 'flex' : 'none';
+      }
     }
-    rUser?.addEventListener('change', toggleMatricule);
-    rAsso?.addEventListener('change', toggleMatricule);
-    toggleMatricule();
+
+    rUser?.addEventListener('change', toggleAssociationFields);
+    rAsso?.addEventListener('change', toggleAssociationFields);
+    
+    // Initial check
+    toggleAssociationFields();
   })();
 </script>
+@endpush
+
+@push('styles')
+<style>
+  /* Alerte pour associations */
+  .alert-association {
+    background: linear-gradient(135deg, rgba(246, 194, 62, 0.15) 0%, rgba(221, 162, 10, 0.15) 100%);
+    border: 2px solid rgba(246, 194, 62, 0.5);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    animation: slideInDown 0.5s ease-out;
+  }
+
+  .alert-association .alert-icon {
+    font-size: 24px;
+    color: #f6c23e;
+    flex-shrink: 0;
+  }
+
+  .alert-association .alert-content {
+    color: #fff;
+    flex: 1;
+  }
+
+  .alert-association .alert-content strong {
+    color: #f6c23e;
+    font-size: 15px;
+  }
+
+  .alert-association .alert-content p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .alert-association ul {
+    padding-left: 20px;
+    margin-bottom: 0;
+  }
+
+  .alert-association li {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Style amélioré pour les boutons radio */
+  .btn-group .btn-outline-light {
+    transition: all 0.3s ease;
+  }
+
+  .btn-group .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  .btn-check:checked + .btn-outline-light {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+
+  /* Animation du champ matricule */
+  #matriculeWrap {
+    animation: slideInDown 0.5s ease-out;
+  }
+</style>
 @endpush
 @endsection

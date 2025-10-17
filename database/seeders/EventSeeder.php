@@ -3,29 +3,28 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
 use App\Models\Event;
-use App\Models\Participant;
-use App\Models\Comment;
+use App\Models\User;
 
-class DatabaseSeeder extends Seeder
+class EventSeeder extends Seeder
 {
     public function run(): void
     {
-        // Créer 10 utilisateurs
-        $users = User::factory(10)->create();
+        // Récupérer des associations comme organisateurs
+        $associations = User::where('role', 'association')->get();
 
-        // Créer 5 événements par utilisateur
-        $users->each(function ($user) {
-            Event::factory(5)->create([
-                'organizer_id' => $user->id,
+        // Si aucune association, créer quelques organisateurs
+        if ($associations->isEmpty()) {
+            $associations = User::factory(3)->create([
+                'role' => 'association',
             ]);
-        });
+        }
 
-        // Créer 30 participants
-        Participant::factory(30)->create();
-
-        // Créer 50 commentaires
-        Comment::factory(50)->create();
+        // Créer 3 à 5 événements par association
+        foreach ($associations as $association) {
+            Event::factory(rand(3, 5))->create([
+                'organizer_id' => $association->id,
+            ]);
+        }
     }
 }

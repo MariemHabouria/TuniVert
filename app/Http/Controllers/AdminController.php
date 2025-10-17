@@ -58,29 +58,237 @@ class AdminController extends Controller
     /* ==============================
      *     UTILISATEURS
      * ==============================*/
-    public function utilisateursIndex()
-    {
-        $check = $this->checkAdmin();
-        if ($check !== true) return $check;
+public function utilisateursIndex(Request $request)
+{
+    $query = User::query();
 
-        return view('admin.utilisateurs.index');
+    // Filtre par nom
+    if ($request->filled('name')) {
+        $query->where('name', 'like', '%'.$request->name.'%');
     }
 
+    // Filtre par email
+    if ($request->filled('email')) {
+        $query->where('email', 'like', '%'.$request->email.'%');
+    }
+
+    // Filtre par rôle
+    if ($request->filled('role')) {
+        $query->where('role', $request->role);
+    }
+
+    $users = $query->orderBy('id', 'desc')->paginate(10);
+
+    return view('admin.utilisateurs.index', compact('users'));
+}
+
+// Bloquer / Débloquer un utilisateur
+public function toggleUser(User $user)
+{
+    // Interdire à l'admin de se bloquer lui-même
+    if (auth()->id() === $user->id) {
+        return redirect()->back()->with('error', "Vous ne pouvez pas vous bloquer vous-même.");
+    }
+
+    // Inverser l'état du blocage
+    $user->is_blocked = !$user->is_blocked;
+    $user->save();
+
+    return redirect()->back()->with(
+        'success',
+        'Utilisateur ' . ($user->is_blocked ? 'bloqué' : 'débloqué') . ' avec succès.'
+    );
+}
+public function associationsVerify(Request $request)
+{
+    $this->checkAdmin();
+
+    $query = User::where('role', 'association');
+
+    // Filtre par nom
+    if ($request->filled('name')) {
+        $query->where('name', 'like', '%'.$request->name.'%');
+    }
+
+    // Filtre par matricule
+    if ($request->filled('matricule')) {
+        $query->where('matricule', 'like', '%'.$request->matricule.'%');
+    }
+
+    // Filtre par statut de vérification
+    if ($request->filled('verified')) {
+        if ($request->verified == '1') {
+            $query->whereNotNull('email_verified_at')
+                  ->whereNotNull('matricule');
+        } else {
+            $query->where(function($q) {
+                $q->whereNull('email_verified_at')
+                  ->orWhereNull('matricule');
+            });
+        }
+    }
+
+    // Filtre par statut (actif/bloqué)
+    if ($request->filled('status')) {
+        if ($request->status == 'active') {
+            $query->where('is_blocked', false);
+        } elseif ($request->status == 'blocked') {
+            $query->where('is_blocked', true);
+        }
+    }
+
+    $users = $query->orderBy('created_at', 'desc')->get();
+
+    return view('admin.utilisateurs.verify', compact('users'));
+}
+
+/**
+ * Vérifier/Déverifier une association
+ */
+public function toggleVerifyAssociation(User $user)
+{
+    $this->checkAdmin();
+
+    // Vérifier que c'est bien une association
+    if ($user->role !== 'association') {
+        return redirect()->back()->with('error', 'Cet utilisateur n\'est pas une association.');
+    }
+
+    // Si on veut vérifier, il faut un matricule
+    if (!$user->email_verified_at && empty($user->matricule)) {
+        return redirect()->back()->with('error', 'Impossible de vérifier cette association : aucun matricule fourni.');
+    }
+
+    // Toggle la vérification
+    if ($user->email_verified_at) {
+        // Révoquer la vérification
+        $user->email_verified_at = null;
+        $message = 'Association dévérifiée avec succès.';
+    } else {
+        // Vérifier l'association
+        $user->email_verified_at = now();
+        $message = 'Association vérifiée avec succès.';
+        
+        // Optionnel : Envoyer un email de notification
+        try {
+            Mail::to($user->email)->send(new \App\Mail\AssociationVerified($user));
+        } catch (\Exception $e) {
+            // Continuer même si l'email échoue
+        }
+    }
+
+    $user->save();
+
+    return redirect()->back()->with('success', $message);
+}
+
+/**
+ * Mettre à jour le matricule d'une association
+ */
+public function updateAssociationMatricule(Request $request, User $user)
+{
+    $this->checkAdmin();
+
+    // Vérifier que c'est bien une association
+    if ($user->role !== 'association') {
+        return redirect()->back()->with('error', 'Cet utilisateur n\'est pas une association.');
+    }
+
+    $request->validate([
+        'matricule' => 'required|string|max:255|unique:users,matricule,' . $user->id,
+    ], [
+        'matricule.required' => 'Le matricule est obligatoire.',
+        'matricule.unique' => 'Ce matricule est déjà utilisé par une autre association.',
+    ]);
+
+    $user->matricule = $request->matricule;
+    $user->save();
+
+    return redirect()->back()->with('success', 'Matricule mis à jour avec succès.');
+}
     public function utilisateursCreate()
     {
-        $check = $this->checkAdmin();
-        if ($check !== true) return $check;
-
+        $this->checkAdmin();
         return view('admin.utilisateurs.create');
+    }
+   public function utilisateursStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role' => 'required|string',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role, // "admin" ou autre
+        ]);
+
+        return redirect()->route('admin.utilisateurs.index')->with('success', 'Utilisateur créé avec succès.');
+    }
+    public function utilisateursShow($id)
+{
+    $this->checkAdmin();
+    $user = User::findOrFail($id);
+    return view('admin.utilisateurs.show', compact('user'));
+}
+
+// Ajoutez cette méthode de suppression
+public function utilisateursDestroy($id)
+{
+    $this->checkAdmin();
+    
+    if ($id === Auth::id()) {
+        return redirect()->back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+    }
+    
+    $user = User::findOrFail($id);
+    $user->delete();
+    
+    return redirect()->route('admin.utilisateurs.index')->with('success', 'Utilisateur supprimé avec succès.');
+}
+    public function utilisateursEdit($id)
+    {
+        $this->checkAdmin();
+        $user = User::findOrFail($id);
+        return view('admin.utilisateurs.edit', compact('user'));
+    }
+
+    public function utilisateursUpdate(Request $request, $id)
+    {
+        $this->checkAdmin();
+
+        $user = User::findOrFail($id);
+
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,'.$user->id,
+            'password' => 'nullable|string|min:6|confirmed',
+            'role' => 'required|in:user,admin,association',
+        ]);
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->role = $data['role'];
+
+        if (!empty($data['password'])) {
+            $user->password = bcrypt($data['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('admin.utilisateurs.index')->with('success', 'Utilisateur mis à jour.');
     }
 
     public function utilisateursRoles()
     {
-        $check = $this->checkAdmin();
-        if ($check !== true) return $check;
-
+        $this->checkAdmin();
         return view('admin.utilisateurs.roles');
     }
+
 
     /* ==============================
      *     ÉVÉNEMENTS

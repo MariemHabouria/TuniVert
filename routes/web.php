@@ -235,69 +235,86 @@ Route::resource('alertes', AlerteForumController::class)->only(['index','show'])
 */
 // ===== ROUTES ADMIN (application wide) =====
 Route::prefix('admin')->name('admin.')->group(function () {
+
+    // ===== AUTH ADMIN (sans middleware admin) =====
     Route::get('/login', [AuthController::class, 'showAdminLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'adminLogin'])->name('login.submit');
     Route::post('/logout', [AuthController::class, 'adminLogout'])->name('logout');
 
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    // ===== TOUTES LES ROUTES ADMIN (middleware auth+admin) =====
+Route::middleware('auth')->group(function () {
 
-    Route::prefix('utilisateurs')->name('utilisateurs.')->group(function () {
-        Route::get('/', [AdminController::class, 'utilisateursIndex'])->name('index');
-        Route::get('/create', [AdminController::class, 'utilisateursCreate'])->name('create');
-        Route::get('/roles', [AdminController::class, 'utilisateursRoles'])->name('roles');
+        // DASHBOARD
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+        // UTILISATEURS
+Route::prefix('utilisateurs')->name('utilisateurs.')->group(function () {
+    Route::get('/', [AdminController::class, 'utilisateursIndex'])->name('index');
+    Route::get('/create', [AdminController::class, 'utilisateursCreate'])->name('create');
+    Route::post('/', [AdminController::class, 'utilisateursStore'])->name('store');
+    Route::get('/{id}', [AdminController::class, 'utilisateursShow'])->name('show'); // Ajouté
+    Route::get('/{id}/edit', [AdminController::class, 'utilisateursEdit'])->name('edit');
+    Route::put('/{id}', [AdminController::class, 'utilisateursUpdate'])->name('update');
+    Route::delete('/{id}', [AdminController::class, 'utilisateursDestroy'])->name('destroy'); // Changé de POST à DELETE
+    Route::post('/{user}/toggle', [AdminController::class, 'toggleUser'])->name('toggle');
+});
+Route::prefix('associations')->name('associations.')->group(function () {
+    Route::get('/verify', [AdminController::class, 'associationsVerify'])->name('verify');
+    Route::post('/{user}/toggle-verify', [AdminController::class, 'toggleVerifyAssociation'])->name('toggle-verify');
+    Route::put('/{user}/matricule', [AdminController::class, 'updateAssociationMatricule'])->name('update-matricule');
+});
+
+        // EVENEMENTS
+        Route::prefix('evenements')->name('evenements.')->group(function () {
+            Route::get('/', [AdminController::class, 'evenementsIndex'])->name('index');
+            Route::get('/create', [AdminController::class, 'evenementsCreate'])->name('create');
+            Route::get('/categories', [AdminController::class, 'evenementsCategories'])->name('categories');
+        });
+
+        // CHALLENGES
+        Route::prefix('challenges')->name('challenges.')->group(function () {
+            Route::get('/', [AdminController::class, 'challengesIndex'])->name('index');
+            Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])->name('participations');
+            Route::get('all-scores', [AdminController::class, 'allScores'])->name('allScores');
+            Route::get('scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
+            Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');
+            Route::post('participants/{id}/action', [AdminController::class, 'participantAction'])->name('participants.action');
+        });
+
+        // FORUMS
+        Route::prefix('forums')->name('forums.')->group(function () {
+            Route::get('/', [AdminController::class, 'forumsIndex'])->name('index');
+            Route::get('/categories', [AdminController::class, 'forumsCategories'])->name('categories');
+            Route::get('/moderations', [AdminController::class, 'forumsModerations'])->name('moderations');
+        });
+
+        // FORMATIONS
+        Route::prefix('formations')->name('formations.')->group(function () {
+            Route::get('/', [AdminController::class, 'formationsIndex'])->name('index');
+            Route::get('/create', [AdminController::class, 'formationsCreate'])->name('create');
+            Route::get('/inscriptions', [AdminController::class, 'formationsInscriptions'])->name('inscriptions');
+        });
+
+        // DONATIONS
+        Route::prefix('donations')->name('donations.')->group(function () {
+            Route::get('/', [AdminController::class, 'donationsIndex'])->name('index');
+            Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
+            Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
+
+            // MÉTHODES DE PAIEMENT
+            Route::get('/methodes', [AdminController::class, 'donationsMethodes'])->name('methodes');
+            Route::post('/methodes', [AdminController::class, 'donationsMethodesStore'])->name('methodes.store');
+            Route::get('/methodes/{key}', [AdminController::class, 'donationsMethodesGet'])->name('methodes.get');
+            Route::put('/methodes/{key}', [AdminController::class, 'donationsMethodesUpdate'])->name('methodes.update');
+
+            // ENTRIES / DONATIONS
+            Route::get('/entries/{id}', [AdminController::class, 'donationsShow'])->name('entries.show');
+            Route::post('/entries/{id}/send-receipt', [AdminController::class, 'donationsSendReceipt'])->name('entries.sendReceipt');
+            Route::delete('/entries/{id}', [AdminController::class, 'donationsDestroy'])->name('entries.destroy');
+        });
     });
 
-    Route::prefix('evenements')->name('evenements.')->group(function () {
-        Route::get('/', [AdminController::class, 'evenementsIndex'])->name('index');
-        Route::get('/create', [AdminController::class, 'evenementsCreate'])->name('create');
-        Route::get('/categories', [AdminController::class, 'evenementsCategories'])->name('categories');
-    });
 
-    Route::prefix('challenges')->name('challenges.')->group(function () {
-        Route::get('/', [AdminController::class, 'challengesIndex'])->name('index');
-
-        // Participations d’un challenge
-        Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])
-            ->name('participations');
-Route::get('all-scores', [AdminController::class, 'allScores'])->name('allScores');
-
-        Route::get('/scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
-
-
-        // Toggle challenge (bloquer/débloquer)
-        Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');
-        Route::post('admin/challenges/participants/{id}/action', [AdminController::class, 'participantAction'])
-    ->name('challenges.participants.action');
-    
-
-    });
-
-    Route::prefix('forums')->name('forums.')->group(function () {
-        Route::get('/', [AdminController::class, 'forumsIndex'])->name('index');
-        Route::get('/categories', [AdminController::class, 'forumsCategories'])->name('categories');
-        Route::get('/moderations', [AdminController::class, 'forumsModerations'])->name('moderations');
-    });
-
-    Route::prefix('formations')->name('formations.')->group(function () {
-        Route::get('/', [AdminController::class, 'formationsIndex'])->name('index');
-        Route::get('/create', [AdminController::class, 'formationsCreate'])->name('create');
-        Route::get('/inscriptions', [AdminController::class, 'formationsInscriptions'])->name('inscriptions');
-    });
-
-    Route::prefix('donations')->name('donations.')->group(function () {
-        Route::get('/', [AdminController::class, 'donationsIndex'])->name('index');
-        Route::get('/campagnes', [AdminController::class, 'donationsCampagnes'])->name('campagnes');
-        Route::get('/rapports', [AdminController::class, 'donationsRapports'])->name('rapports');
-        Route::get('/methodes', [AdminController::class, 'donationsMethodes'])->name('methodes');
-        Route::post('/methodes', [AdminController::class, 'donationsMethodesStore'])->name('methodes.store');
-        Route::get('/methodes/{key}', [AdminController::class, 'donationsMethodesGet'])->name('methodes.get');
-        Route::put('/methodes/{key}', [AdminController::class, 'donationsMethodesUpdate'])->name('methodes.update');
-
-        // Donation entries actions
-        Route::get('/entries/{id}', [AdminController::class, 'donationsShow'])->name('entries.show');
-        Route::post('/entries/{id}/send-receipt', [AdminController::class, 'donationsSendReceipt'])->name('entries.sendReceipt');
-        Route::delete('/entries/{id}', [AdminController::class, 'donationsDestroy'])->name('entries.destroy');
-    });
 
     Route::prefix('ui-features')->name('ui-features.')->group(function () {
         Route::get('/buttons', [AdminController::class, 'uiButtons'])->name('buttons');
