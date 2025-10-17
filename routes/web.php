@@ -266,6 +266,10 @@ Route::get('all-scores', [AdminController::class, 'allScores'])->name('allScores
 
         // Toggle challenge (bloquer/débloquer)
         Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');
+        Route::post('admin/challenges/participants/{id}/action', [AdminController::class, 'participantAction'])
+    ->name('challenges.participants.action');
+    
+
     });
 
     Route::prefix('forums')->name('forums.')->group(function () {

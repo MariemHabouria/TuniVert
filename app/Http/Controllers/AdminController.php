@@ -238,6 +238,28 @@ public function toggleChallenge($id)
 
     return redirect()->back()->with('success', 'Le statut du challenge a été mis à jour.');
 }
+public function participantAction(Request $request, $participantId)
+{
+    $this->checkAdmin();
+
+    $request->validate([
+        'action' => 'required|in:valider,rejeter',
+    ]);
+
+    $participant = \App\Models\Participant::findOrFail($participantId);
+
+    if ($request->action === 'valider') {
+        $participant->statut = 'valide';
+    } elseif ($request->action === 'rejeter') {
+        $participant->statut = 'rejete';
+    }
+
+    $participant->save();
+
+    return redirect()->back()->with('success', 'Statut du participant mis à jour.');
+}
+
+
 
     /* ==============================
      *     FORUMS

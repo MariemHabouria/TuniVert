@@ -256,31 +256,39 @@
                                         @endif
 
                                         <!-- Formulaire de soumission de preuve -->
-                                        @if($participantChallenge->statut === 'en_cours' || $participantChallenge->statut === 'en_attente')
-                                            <form method="POST" action="{{ route('challenges.submit', $challenge->id) }}" enctype="multipart/form-data">
-                                                @csrf
-                                                <div class="row">
-                                                    <div class="col-md-8">
-                                                        <div class="mb-3">
-                                                            <label for="preuve" class="form-label fw-semibold">Ajouter votre preuve :</label>
-                                                            <input type="file" name="preuve" id="preuve" class="form-control" required 
-                                                                   accept="image/*,.pdf,.doc,.docx">
-                                                            <div class="form-text">Formats acceptés: images, PDF, Word (max: 5MB)</div>
-                                                            @error('preuve')
-                                                                <div class="text-danger small">{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <button type="submit" 
-                                                                class="btn btn-warning btn-lg w-100 mt-4 shadow-sm"
-                                                                style="border-radius: 10px; transition: all 0.3s ease;">
-                                                            <i class="fas fa-paper-plane me-2"></i>Soumettre
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        @endif
+                                        @if(($participantChallenge->statut === 'en_cours' || $participantChallenge->statut === 'en_attente') 
+    && $now->between($dateDebut, $dateFin))
+    <form method="POST" action="{{ route('challenges.submit', $challenge->id) }}" enctype="multipart/form-data">
+        @csrf
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-3">
+                    <label for="preuve" class="form-label fw-semibold">Ajouter votre preuve :</label>
+                    <input type="file" name="preuve" id="preuve" class="form-control" required 
+                           accept="image/*,.pdf,.doc,.docx">
+                    <div class="form-text">Formats acceptés: images, PDF, Word (max: 5MB)</div>
+                    @error('preuve')
+                        <div class="text-danger small">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" 
+                        class="btn btn-warning btn-lg w-100 mt-4 shadow-sm"
+                        style="border-radius: 10px; transition: all 0.3s ease;">
+                    <i class="fas fa-paper-plane me-2"></i>Soumettre
+                </button>
+            </div>
+        </div>
+    </form>
+@else
+    @if($now->lt($dateDebut))
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-info-circle me-2"></i>La soumission de preuves sera disponible à partir du {{ $dateDebut->format('d/m/Y') }}.
+        </div>
+    @endif
+@endif
+
 
                                         <!-- Preuve existante -->
                                         @if($participantChallenge->preuve)
