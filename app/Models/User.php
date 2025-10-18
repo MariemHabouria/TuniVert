@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
-
+use Notifiable; 
     protected $fillable = ['name', 'email', 'password', 'role', 'matricule'];
     protected $hidden = ['password', 'remember_token'];
 
@@ -31,4 +31,14 @@ class User extends Authenticatable
     public function participations() { return $this->hasMany(\App\Models\ParticipantChallenge::class, 'utilisateur_id'); }
     public function scoresChallenges() { return $this->hasManyThrough(\App\Models\ScoreChallenge::class, \App\Models\ParticipantChallenge::class, 'utilisateur_id', 'participant_challenge_id', 'id', 'id'); }
     public function donations() { return $this->hasMany(Donation::class, 'utilisateur_id'); }
+    public function alerts()
+    {
+        return $this->hasMany(AlerteForum::class, 'utilisateur_id');
+    }
+
+    // Méthode pour récupérer les notifications non lues
+    public function getUnreadNotificationsCount()
+    {
+        return $this->unreadNotifications()->count();
+    }
 }

@@ -7,12 +7,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="card-title">Gestion des Challenges</h4>
-                    <a href="{{ route('admin.challenges.create') }}" class="btn btn-primary">
-                        <i class="mdi mdi-plus"></i> Nouveau Challenge
-                    </a>
-                </div>
+                
                 
                 <div class="table-responsive">
                     <table class="table table-striped">
