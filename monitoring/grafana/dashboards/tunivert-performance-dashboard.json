@@ -1,0 +1,266 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TuniVert Performance & Infrastructure",
+    "tags": ["tunivert", "performance", "infrastructure", "monitoring"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Availability",
+        "type": "heatmap",
+        "gridPos": {"h": 6, "w": 24, "x": 0, "y": 0},
+        "targets": [
+          {"expr": "(tunivert_app_up + tunivert_db_up + tunivert_ai_service_up) / 3 * 100", "refId": "A", "legendFormat": "Overall Health %"}
+        ],
+        "options": {
+          "calculate": false,
+          "calculation": {},
+          "cellGap": 2,
+          "cellValues": {},
+          "color": {
+            "exponent": 0.5,
+            "fill": "dark-orange",
+            "mode": "spectrum",
+            "reverse": false,
+            "scale": "exponential",
+            "scheme": "RdYlGn",
+            "steps": 64
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Application Uptime",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 6},
+        "targets": [
+          {"expr": "avg_over_time(tunivert_app_up[24h]) * 100", "refId": "A"}
+        ],
+        "options": {"colorMode": "background"},
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Database Uptime",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 6},
+        "targets": [
+          {"expr": "avg_over_time(tunivert_db_up[24h]) * 100", "refId": "A"}
+        ],
+        "options": {"colorMode": "background"},
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 95},
+                {"color": "green", "value": 99}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "AI Service Uptime",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 6},
+        "targets": [
+          {"expr": "avg_over_time(tunivert_ai_service_up[24h]) * 100", "refId": "A"}
+        ],
+        "options": {"colorMode": "background"},
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 80},
+                {"color": "green", "value": 95}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Current Memory Usage",
+        "type": "gauge",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 6},
+        "targets": [
+          {"expr": "tunivert_memory_usage_bytes / 1024 / 1024", "refId": "A"}
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "decmbytes",
+            "min": 0,
+            "max": 128,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 80},
+                {"color": "red", "value": 100}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Response Time Distribution",
+        "type": "histogram",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 10},
+        "targets": [
+          {"expr": "histogram_quantile(0.50, rate(tunivert_request_duration_seconds[5m]))", "refId": "A", "legendFormat": "50th percentile"},
+          {"expr": "histogram_quantile(0.90, rate(tunivert_request_duration_seconds[5m]))", "refId": "B", "legendFormat": "90th percentile"},
+          {"expr": "histogram_quantile(0.99, rate(tunivert_request_duration_seconds[5m]))", "refId": "C", "legendFormat": "99th percentile"}
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Memory Usage Over Time",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 10},
+        "targets": [
+          {"expr": "tunivert_memory_usage_bytes", "refId": "A", "legendFormat": "Memory Usage (bytes)"}
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 20,
+              "gradientMode": "opacity"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "transparent", "value": null},
+                {"color": "yellow", "value": 83886080},
+                {"color": "red", "value": 104857600}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "HTTP Error Rate",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 18},
+        "targets": [
+          {"expr": "rate(tunivert_http_errors_total[5m]) / rate(tunivert_http_requests_total[5m]) * 100", "refId": "A", "legendFormat": "Error Rate %"}
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 5}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Request Throughput",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 18},
+        "targets": [
+          {"expr": "rate(tunivert_http_requests_total[5m])", "refId": "A", "legendFormat": "Requests/sec"}
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "System Health Score",
+        "type": "gauge",
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 18},
+        "targets": [
+          {"expr": "(\n  (tunivert_app_up * 40) +\n  (tunivert_db_up * 40) +\n  (tunivert_ai_service_up * 20)\n)", "refId": "A"}
+        ],
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 70},
+                {"color": "green", "value": 90}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Application Logs",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24},
+        "targets": [
+          {"expr": "{job=\"tunivert-app\"}", "refId": "A"}
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "sortOrder": "Descending",
+          "wrapLogMessage": true
+        }
+      }
+    ],
+    "time": {"from": "now-3h", "to": "now"},
+    "refresh": "10s",
+    "schemaVersion": 36,
+    "version": 1,
+    "uid": "tunivert-performance"
+  }
+}

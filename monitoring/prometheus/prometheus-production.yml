@@ -1,0 +1,103 @@
+# Production Prometheus Configuration with Retention and Backup
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  # Production retention settings
+  external_labels:
+    cluster: 'tunivert-production'
+    replica: '1'
+
+# Rule evaluation with retention
+rule_files:
+  - "rules/*.yml"
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Scrape configurations for production
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 15s
+    metrics_path: /metrics
+
+  # TuniVert Laravel Application
+  - job_name: 'tunivert-app'
+    static_configs:
+      - targets: ['nginx:80']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    # Production metadata
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'tunivert_.*'
+        target_label: 'application'
+        replacement: 'tunivert'
+
+  # Node Exporter (System Metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # MySQL Database Metrics
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['mysql-exporter:9104']
+    scrape_interval: 30s
+
+  # Redis Cache Metrics
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 30s
+
+  # Nginx Web Server Metrics
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 30s
+
+  # Python AI Service
+  - job_name: 'donation-ai'
+    static_configs:
+      - targets: ['donation-ai:8085']
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+    scrape_timeout: 10s
+
+  # Blackbox exporter for external monitoring
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://nginx:80/health
+        - http://donation-ai:8085/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+# Production storage configuration
+storage:
+  tsdb:
+    # Retain data for 90 days in production
+    retention.time: 90d
+    # Limit storage size to 50GB
+    retention.size: 50GB
+    # Optimize for better performance
+    wal-compression: true
+    # Better performance for high-cardinality metrics
+    max-block-duration: 2h

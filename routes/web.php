@@ -18,9 +18,13 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\AlerteForumController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\MetricsController;
 
 // QR verification
 require __DIR__ . '/qr-verify.php';
+
+// Metrics for Prometheus
+Route::get('/metrics', [MetricsController::class, 'index'])->name('metrics');
 
 /*
 |--------------------------------------------------------------------------

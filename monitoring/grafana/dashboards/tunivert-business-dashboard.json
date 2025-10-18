@@ -1,0 +1,277 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TuniVert Business Intelligence Dashboard",
+    "tags": ["tunivert", "business", "donations", "users"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health Overview",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 0},
+        "targets": [
+          {"expr": "tunivert_app_up", "refId": "A", "legendFormat": "App"},
+          {"expr": "tunivert_db_up", "refId": "B", "legendFormat": "Database"},
+          {"expr": "tunivert_ai_service_up", "refId": "C", "legendFormat": "AI Service"}
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "center"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {
+                "options": {"0": {"text": "DOWN", "color": "red"}, "1": {"text": "UP", "color": "green"}},
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Donations",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
+        "targets": [{"expr": "tunivert_donations_total", "refId": "A"}],
+        "options": {"colorMode": "value", "graphMode": "area"},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 100},
+                {"color": "red", "value": 1000}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Total Users",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 4, "x": 12, "y": 0},
+        "targets": [{"expr": "tunivert_users_total", "refId": "A"}],
+        "options": {"colorMode": "value", "graphMode": "area"},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Total Donation Amount (TND)",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 0},
+        "targets": [{"expr": "tunivert_donation_amount_total_tnd", "refId": "A"}],
+        "options": {"colorMode": "value", "graphMode": "area"},
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"},
+            "unit": "currencyUSD",
+            "decimals": 2
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Donations Over Time",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {"expr": "increase(tunivert_donations_total[1h])", "refId": "A", "legendFormat": "Donations/hour"},
+          {"expr": "tunivert_donations_24h", "refId": "B", "legendFormat": "Last 24h"},
+          {"expr": "tunivert_donations_7d", "refId": "C", "legendFormat": "Last 7 days"}
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "gradientMode": "opacity"
+            },
+            "color": {"mode": "palette-classic"}
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Users by Role Distribution",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 4},
+        "targets": [
+          {"expr": "tunivert_users_by_role", "refId": "A", "legendFormat": "{{ role }}"}
+        ],
+        "options": {
+          "pieType": "pie",
+          "tooltip": {"mode": "single"},
+          "legend": {"displayMode": "visible", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 7,
+        "title": "Memory Usage Trend",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 4},
+        "targets": [
+          {"expr": "tunivert_memory_usage_bytes / 1024 / 1024", "refId": "A", "legendFormat": "Memory (MB)"}
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "decmbytes",
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 20
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 80},
+                {"color": "red", "value": 100}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Donation Amount Trends (TND)",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {"expr": "tunivert_donation_amount_24h_tnd", "refId": "A", "legendFormat": "Last 24h Amount"},
+          {"expr": "tunivert_donation_amount_7d_tnd", "refId": "B", "legendFormat": "Last 7 days Amount"},
+          {"expr": "tunivert_donation_amount_avg_tnd", "refId": "C", "legendFormat": "Average Donation"}
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Donation Success Rate",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 12},
+        "targets": [
+          {"expr": "tunivert_donation_success_rate_percent", "refId": "A"}
+        ],
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": null},
+                {"color": "yellow", "value": 70},
+                {"color": "green", "value": 90}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Response Time Performance",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 12},
+        "targets": [
+          {"expr": "tunivert_request_duration_seconds", "refId": "A", "legendFormat": "Request Duration"}
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 10}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Donations by Payment Method",
+        "type": "barchart",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+        "targets": [
+          {"expr": "tunivert_donations_by_method", "refId": "A", "legendFormat": "{{ method }}"}
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "basic"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"}
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Anonymous vs Named Donations",
+        "type": "piechart",
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 20},
+        "targets": [
+          {"expr": "tunivert_donations_anonymous", "refId": "A", "legendFormat": "Anonymous"},
+          {"expr": "tunivert_donations_named", "refId": "B", "legendFormat": "Named"}
+        ],
+        "options": {
+          "pieType": "donut",
+          "tooltip": {"mode": "single"}
+        }
+      },
+      {
+        "id": 13,
+        "title": "System Alerts",
+        "type": "alertlist",
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 20},
+        "options": {
+          "showOptions": "current",
+          "maxItems": 10,
+          "sortOrder": "timeDesc"
+        }
+      }
+    ],
+    "time": {"from": "now-6h", "to": "now"},
+    "refresh": "30s",
+    "schemaVersion": 36,
+    "version": 2,
+    "uid": "tunivert-business-intelligence"
+  }
+}

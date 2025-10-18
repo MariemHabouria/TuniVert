@@ -1,0 +1,98 @@
+name: Dependencies Update
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Monday at 6 AM UTC
+  workflow_dispatch:
+
+jobs:
+  update-php-dependencies:
+    name: Update PHP Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+
+      - name: Update Composer dependencies
+        run: |
+          composer update --no-interaction
+          composer outdated --direct
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update PHP dependencies'
+          title: 'chore: update PHP dependencies'
+          body: |
+            Automated update of PHP dependencies.
+            
+            Please review the changes and test thoroughly before merging.
+          branch: update-php-dependencies
+          delete-branch: true
+
+  update-python-dependencies:
+    name: Update Python Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Update Python dependencies
+        working-directory: ./python
+        run: |
+          pip install --upgrade pip pip-tools
+          pip-compile --upgrade requirements.in
+          pip list --outdated
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update Python dependencies'
+          title: 'chore: update Python dependencies'
+          body: |
+            Automated update of Python dependencies.
+            
+            Please review the changes and test thoroughly before merging.
+          branch: update-python-dependencies
+          delete-branch: true
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+
+      - name: PHP Security Audit
+        run: |
+          composer audit
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Python Security Audit
+        working-directory: ./python
+        run: |
+          pip install safety
+          safety check -r requirements.txt

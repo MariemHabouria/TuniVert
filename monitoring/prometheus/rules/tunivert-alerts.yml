@@ -1,0 +1,163 @@
+groups:
+  - name: tunivert.rules
+    rules:
+      # Application Health Alerts
+      - alert: TuniVertApplicationDown
+        expr: tunivert_app_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: tunivert
+          component: application
+        annotations:
+          summary: "TuniVert application is down"
+          description: "TuniVert application has been down for more than 1 minute. Instance: {{ $labels.instance }}"
+          runbook_url: "https://wiki.tunivert.com/runbooks/application-down"
+
+      - alert: TuniVertDatabaseDisconnected
+        expr: tunivert_db_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: tunivert
+          component: database
+        annotations:
+          summary: "TuniVert database connection failed"
+          description: "Database connection has been down for more than 2 minutes. Check MySQL service status."
+          runbook_url: "https://wiki.tunivert.com/runbooks/database-connection"
+
+      - alert: TuniVertAIServiceDown
+        expr: tunivert_ai_service_up == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: tunivert
+          component: ai-service
+        annotations:
+          summary: "TuniVert AI service is unavailable"
+          description: "AI service has been down for more than 5 minutes. Donation recommendations may be affected."
+          runbook_url: "https://wiki.tunivert.com/runbooks/ai-service-down"
+
+      # Performance Alerts
+      - alert: TuniVertHighMemoryUsage
+        expr: tunivert_memory_usage_bytes > 100 * 1024 * 1024  # 100MB
+        for: 5m
+        labels:
+          severity: warning
+          service: tunivert
+          component: application
+        annotations:
+          summary: "TuniVert application high memory usage"
+          description: "Memory usage is {{ $value }} bytes which is above 100MB threshold"
+          runbook_url: "https://wiki.tunivert.com/runbooks/high-memory-usage"
+
+      - alert: TuniVertCriticalMemoryUsage
+        expr: tunivert_memory_usage_bytes > 120 * 1024 * 1024  # 120MB
+        for: 2m
+        labels:
+          severity: critical
+          service: tunivert
+          component: application
+        annotations:
+          summary: "TuniVert application critical memory usage"
+          description: "Memory usage is critically high at {{ humanize $value }} bytes"
+          runbook_url: "https://wiki.tunivert.com/runbooks/critical-memory-usage"
+
+      - alert: TuniVertSlowResponse
+        expr: tunivert_request_duration_seconds > 10
+        for: 3m
+        labels:
+          severity: warning
+          service: tunivert
+          component: application
+        annotations:
+          summary: "TuniVert application slow response times"
+          description: "Average request duration is {{ $value }} seconds, which is above the 10s threshold"
+          runbook_url: "https://wiki.tunivert.com/runbooks/slow-response"
+
+      - alert: TuniVertVerySlowResponse
+        expr: tunivert_request_duration_seconds > 30
+        for: 1m
+        labels:
+          severity: critical
+          service: tunivert
+          component: application
+        annotations:
+          summary: "TuniVert application very slow response times"
+          description: "Request duration is critically slow at {{ $value }} seconds"
+          runbook_url: "https://wiki.tunivert.com/runbooks/very-slow-response"
+
+      # Business Logic Alerts (when DB metrics are available)
+      - alert: TuniVertNoDonationsIn24Hours
+        expr: increase(tunivert_donations_24h[24h]) == 0
+        for: 12h
+        labels:
+          severity: warning
+          service: tunivert
+          component: business
+        annotations:
+          summary: "No donations received in 24 hours"
+          description: "TuniVert has not received any donations in the last 24 hours, which may indicate a business issue"
+          runbook_url: "https://wiki.tunivert.com/runbooks/no-donations"
+
+      - alert: TuniVertLowDonationSuccessRate
+        expr: tunivert_donation_success_rate_percent < 80
+        for: 1h
+        labels:
+          severity: warning
+          service: tunivert
+          component: payments
+        annotations:
+          summary: "Low donation success rate"
+          description: "Donation success rate is {{ $value }}%, which is below the 80% threshold"
+          runbook_url: "https://wiki.tunivert.com/runbooks/low-success-rate"
+
+      - alert: TuniVertCriticalDonationSuccessRate
+        expr: tunivert_donation_success_rate_percent < 50
+        for: 30m
+        labels:
+          severity: critical
+          service: tunivert
+          component: payments
+        annotations:
+          summary: "Critical donation success rate"
+          description: "Donation success rate is critically low at {{ $value }}%"
+          runbook_url: "https://wiki.tunivert.com/runbooks/critical-success-rate"
+
+      # Error Rate Alerts
+      - alert: TuniVertHighErrorRate
+        expr: (tunivert_http_errors_total / tunivert_http_requests_total) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: tunivert
+          component: application
+        annotations:
+          summary: "High HTTP error rate"
+          description: "HTTP error rate is {{ $value }}%, which is above 5%"
+          runbook_url: "https://wiki.tunivert.com/runbooks/high-error-rate"
+
+      # Infrastructure Health Derived Metrics
+      - alert: TuniVertServicesPartiallyDown
+        expr: (tunivert_app_up + tunivert_db_up + tunivert_ai_service_up) < 3
+        for: 2m
+        labels:
+          severity: warning
+          service: tunivert
+          component: infrastructure
+        annotations:
+          summary: "TuniVert services partially unavailable"
+          description: "{{ $value }} out of 3 core services are running. Check individual service status."
+          runbook_url: "https://wiki.tunivert.com/runbooks/partial-outage"
+
+      - alert: TuniVertAllServicesDown
+        expr: (tunivert_app_up + tunivert_db_up + tunivert_ai_service_up) == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: tunivert
+          component: infrastructure
+        annotations:
+          summary: "TuniVert complete system outage"
+          description: "All TuniVert services are down. This is a complete system failure."
+          runbook_url: "https://wiki.tunivert.com/runbooks/complete-outage"

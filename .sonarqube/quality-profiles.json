@@ -1,0 +1,90 @@
+{
+  "qualityGates": [
+    {
+      "name": "TuniVert Quality Gate",
+      "conditions": [
+        {
+          "metric": "new_coverage",
+          "operation": "LT",
+          "threshold": "80",
+          "warning": "85"
+        },
+        {
+          "metric": "new_duplicated_lines_density",
+          "operation": "GT",
+          "threshold": "3"
+        },
+        {
+          "metric": "new_maintainability_rating",
+          "operation": "GT",
+          "threshold": "1"
+        },
+        {
+          "metric": "new_reliability_rating",
+          "operation": "GT",
+          "threshold": "1"
+        },
+        {
+          "metric": "new_security_rating",
+          "operation": "GT",
+          "threshold": "1"
+        },
+        {
+          "metric": "new_security_hotspots_reviewed",
+          "operation": "LT",
+          "threshold": "100"
+        },
+        {
+          "metric": "new_code_smells",
+          "operation": "GT",
+          "threshold": "5"
+        },
+        {
+          "metric": "new_bugs",
+          "operation": "GT",
+          "threshold": "0"
+        },
+        {
+          "metric": "new_vulnerabilities",
+          "operation": "GT",
+          "threshold": "0"
+        }
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "name": "TuniVert PHP Profile",
+      "language": "php",
+      "rules": [
+        {
+          "key": "PSR2:Generic.Files.LineLength",
+          "params": {
+            "lineLimit": "120"
+          }
+        },
+        {
+          "key": "PSR12:PSR12.Files.DeclareStatement"
+        },
+        {
+          "key": "Squiz:Squiz.PHP.CommentedOutCode"
+        }
+      ]
+    },
+    {
+      "name": "TuniVert Python Profile", 
+      "language": "py",
+      "rules": [
+        {
+          "key": "python:S1192"
+        },
+        {
+          "key": "python:S125"
+        },
+        {
+          "key": "python:S1481"
+        }
+      ]
+    }
+  ]
+}
