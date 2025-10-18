@@ -981,6 +981,15 @@
                         btns.forEach(b=> b.addEventListener('click', ()=> { if(input){ input.value = b.dataset.amount; input.focus(); } }));
 
                                 const methodSelect = document.querySelector('select[name="moyen_paiement"]');
+                                // Preselect method from URL (?method=paymee|paypal|carte|...)
+                                try {
+                                    const params = new URLSearchParams(window.location.search);
+                                    const m = params.get('method');
+                                    if (m && methodSelect) {
+                                        const opt = Array.from(methodSelect.options).find(o => (o.value||'').toLowerCase() === m.toLowerCase());
+                                        if (opt) { methodSelect.value = opt.value; methodSelect.dispatchEvent(new Event('change')); }
+                                    }
+                                } catch(_) {}
                                 const donateSubmit = document.getElementById('donate-submit');
                                 const cardWrapper = document.getElementById('card-payment-wrapper');
                                 const paypalWrapper = document.getElementById('paypal-wrapper');

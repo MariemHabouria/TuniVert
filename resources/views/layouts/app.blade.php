@@ -83,6 +83,9 @@
     <!-- Template Javascript -->
     <script src="{{ asset('js/main.js') }}"></script>
 
+    {{-- Badge popups (toasts) --}}
+    @include('partials.badge-popups')
+
     @stack('scripts')
 </body>
 </html>

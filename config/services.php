@@ -75,5 +75,15 @@ return [
     'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
 ],
 
+    // External Donation AI microservice (Python FastAPI)
+    'donation_ai' => [
+        'url' => env('DONATION_AI_URL', null), // e.g., http://127.0.0.1:8085
+    ],
+
+    // HuggingFace API for sentiment analysis
+    'huggingface' => [
+        'api_key' => env('HF_API_KEY'),
+        'model' => env('HF_MODEL', 'nlptown/bert-base-multilingual-uncased-sentiment'),
+    ],
 
 ];

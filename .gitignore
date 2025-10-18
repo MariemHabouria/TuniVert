@@ -22,3 +22,14 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Python virtual environment
+/.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Temporary test files
+test-*.php
+*.txt
+!requirements.txt

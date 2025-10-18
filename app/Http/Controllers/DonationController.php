@@ -18,6 +18,9 @@ use App\Services\GamificationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use App\Models\PaymentMethod;
+use App\Models\User;
+use Illuminate\Support\Facades\Log as LogFacade;
+use Illuminate\Support\Facades\Auth as AuthFacade;
 
 class DonationController extends Controller
 {
@@ -85,6 +88,8 @@ class DonationController extends Controller
             'transaction_id' => $reference, // null for non-bank methods
             'date_don' => now(),
         ]);
+        // Track last used method for future defaults
+        try { session(['last_method' => $don->moyen_paiement]); } catch (\Throwable $e) {}
         // Gamification
         try {
             $res = app(GamificationService::class)->onDonation($don);
@@ -187,6 +192,7 @@ class DonationController extends Controller
             'transaction_id' => $validated['paymentIntentId'],
             'date_don' => now(),
         ]);
+        try { session(['last_method' => $don->moyen_paiement]); } catch (\Throwable $e) {}
         try {
             $res = app(GamificationService::class)->onDonation($don);
             if (!empty($res['new_badges'])) {
@@ -234,6 +240,32 @@ class DonationController extends Controller
                 ], ['slug'], ['name','icon','description','updated_at']);
             }
         } catch (\Throwable $e) {}
+
+        // Keep donation badges consistent with current totals
+        try {
+            $user = \App\Models\User::find($userId);
+            if ($user) {
+                    if ($dons->total() === 0) {
+                        app(\App\Services\GamificationService::class)->revokeDonationBadgesIfNoDonations($user);
+                    } else {
+                        $syncResult = app(\App\Services\GamificationService::class)->syncDonationBadges($user);
+                        Log::info('syncDonationBadges result', ['awarded' => $syncResult['awarded'] ?? []]);
+                        if (!empty($syncResult['awarded'])) {
+                            $existing = session('new_badges');
+                            $merged = [];
+                            if (is_array($existing)) {
+                                $merged = array_values(array_merge($existing, $syncResult['awarded']));
+                            } else {
+                                $merged = $syncResult['awarded'];
+                            }
+                            Log::info('Flashing new_badges to session', ['merged' => $merged]);
+                            session()->flash('new_badges', $merged);
+                        }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error('Badge sync error: ' . $e->getMessage());
+        }
 
         // Aggregate points and badges for the current user
         // Total points = points from donations (1 per TND) + any bonus points (e.g., challenges)
@@ -355,6 +387,7 @@ class DonationController extends Controller
             'transaction_id' => $capture['id'] ?? $orderId,
             'date_don' => now(),
         ]);
+        try { session(['last_method' => $don->moyen_paiement]); } catch (\Throwable $e) {}
         try { app(GamificationService::class)->onDonation($don); } catch (\Throwable $e) {}
         session()->flash('points_earned', (int) round((float)$don->montant));
         try {
@@ -498,6 +531,7 @@ class DonationController extends Controller
                     'transaction_id' => $tx,
                     'date_don' => now(),
                 ]);
+                try { session(['last_method' => $don->moyen_paiement]); } catch (\Throwable $e) {}
                 try {
                     $res = app(GamificationService::class)->onDonation($don);
                     if (!empty($res['new_badges'])) {
@@ -737,5 +771,26 @@ class DonationController extends Controller
             'alerts',
             'period'
         ));
+    }
+
+    // Lightweight metric: record when a suggestion button is clicked
+    public function logSuggestionClick(Request $request)
+    {
+        $validated = $request->validate([
+            'event_id' => ['required','integer'],
+            'amount' => ['required','numeric','min:1'],
+            'position' => ['nullable','string'], // low|mid|high
+            'method' => ['nullable','string'],
+        ]);
+        try {
+            LogFacade::info('donation_ai_suggestion_clicked', [
+                'event_id' => (int)$validated['event_id'],
+                'user_id' => AuthFacade::id(),
+                'amount' => (float)$validated['amount'],
+                'position' => $validated['position'] ?? null,
+                'method' => $validated['method'] ?? null,
+            ]);
+        } catch (\Throwable $e) {}
+        return response()->json(['ok' => true]);
     }
 }

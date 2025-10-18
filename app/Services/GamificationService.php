@@ -9,6 +9,16 @@ use Illuminate\Support\Carbon;
 
 class GamificationService
 {
+    /**
+     * Donation-related badge slugs managed by this service
+     */
+    protected array $donationBadgeSlugs = [
+        'donor_bronze',
+        'donor_silver',
+        'donor_gold',
+        'protector_oceans',
+    ];
+
     public function onDonation(Donation $donation): array
     {
         $user = $donation->user;
@@ -21,7 +31,9 @@ class GamificationService
             'method' => $donation->moyen_paiement,
         ]);
 
-        $newBadges = $this->evaluateBadges($user);
+        // Keep donation badges in sync after each donation
+        $sync = $this->syncDonationBadges($user);
+        $newBadges = $sync['awarded'] ?? [];
         $this->updateChallenges($user, $donation);
         return ['points' => $points, 'new_badges' => $newBadges];
     }
@@ -41,6 +53,7 @@ class GamificationService
 
     public function evaluateBadges(User $user): array
     {
+        // Backward-compatible helper: only adds missing donation badges
         $totals = DB::table('donations')
             ->selectRaw('COALESCE(SUM(montant),0) as total_amount')
             ->where('utilisateur_id', $user->id)
@@ -86,6 +99,86 @@ class GamificationService
             }
         }
         return $awarded;
+    }
+
+    /**
+     * Synchronize donation-related badges: add missing ones that meet rules and remove those no longer valid.
+     * Returns an array with keys 'awarded' and 'removed' (removed contains slugs).
+     */
+    public function syncDonationBadges(User $user): array
+    {
+        // Compute totals for rules
+        $totals = DB::table('donations')
+            ->selectRaw('COALESCE(SUM(montant),0) as total_amount')
+            ->where('utilisateur_id', $user->id)
+            ->first();
+
+        $event2 = DB::table('donations')
+            ->selectRaw('COALESCE(SUM(montant),0) as total_amount')
+            ->where('utilisateur_id', $user->id)
+            ->where('evenement_id', 2)
+            ->first();
+
+        $rules = [
+            'donor_bronze' => fn() => ($totals->total_amount ?? 0) >= 50,
+            'donor_silver' => fn() => ($totals->total_amount ?? 0) >= 200,
+            'donor_gold'   => fn() => ($totals->total_amount ?? 0) >= 500,
+            'protector_oceans' => fn() => ($event2->total_amount ?? 0) >= 100,
+        ];
+
+        $badgeMap = DB::table('badges')->whereIn('slug', $this->donationBadgeSlugs)->pluck('id', 'slug');
+        $badgeInfo = DB::table('badges')->select('id','slug','name','icon','description')->get()->keyBy('slug');
+
+        $ownedIds = DB::table('user_badges')->where('user_id', $user->id)->pluck('badge_id');
+        $ownedSlugs = DB::table('badges')->whereIn('id', $ownedIds)->whereIn('slug', $this->donationBadgeSlugs)->pluck('slug')->all();
+
+        $shouldHave = [];
+        foreach ($rules as $slug => $ok) {
+            if ($ok()) $shouldHave[] = $slug;
+        }
+
+        $toAdd = array_values(array_diff($shouldHave, $ownedSlugs));
+        $toRemove = array_values(array_diff($ownedSlugs, $shouldHave));
+
+        $awarded = [];
+        foreach ($toAdd as $slug) {
+            if (!isset($badgeMap[$slug])) continue;
+            DB::table('user_badges')->insert([
+                'user_id' => $user->id,
+                'badge_id' => $badgeMap[$slug],
+                'awarded_at' => now(),
+            ]);
+            if (isset($badgeInfo[$slug])) {
+                $b = $badgeInfo[$slug];
+                $awarded[] = [
+                    'slug' => $b->slug,
+                    'name' => $b->name,
+                    'icon' => $b->icon,
+                    'description' => $b->description,
+                ];
+            } else {
+                $awarded[] = ['slug'=>$slug];
+            }
+        }
+
+        if (!empty($toRemove)) {
+            $idsToRemove = DB::table('badges')->whereIn('slug', $toRemove)->pluck('id');
+            DB::table('user_badges')->where('user_id', $user->id)->whereIn('badge_id', $idsToRemove)->delete();
+        }
+
+        return ['awarded' => $awarded, 'removed' => $toRemove];
+    }
+
+    /**
+     * Remove all donation-related badges if the user has no donation history.
+     * Returns number of badges removed.
+     */
+    public function revokeDonationBadgesIfNoDonations(User $user): int
+    {
+        $hasDonations = DB::table('donations')->where('utilisateur_id', $user->id)->exists();
+        if ($hasDonations) return 0;
+        $ids = DB::table('badges')->whereIn('slug', $this->donationBadgeSlugs)->pluck('id');
+        return DB::table('user_badges')->where('user_id', $user->id)->whereIn('badge_id', $ids)->delete();
     }
 
     public function updateChallenges(User $user, Donation $donation): void

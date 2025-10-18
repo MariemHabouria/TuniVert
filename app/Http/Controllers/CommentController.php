@@ -7,19 +7,32 @@ use App\Models\Comment;
 use App\Models\Event;
 use Illuminate\Support\Facades\Auth;
 use App\Services\CommentSentimentService; // Service pour analyser le sentiment
-use App\Services\CommentModerationService; // Service pour modération automatique
 
 class CommentController extends Controller
 {
     protected $sentimentService;
-    protected $moderationService;
 
     public function __construct(
         CommentSentimentService $sentimentService,
-        CommentModerationService $moderationService
     ) {
         $this->sentimentService = $sentimentService;
-        $this->moderationService = $moderationService;
+    }
+
+    private function checkCommentText(string $text): bool
+    {
+        $defaults = 'spam,scam,fake,cheat,bully,insulte,haine';
+        $source = env('COMMENT_BLOCKED_KEYWORDS', $defaults);
+        $parts = array_map('trim', preg_split('/[,;|]/', (string) $source) ?: []);
+        $blocked = array_values(array_unique(array_map(function ($w) {
+            return mb_strtolower($w);
+        }, array_filter($parts, fn($w) => $w !== ''))));
+        $haystack = mb_strtolower($text);
+        foreach ($blocked as $word) {
+            if ($word !== '' && mb_strpos($haystack, $word) !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Ajouter un commentaire
@@ -35,9 +48,9 @@ class CommentController extends Controller
         $sentiment = $this->sentimentService->analyseSentiment($content);
 
         // 2️⃣ Vérification modération
-        $isBlocked = $this->moderationService->checkComment($content);
+        $isBlocked = $this->checkCommentText($content);
         if ($isBlocked) {
-            return redirect()->back()->with('error', 'Votre commentaire contient des propos inappropriés ❌');
+            return redirect()->back()->with('error', 'Votre commentaire contient des propos inappropriés ❌')->withFragment('comments');
         }
 
         // 3️⃣ Création du commentaire
@@ -47,7 +60,7 @@ class CommentController extends Controller
             'sentiment' => $sentiment,
         ]);
 
-        return redirect()->back()->with('success', 'Commentaire ajouté ✅');
+        return redirect()->back()->with('success', 'Commentaire ajouté ✅')->withFragment('comments');
     }
 
     // Modifier un commentaire
@@ -68,9 +81,9 @@ class CommentController extends Controller
         $sentiment = $this->sentimentService->analyseSentiment($content);
 
         // Vérification modération
-        $isBlocked = $this->moderationService->checkComment($content);
+        $isBlocked = $this->checkCommentText($content);
         if ($isBlocked) {
-            return redirect()->back()->with('error', 'Votre commentaire contient des propos inappropriés ❌');
+            return redirect()->back()->with('error', 'Votre commentaire contient des propos inappropriés ❌')->withFragment('comments');
         }
 
         $comment->update([
@@ -78,7 +91,7 @@ class CommentController extends Controller
             'sentiment' => $sentiment,
         ]);
 
-        return redirect()->back()->with('success', 'Commentaire modifié ✅');
+        return redirect()->back()->with('success', 'Commentaire modifié ✅')->withFragment('comments');
     }
 
     // Supprimer un commentaire
@@ -91,7 +104,7 @@ class CommentController extends Controller
 
         $comment->delete();
 
-        return redirect()->back()->with('success', 'Commentaire supprimé ❌');
+        return redirect()->back()->with('success', 'Commentaire supprimé ❌')->withFragment('comments');
     }
     public function reanalyse(Comment $comment)
 {
@@ -107,7 +120,7 @@ class CommentController extends Controller
         'sentiment' => $sentiment,
     ]);
 
-    return redirect()->back()->with('success', 'Le commentaire a été ré-analysé ✅');
+    return redirect()->back()->with('success', 'Le commentaire a été ré-analysé ✅')->withFragment('comments');
 }
 
 }

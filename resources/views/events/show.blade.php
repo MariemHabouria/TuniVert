@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>TuniVert - {{ $event->title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600&family=Roboto&display=swap" rel="stylesheet"> 
@@ -155,6 +156,13 @@
                                     </a>
                                 </li>
 
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('donations.history') }}">
+                                        <i class="fas fa-heart"></i>
+                                        Mes Donations
+                                    </a>
+                                </li>
+
                                 @if(Auth::user()->role === 'association')
                                 <li>
                                     <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
@@ -262,6 +270,11 @@
             </a>
 
             @auth
+              {{-- Donation Button - Available for all authenticated users --}}
+              <a href="{{ route('donations.create', ['event_id' => $event->id]) }}" class="btn btn-success">
+                <i class="bi bi-heart-fill"></i> Faire un Don
+              </a>
+
               @if(Auth::id() === $event->organizer_id)
                 <a href="{{ route('events.edit', $event->id) }}" class="btn btn-warning">
                   <i class="bi bi-pencil-square"></i> Modifier
@@ -281,6 +294,59 @@
       </div>
     </div>
   </div>
+
+  {{-- ====== DONATION AI SUGGESTIONS ====== --}}
+  @if(isset($donationSuggestion) && $donationSuggestion && auth()->check())
+  <div class="card shadow-sm border-0 rounded-4 mb-5">
+    <div class="card-body p-4">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h4 class="text-primary mb-2">
+            <i class="bi bi-robot me-2"></i>
+            Suggestions IA de Don
+          </h4>
+          <p class="text-muted mb-3">
+            Notre IA suggère un montant personnalisé basé sur votre historique et cet événement.
+            <strong>Probabilité de don: {{ number_format($donationSuggestion['propensity'] * 100, 1) }}%</strong>
+          </p>
+          
+          <div class="d-flex gap-2 flex-wrap">
+            @foreach($donationSuggestion['amounts'] as $level => $amount)
+              @php
+                $badgeClass = match($level) {
+                  'low' => 'bg-success',
+                  'mid' => 'bg-warning text-dark',
+                  'high' => 'bg-danger',
+                  default => 'bg-secondary'
+                };
+                $levelText = match($level) {
+                  'low' => 'Modeste',
+                  'mid' => 'Recommandé',
+                  'high' => 'Généreux',
+                  default => ucfirst($level)
+                };
+              @endphp
+              <button type="button" 
+                      class="btn {{ $badgeClass }} suggestion-amount-btn"
+                      data-amount="{{ $amount }}"
+                      data-level="{{ $level }}"
+                      data-event-id="{{ $event->id }}">
+                {{ $levelText }}: {{ $amount }} TND
+              </button>
+            @endforeach
+          </div>
+        </div>
+        
+        <div class="col-md-4 text-center">
+          <div class="text-center">
+            <i class="bi bi-heart-fill text-danger fs-1 mb-2"></i>
+            <p class="small text-muted mb-0">Soutenez cet événement</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  @endif
 
   {{-- ====== Commentaires (refonte avec classes CSS dédiées) ====== --}}
 <section id="comments" class="mt-5">
@@ -719,6 +785,41 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+
+@if(isset($donationSuggestion) && $donationSuggestion && auth()->check())
+<script>
+// Donation AI Suggestions Click Tracking
+document.addEventListener('DOMContentLoaded', function() {
+  const suggestionBtns = document.querySelectorAll('.suggestion-amount-btn');
+  
+  suggestionBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const amount = this.dataset.amount;
+      const level = this.dataset.level;
+      const eventId = this.dataset.eventId;
+      
+      // Log the click for analytics
+      fetch('/donations/suggestion-click', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify({
+          event_id: eventId,
+          amount: amount,
+          level: level
+        })
+      }).catch(console.error);
+      
+      // Redirect to donation page with the suggested amount
+      const donationUrl = `/donations/create?event_id=${eventId}&amount=${amount}&method={{ $donationSuggestion['method'] ?? 'paymee' }}`;
+      window.location.href = donationUrl;
+    });
+  });
+});
+</script>
+@endif
 
  <!--Footer Start -->
         <div class="container-fluid footer bg-dark text-body py-5">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Participant;
+use App\Services\DonationAI;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -94,7 +95,7 @@ class EventController extends Controller
         return redirect()->route('events.index')->with('success', 'Événement créé ✅');
     }
 
-    // Afficher un événement avec calcul global des sentiments
+    // Afficher un événement avec calcul global des sentiments et suggestions IA
     public function show(Event $event)
     {
         $comments = $event->comments;
@@ -104,11 +105,20 @@ class EventController extends Controller
             'positif' => 0,
             'neutre' => 0,
             'negatif' => 0,
+            'en_attente' => 0,
         ];
 
         foreach ($comments as $comment) {
-            if ($comment->sentiment && isset($sentimentCounts[$comment->sentiment])) {
-                $sentimentCounts[$comment->sentiment]++;
+            $sentiment = $comment->sentiment;
+            
+            // Si pas de sentiment ou null, considérer comme "en attente"
+            if (!$sentiment || empty($sentiment)) {
+                $sentimentCounts['en_attente']++;
+            } elseif (isset($sentimentCounts[$sentiment])) {
+                $sentimentCounts[$sentiment]++;
+            } else {
+                // Sentiment non reconnu, mettre en attente
+                $sentimentCounts['en_attente']++;
             }
         }
 
@@ -120,7 +130,7 @@ class EventController extends Controller
                 $sentimentPercent[$key] = round($count / $totalAnalyzed * 100);
             }
         } else {
-            $sentimentPercent = ['positif'=>0,'neutre'=>0,'negatif'=>0];
+            $sentimentPercent = ['positif'=>0,'neutre'=>0,'negatif'=>0,'en_attente'=>0];
         }
 
         // Emoji dominant
@@ -129,10 +139,49 @@ class EventController extends Controller
             'positif' => '😊',
             'neutre'  => '😐',
             'negatif' => '😞',
+            'en_attente' => '⏳',
             default => '❓',
         };
 
-        return view('events.show', compact('event', 'sentimentPercent', 'dominantEmoji'));
+        // === DONATION AI SUGGESTIONS ===
+        $donationSuggestion = null;
+        if (auth()->check()) {
+            $user = auth()->user();
+            
+            // Build context for AI suggestion
+            $ctx = [
+                'user_total_tnd' => $user->donations()->sum('montant') ?? 0,
+                'user_count' => $user->donations()->count() ?? 0,
+                'user_avg_tnd' => $user->donations()->avg('montant') ?? 0,
+                'user_last_days' => $user->donations()->latest()->first()?->created_at?->diffInDays() ?? null,
+                'user_badge_count' => $user->badges ?? 0,
+                'default_method' => session('last_method', 'paymee'),
+                'event_popularity' => $event->participants()->count() ?? 0,
+                'event_days_left' => now()->diffInDays($event->date, false),
+                'event_category' => $event->category ?? 'general',
+                'event_goal_progress' => 0.0, // TODO: if you have event goals
+                'hour' => now()->hour,
+                'weekday' => now()->dayOfWeek,
+                'is_mobile' => request()->header('User-Agent') && str_contains(request()->header('User-Agent'), 'Mobile') ? 1 : 0,
+            ];
+
+            try {
+                $ai = app(DonationAI::class);
+                $donationSuggestion = $ai->suggest($event->id, $user->id, $ctx);
+                
+                // Log the suggestion exposure for analytics
+                \Log::info('donation_ai_suggestion_exposed', [
+                    'user_id' => $user->id,
+                    'event_id' => $event->id,
+                    'suggestion' => $donationSuggestion,
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Donation AI error: ' . $e->getMessage());
+                $donationSuggestion = null;
+            }
+        }
+
+        return view('events.show', compact('event', 'sentimentPercent', 'dominantEmoji', 'donationSuggestion'));
     }
 
     // Formulaire édition

@@ -170,6 +170,11 @@ Route::get('/payments/paymee/return', [DonationController::class, 'paymeeReturn'
 Route::get('/payments/paymee/cancel', [DonationController::class, 'paymeeCancel'])->name('payments.paymee.cancel');
 Route::post('/webhooks/paymee', [DonationController::class, 'paymeeWebhook'])->middleware('api')->name('webhooks.paymee');
 
+// Lightweight analytics: log suggestion button clicks (no CSRF via api middleware)
+Route::post('/donations/suggestion-click', [DonationController::class, 'logSuggestionClick'])
+    ->middleware('api')
+    ->name('donations.suggestionClick');
+
 // TestPay (mock) — POST endpoints utilisés par donation.blade.php
 Route::post('/payments/test/create',   [TestPaymentController::class, 'create'])->name('payments.test.create');
 Route::post('/payments/test/complete', [TestPaymentController::class, 'complete'])->name('payments.test.complete');

@@ -552,6 +552,56 @@
     <!-- Back to Top -->
     <a href="#" class="btn btn-primary btn-primary-outline-0 btn-md-square back-to-top"><i class="fa fa-arrow-up"></i></a>
 
+    @if (session('new_badges'))
+    <!-- Badge Unlock Modal -->
+    <div class="modal fade" id="badgeModal" tabindex="-1" aria-labelledby="badgeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+          <div class="badge-modal-header">
+            <button type="button" class="badge-close-btn btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="badge-modal-title-container">
+              <div class="trophy-icon">🏆</div>
+              <h5 class="badge-modal-title">
+                <span class="badge-unlock-text">Badge Débloqué!</span>
+              </h5>
+              <div class="sparkles">✨ 🎉 ✨</div>
+            </div>
+          </div>
+          <div class="badge-modal-body">
+            @php $badges = session('new_badges'); @endphp
+            @if(is_array($badges))
+              @foreach($badges as $badge)
+                <div class="badge-card">
+                  <div class="badge-glow"></div>
+                  <div class="badge-icon-container">
+                    <div class="badge-shine"></div>
+                    <span class="badge-icon">{{ $badge['icon'] ?? '🏅' }}</span>
+                  </div>
+                  <div class="badge-details">
+                    <h6 class="badge-name">{{ $badge['name'] ?? 'Nouveau Badge' }}</h6>
+                    <p class="badge-description">{{ $badge['description'] ?? '' }}</p>
+                  </div>
+                  <div class="badge-celebration">🎊</div>
+                </div>
+              @endforeach
+            @endif
+            <div class="celebration-message">
+              <div class="success-badge">
+                <span class="success-text">Bravo!</span>
+                <span class="success-subtitle">Vous avez débloqué un nouveau badge</span>
+              </div>
+            </div>
+          </div>
+          <div class="badge-modal-footer">
+            <button type="button" class="badge-awesome-btn" data-bs-dismiss="modal">
+              <span class="btn-icon">🚀</span> Fantastique!
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endif
+
     <!-- JavaScript Libraries -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
