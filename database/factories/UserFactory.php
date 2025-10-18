@@ -2,26 +2,44 @@
 
 namespace Database\Factories;
 
-use App\Models\Event;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
-class EventFactory extends Factory
+class UserFactory extends Factory
 {
-    protected $model = Event::class;
+    protected $model = User::class;
 
     public function definition(): array
     {
-        $categories = ['Formation', 'Challenge', 'Conférence', 'Atelier', 'Webinaire'];
+        // Rôle de l'utilisateur
+        $role = $this->faker->randomElement(['user','association','admin']);
+
+        // Générer matricule si association
+        $matricule = $role === 'association'
+            ? str_pad((string)$this->faker->numberBetween(1, 9999999), 7, '0', STR_PAD_LEFT).$this->faker->randomLetter()
+            : null;
 
         return [
-            'title' => $this->faker->sentence(4),
-            'location' => $this->faker->city(),
-            'date' => $this->faker->dateTimeBetween('+1 week', '+6 months'),
-            'category' => $this->faker->randomElement($categories),
-            'details' => $this->faker->paragraph(4),
-            'image' => $this->faker->imageUrl(800, 600, 'events', true, 'event'),
-            'organizer_id' => User::factory(), // crée un user si non fourni
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'email_verified_at' => now(),
+            'password' => bcrypt('password'),
+            'remember_token' => Str::random(10),
+            'role' => $role,
+            // Champs existants dans User.php
+            'matricule' => $matricule,
+            'is_blocked' => false,
+            // Champs supplémentaires si tu veux les garder
+            'is_association' => $role === 'association',        // ajouté
+            'matricule_association' => $matricule,             // ajouté
         ];
+    }
+
+    public function unverified(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email_verified_at' => null,
+        ]);
     }
 }

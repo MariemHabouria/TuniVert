@@ -17,6 +17,7 @@ use App\Http\Controllers\TestPaymentController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\AlerteForumController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\EventController;
 
 // QR verification
 require __DIR__ . '/qr-verify.php';

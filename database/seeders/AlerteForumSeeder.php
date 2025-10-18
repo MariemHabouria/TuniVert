@@ -13,12 +13,12 @@ class AlerteForumSeeder extends Seeder
         // Vérifier s'il y a au moins un utilisateur
         $user = User::first() ?? User::factory()->create();
 
-        // Créer quelques alertes avec les nouvelles colonnes
+        // Créer quelques alertes avec le statut correct pour l'ENUM
         AlerteForum::create([
             'titre'          => 'Fuite d\'eau rue centrale',
             'description'    => 'Une fuite d\'eau importante est signalée près du parc central. Débordement sur la chaussée.',
             'gravite'        => 'moyenne',
-            'statut'         => 'active',
+            'statut'         => 'en_cours',
             'localisation'   => 'Rue Centrale, près du Parc',
             'utilisateur_id' => $user->id,
         ]);
@@ -27,7 +27,7 @@ class AlerteForumSeeder extends Seeder
             'titre'          => 'Incendie dans le parc nord',
             'description'    => 'Début d\'incendie signalé, pompiers en route. Évitez la zone.',
             'gravite'        => 'feu',
-            'statut'         => 'active', 
+            'statut'         => 'en_cours',
             'localisation'   => 'Parc Nord, Quartier Résidentiel',
             'utilisateur_id' => $user->id,
         ]);
@@ -36,7 +36,7 @@ class AlerteForumSeeder extends Seeder
             'titre'          => 'Panne d\'éclairage public',
             'description'    => 'Plusieurs lampadaires éteints dans le quartier sud. Prudence la nuit.',
             'gravite'        => 'basse',
-            'statut'         => 'active',
+            'statut'         => 'en_cours',
             'localisation'   => 'Quartier Sud, Avenue des Lilas',
             'utilisateur_id' => $user->id,
         ]);
@@ -45,7 +45,7 @@ class AlerteForumSeeder extends Seeder
             'titre'          => 'Arbre tombé sur la route',
             'description'    => 'Un grand arbre est tombé suite aux intempéries. Route bloquée.',
             'gravite'        => 'haute',
-            'statut'         => 'active',
+            'statut'         => 'en_cours',
             'localisation'   => 'Boulevard Principal, Section Est',
             'utilisateur_id' => $user->id,
         ]);
