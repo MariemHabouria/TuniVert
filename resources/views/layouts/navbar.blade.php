@@ -204,6 +204,81 @@
                         @endguest
 
                     @auth
+                        <!-- 🔔 NOTIFICATIONS DROPDOWN -->
+                        <div class="nav-item dropdown me-3">
+                            <a class="nav-link dropdown-toggle p-0 position-relative" href="#" id="notificationsMenu" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                                <i class="fas fa-bell fa-lg text-primary"></i>
+                                @php
+                                    $notificationCount = Auth::user()->unreadNotifications->count();
+                                @endphp
+                                @if($notificationCount > 0)
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                          style="font-size: 0.6rem;">
+                                        {{ $notificationCount }}
+                                    </span>
+                                @endif
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationsMenu" style="min-width: 320px;">
+                                <li class="px-3 py-2 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">🔔 Notifications</h6>
+                                        @if($notificationCount > 0)
+                                            <form action="{{ route('notifications.mark-all-read') }}" method="POST" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-primary py-0" style="font-size: 0.7rem;">
+                                                    Tout marquer comme lu
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </li>
+                                
+                                @forelse(Auth::user()->unreadNotifications->take(5) as $notification)
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center py-2" 
+                                           href="{{ $notification->data['url'] ?? '#' }}"
+                                           onclick="markNotificationAsRead('{{ $notification->id }}')">
+                                            <div class="me-3 fs-6">
+                                                {!! $notification->data['icon'] ?? '🔔' !!}
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <small class="d-block text-dark">{{ $notification->data['message'] ?? 'Nouvelle notification' }}</small>
+                                                <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                @empty
+                                    <li class="px-3 py-2 text-center">
+                                        <small class="text-muted">Aucune notification</small>
+                                    </li>
+                                @endforelse
+                                
+                                @if($notificationCount > 5)
+                                    <li class="text-center">
+                                        <a class="dropdown-item small py-2" href="{{ route('notifications.index') }}">
+                                            Voir toutes les notifications ({{ $notificationCount }})
+                                        </a>
+                                    </li>
+                                @elseif($notificationCount > 0)
+                                    <li class="text-center">
+                                        <a class="dropdown-item small py-2" href="{{ route('notifications.index') }}">
+                                            Voir toutes les notifications
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="text-center">
+                                        <a class="dropdown-item small py-2" href="{{ route('notifications.index') }}">
+                                            Historique des notifications
+                                        </a>
+                                    </li>
+                                @endif
+                            </ul>
+                        </div>
+
+                        <!-- PROFIL UTILISATEUR -->
                         <div class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button"
                                data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
@@ -233,6 +308,23 @@
                                     </a>
                                 </li>
 
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('notifications.index') }}">
+                                        <i class="fas fa-bell"></i>
+                                        Mes Notifications
+                                        @if($notificationCount > 0)
+                                            <span class="badge bg-danger ms-auto">{{ $notificationCount }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('alertes.create') }}">
+                                        <i class="fas fa-plus-circle"></i>
+                                        Créer une alerte
+                                    </a>
+                                </li>
+
                                 @if(Auth::user()->role === 'association')
                                 <li>
                                     <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
@@ -248,6 +340,8 @@
                                     </a>
                                 </li>
                                 @endif
+
+                                <li><hr class="dropdown-divider"></li>
 
                                 <li>
                                     <form action="{{ route('logout') }}" method="POST" class="d-inline w-100">
@@ -278,3 +372,34 @@
     </div>
 </div>
 <!-- Navbar End -->
+
+<!-- Script pour les notifications -->
+<script>
+function markNotificationAsRead(notificationId) {
+    fetch('/notifications/' + notificationId + '/read', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            // Recharger pour mettre à jour le compteur
+            setTimeout(() => location.reload(), 300);
+        }
+    });
+}
+
+// Actualiser le compteur de notifications toutes les 60 secondes
+setInterval(() => {
+    if (document.querySelector('.navbar-nav')) {
+        // Rechargement simple pour mettre à jour le compteur
+        // Vous pouvez implémenter une actualisation AJAX plus tard
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes('notifications')) {
+            // Ne pas recharger si on est sur la page des notifications
+            // location.reload();
+        }
+    }
+}, 60000);
+</script>

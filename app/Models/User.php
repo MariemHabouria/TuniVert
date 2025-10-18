@@ -41,4 +41,14 @@ class User extends Authenticatable
     return $this->hasMany(Comment::class);
 }
 
+    public function alerts()
+    {
+        return $this->hasMany(AlerteForum::class, 'utilisateur_id');
+    }
+
+    // Méthode pour récupérer les notifications non lues
+    public function getUnreadNotificationsCount()
+    {
+        return $this->unreadNotifications()->count();
+    }
 }
