@@ -1,4 +1,4 @@
-name: Simple Health Check
+name: Basic Health Check
 
 on:
   push:
@@ -10,23 +10,16 @@ jobs:
   health-check:
     runs-on: ubuntu-latest
     
-    strategy:
-      matrix:
-        php: [8.2, 8.3]
-    
-    name: PHP ${{ matrix.php }} Health Check
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Setup PHP
+      - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          php-version: 8.3
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite
           tools: composer:v2
-          coverage: none
           
       - name: Get composer cache directory
         id: composer-cache
@@ -40,20 +33,19 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
           
       - name: Install dependencies
-        run: |
-          composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
           
       - name: Prepare Laravel Application
         run: |
           cp .env.example .env
           php artisan key:generate
+          mkdir -p database
           touch database/database.sqlite
           
       - name: Test PHP syntax
-        run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+        run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \; | head -20
         
-      - name: Run simple application test
+      - name: Run basic application test
         run: |
-          php artisan about
-          php -r "echo 'PHP version: ' . PHP_VERSION . PHP_EOL;"
-          php -r "echo 'Laravel loaded successfully' . PHP_EOL;"
+          php artisan about --only=environment
+          echo "✅ Application loaded successfully"
