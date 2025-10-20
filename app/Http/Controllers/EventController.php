@@ -44,17 +44,65 @@ class EventController extends Controller
 
         $events = $events->latest()->paginate(10);
 
-        // Recommandations
+        // Recommandations améliorées
         $recommendedEvents = collect();
         $jsonPath = base_path('recommendations.json');
 
-        if (auth()->check() && file_exists($jsonPath)) {
-            $data = json_decode(file_get_contents($jsonPath), true);
+        if (auth()->check()) {
             $userId = auth()->id();
-            $eventIds = $data[$userId] ?? [];
-            if (!empty($eventIds)) {
-                $recommendedEvents = Event::whereIn('id', $eventIds)->take(5)->get();
+            
+            // Essayer de charger depuis le fichier JSON
+            if (file_exists($jsonPath)) {
+                $data = json_decode(file_get_contents($jsonPath), true);
+                $eventIds = $data[$userId] ?? [];
+                if (!empty($eventIds)) {
+                    $recommendedEvents = Event::whereIn('id', $eventIds)->take(5)->get();
+                }
             }
+            
+            // Fallback: recommandations basées sur les catégories préférées de l'utilisateur
+            if ($recommendedEvents->isEmpty()) {
+                // Récupérer les événements auxquels l'utilisateur a participé
+                $userParticipations = \DB::table('participants')
+                    ->where('user_id', $userId)
+                    ->pluck('event_id');
+                
+                if ($userParticipations->isNotEmpty()) {
+                    // Trouver les catégories favorites
+                    $favoriteCategories = Event::whereIn('id', $userParticipations)
+                        ->groupBy('category')
+                        ->selectRaw('category, COUNT(*) as count')
+                        ->orderBy('count', 'desc')
+                        ->pluck('category')
+                        ->take(3);
+                    
+                    if ($favoriteCategories->isNotEmpty()) {
+                        $recommendedEvents = Event::whereIn('category', $favoriteCategories)
+                            ->whereNotIn('id', $userParticipations) // Exclure les événements déjà participés
+                            ->where('date', '>=', now())
+                            ->take(5)
+                            ->get();
+                    }
+                }
+                
+                // Fallback final: événements populaires récents
+                if ($recommendedEvents->isEmpty()) {
+                    $recommendedEvents = Event::withCount('participants')
+                        ->where('date', '>=', now())
+                        ->orderBy('participants_count', 'desc')
+                        ->orderBy('created_at', 'desc')
+                        ->take(5)
+                        ->get();
+                }
+            }
+        } else {
+            // Pour les utilisateurs non connectés: événements populaires
+            $recommendedEvents = Event::withCount('participants')
+                ->where('date', '>=', now())
+                ->orderBy('participants_count', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
         }
 
         if ($request->ajax()) {

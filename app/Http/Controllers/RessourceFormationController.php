@@ -37,16 +37,17 @@ class RessourceFormationController extends Controller
             ]);
         }
 
-        // Déterminer la valeur finale de l'URL à enregistrer
+        // Déterminer la valeur finale de l'URL et le chemin à enregistrer
         $finalUrl = null;
+        $finalPath = null;
 
         if (in_array($request->type, ['pdf','ppt']) && $request->hasFile('file')) {
             // Enregistrer le fichier sur le disk "public"
             // => public/storage/formations/ressources/xxxx.pdf
-            $path = $request->file('file')->store('formations/ressources', 'public');
+            $finalPath = $request->file('file')->store('formations/ressources', 'public');
 
             // Génère une URL accessible publiquement (via le symlink storage:link)
-            $finalUrl = Storage::disk('public')->url($path);
+            $finalUrl = Storage::disk('public')->url($finalPath);
         } else {
             // Lien externe (YouTube, Drive, site, …)
             $finalUrl = $request->input('url');
@@ -57,6 +58,7 @@ class RessourceFormationController extends Controller
             'titre' => $request->titre,
             'type'  => $request->type,
             'url'   => $finalUrl,
+            'path'  => $finalPath, // Store the path separately for flexibility
         ]);
 
         return back()->with('status', 'Ressource ajoutée avec succès.');

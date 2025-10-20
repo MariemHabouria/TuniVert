@@ -1,11 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Environs - Environmental & Nature Website Template</title>
+    <title>TuniVert - Plateforme Environnementale Tunisienne</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
+    <meta content="environnement, tunisie, écologie, donations, événements" name="keywords">
+    <meta content="TuniVert - Protégeons l'environnement tunisien ensemble" name="description">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="{{ asset('favicon-16x16.svg') }}">
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="{{ asset('favicon-32x32.svg') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,12 +59,12 @@
                         <img src="img/carousel-1.jpg" class="img-fluid" alt="Image">
                         <div class="carousel-caption">
                             <div class="p-3" style="max-width: 900px;">
-                                <h4 class="text-white text-uppercase fw-bold mb-4" style="letter-spacing: 3px;">WE'll Save Our Planet</h4>
-                                <h1 class="display-1 text-capitalize text-white mb-4">Protect Environment</h1>
-                                <p class="mb-5 fs-5">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
+                                <h4 class="text-white text-uppercase fw-bold mb-4" style="letter-spacing: 3px;">Protégeons Notre Tunisie</h4>
+                                <h1 class="display-1 text-capitalize text-white mb-4">Environnement Durable</h1>
+                                <p class="mb-5 fs-5">TuniVert est votre plateforme dédiée à la protection de l'environnement tunisien. Ensemble, nous pouvons créer un avenir plus vert pour notre pays.
                                 </p>
                                 <div class="d-flex align-items-center justify-content-center">
-                                    <a class="btn-hover-bg btn btn-primary text-white py-3 px-5" href="#">Join With Us</a>
+                                    <a class="btn-hover-bg btn btn-primary text-white py-3 px-5" href="#">Rejoignez-nous</a>
                                 </div>
                             </div>
                         </div>
@@ -67,12 +73,12 @@
                         <img src="img/carousel-2.jpg" class="img-fluid" alt="Image">
                         <div class="carousel-caption">
                             <div class="p-3" style="max-width: 900px;">
-                                <h4 class="text-white text-uppercase fw-bold mb-4" style="letter-spacing: 3px;">WE'll Save Our Planet</h4>
-                                <h1 class="display-1 text-capitalize text-white mb-4">Protect Environment</h1>
-                                <p class="mb-5 fs-5">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
+                                <h4 class="text-white text-uppercase fw-bold mb-4" style="letter-spacing: 3px;">Sauvons Notre Patrimoine</h4>
+                                <h1 class="display-1 text-capitalize text-white mb-4">Biodiversité Tunisienne</h1>
+                                <p class="mb-5 fs-5">Préservons la richesse naturelle de la Tunisie. Des oasis du sud aux forêts du nord, chaque écosystème compte pour notre avenir.
                                 </p>
                                 <div class="d-flex align-items-center justify-content-center">
-                                    <a class="btn-hover-bg btn btn-primary text-white py-3 px-5" href="#">Join With Us</a>
+                                    <a class="btn-hover-bg btn btn-primary text-white py-3 px-5" href="#">Agissez Maintenant</a>
                                 </div>
                             </div>
                         </div>
@@ -81,12 +87,12 @@
                         <img src="img/carousel-3.jpg" class="img-fluid" alt="Image">
                         <div class="carousel-caption">
                             <div class="p-3" style="max-width: 900px;">
-                                <h4 class="text-white text-uppercase fw-bold mb-4" style="letter-spacing: 3px;">WE'll Save Our Planet</h4>
-                                <h1 class="display-1 text-capitalize text-white mb-4">Protect Environment</h1>
-                                <p class="mb-5 fs-5">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
+                                <h4 class="text-white text-uppercase fw-bold mb-4" style="letter-spacing: 3px;">Action Collective</h4>
+                                <h1 class="display-1 text-capitalize text-white mb-4">Communauté Verte</h1>
+                                <p class="mb-5 fs-5">Rejoignez une communauté engagée pour l'environnement. Participez à nos événements, faites des dons et contribuez à un changement positif.
                                 </p>
                                 <div class="d-flex align-items-center justify-content-center">
-                                    <a class="btn-hover-bg btn btn-primary text-white py-3 px-5" href="#">Join With Us</a>
+                                    <a class="btn-hover-bg btn btn-primary text-white py-3 px-5" href="#">Participez</a>
                                 </div>
                             </div>
                         </div>
@@ -118,15 +124,15 @@
                         </div>
                     </div>
                     <div class="col-xl-7">
-                        <h5 class="text-uppercase text-primary">About Us</h5>
-                        <h1 class="mb-4">Our main goal is to protect environment</h1>
-                        <p class="fs-5 mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has
+                        <h5 class="text-uppercase text-primary">À Propos de Nous</h5>
+                        <h1 class="mb-4">Notre mission : protéger l'environnement tunisien</h1>
+                        <p class="fs-5 mb-4">TuniVert est une plateforme innovante dédiée à la protection de l'environnement en Tunisie. Nous connectons les citoyens, les associations et les entreprises pour créer un impact positif durable sur notre écosystème national.
                         </p>
                         <div class="tab-class bg-secondary p-4">
                             <ul class="nav d-flex mb-2">
                                 <li class="nav-item mb-3">
                                     <a class="d-flex py-2 text-center bg-white active" data-bs-toggle="pill" href="#tab-1">
-                                        <span class="text-dark" style="width: 150px;">About</span>
+                                        <span class="text-dark" style="width: 150px;">À Propos</span>
                                     </a>
                                 </li>
                                 <li class="nav-item mb-3">
@@ -146,11 +152,11 @@
                                         <div class="col-12">
                                             <div class="d-flex">
                                                 <div class="text-start my-auto">
-                                                    <h5 class="text-uppercase mb-3">Lorem Ipsum 1</h5>
-                                                    <p class="mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has
+                                                    <h5 class="text-uppercase mb-3">Plateforme Collaborative</h5>
+                                                    <p class="mb-4">TuniVert rassemble tous les acteurs soucieux de l'environnement en Tunisie. Notre plateforme facilite les donations, organise des événements écologiques et sensibilise la population aux enjeux environnementaux.
                                                     </p>
                                                     <div class="d-flex align-items-center justify-content-start">
-                                                        <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Read More</a>
+                                                        <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">En Savoir Plus</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -162,11 +168,11 @@
                                         <div class="col-12">
                                             <div class="d-flex">
                                                 <div class="text-start my-auto">
-                                                    <h5 class="text-uppercase mb-3">Lorem Ipsum 2</h5>
-                                                    <p class="mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has
+                                                    <h5 class="text-uppercase mb-3">Notre Mission</h5>
+                                                    <p class="mb-4">Mobiliser la communauté tunisienne pour la protection de l'environnement à travers des actions concrètes, des campagnes de sensibilisation et un système de financement participatif pour les projets verts.
                                                     </p>
                                                     <div class="d-flex align-items-center justify-content-start">
-                                                        <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Read More</a>
+                                                        <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Notre Impact</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -178,11 +184,11 @@
                                         <div class="col-12">
                                             <div class="d-flex">
                                                 <div class="text-start my-auto">
-                                                    <h5 class="text-uppercase mb-3">Lorem Ipsum 3</h5>
-                                                    <p class="mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has
+                                                    <h5 class="text-uppercase mb-3">Notre Vision</h5>
+                                                    <p class="mb-4">Faire de la Tunisie un modèle de développement durable en Afrique du Nord, où chaque citoyen participe activement à la préservation de l'environnement pour les générations futures.
                                                     </p>
                                                     <div class="d-flex align-items-center justify-content-start">
-                                                        <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Read More</a>
+                                                        <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Nos Projets</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -202,53 +208,53 @@
         <div class="container-fluid service py-5 bg-light">
             <div class="container py-5">
                 <div class="text-center mx-auto pb-5" style="max-width: 800px;">
-                    <h5 class="text-uppercase text-primary">What we do</h5>
-                    <h1 class="mb-0">What we do to protect environment</h1>
+                    <h5 class="text-uppercase text-primary">Nos Services</h5>
+                    <h1 class="mb-0">Comment nous protégeons l'environnement tunisien</h1>
                 </div>
                 <div class="row g-4">
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="service-item">
                             <img src="img/service-1.jpg" class="img-fluid w-100" alt="Image">
                             <div class="service-link">
-                                <a href="#" class="h4 mb-0">Raising money to help</a>
+                                <a href="#" class="h4 mb-0">Collecte de Fonds</a>
                             </div>
                         </div>
-                        <p class="my-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+                        <p class="my-4">Facilitons les donations pour financer des projets environnementaux en Tunisie et soutenir les initiatives locales de protection de la nature.
                         </p>
                     </div>
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="service-item">
                             <img src="img/service-2.jpg" class="img-fluid w-100" alt="Image">
                             <div class="service-link">
-                                <a href="#" class="h4 mb-0"> close work with services</a>
+                                <a href="#" class="h4 mb-0">Partenariats Associatifs</a>
                             </div>
                         </div>
-                        <p class="my-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+                        <p class="my-4">Collaboration étroite avec les associations environnementales tunisiennes pour maximiser l'impact de nos actions collectives.
                         </p>
                     </div>
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="service-item">
                             <img src="img/service-3.jpg" class="img-fluid w-100" alt="Image">
                             <div class="service-link">
-                                <a href="#" class="h4 mb-0">Pro Guided tours only</a>
+                                <a href="#" class="h4 mb-0">Événements Écologiques</a>
                             </div>
                         </div>
-                        <p class="my-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+                        <p class="my-4">Organisation d'événements de sensibilisation et d'actions concrètes pour la protection de l'environnement tunisien.
                         </p>
                     </div>
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="service-item">
                             <img src="img/service-4.jpg" class="img-fluid w-100" alt="Image">
                             <div class="service-link">
-                                <a href="#" class="h4 mb-0">Protecting animal area</a>
+                                <a href="#" class="h4 mb-0">Protection de la Faune</a>
                             </div>
                         </div>
-                        <p class="my-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,
+                        <p class="my-4">Préservation des espèces endémiques tunisiennes et protection des habitats naturels de notre riche biodiversité.
                         </p>
                     </div>
                     <div class="col-12">
                         <div class="d-flex align-items-center justify-content-center">
-                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Read More</a>
+                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">En Savoir Plus</a>
                         </div>
                     </div>
                 </div>
@@ -261,20 +267,20 @@
         <div class="container-fluid donation py-5">
             <div class="container py-5">
                 <div class="text-center mx-auto pb-5" style="max-width: 800px;">
-                    <h5 class="text-uppercase text-primary">Donation</h5>
-                    <h1 class="mb-0">Your money will save our life</h1>
+                    <h5 class="text-uppercase text-primary">Donations</h5>
+                    <h1 class="mb-0">Vos dons protègent l'environnement tunisien</h1>
                 </div>
                 <div class="row g-4">
                     <div class="col-lg-4">
                         <div class="donation-item">
                             <img src="img/donation-1.jpg" class="img-fluid w-100" alt="Image">
                             <div class="donation-content d-flex flex-column">
-                                <h5 class="text-uppercase text-primary mb-4">Organic</h5>
-                                <a href="#" class="btn-hover-color display-6 text-white">Help Us More</a>
-                                <h4 class="text-white mb-4">Protect Environments</h4>
-                                <p class="text-white mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's</p>
+                                <h5 class="text-uppercase text-primary mb-4">Agriculture Bio</h5>
+                                <a href="#" class="btn-hover-color display-6 text-white">Soutenez-nous</a>
+                                <h4 class="text-white mb-4">Agriculture Durable</h4>
+                                <p class="text-white mb-4">Promotion de l'agriculture biologique en Tunisie pour préserver nos sols et notre santé.</p>
                                 <div class="donation-btn d-flex align-items-center justify-content-start">
-                                    <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Donate !</a>
+                                    <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Faire un Don</a>
                                 </div>
                             </div>
                         </div>
@@ -283,12 +289,12 @@
                         <div class="donation-item">
                             <img src="img/service-2.jpg" class="img-fluid w-100" alt="Image">
                             <div class="donation-content d-flex flex-column">
-                                <h5 class="text-uppercase text-primary mb-4">Ecosystem</h5>
-                                <a href="#" class="btn-hover-color display-6 text-white">Help Us More</a>
-                                <h4 class="text-white mb-4">Protect Environments</h4>
-                                <p class="text-white mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's</p>
+                                <h5 class="text-uppercase text-primary mb-4">Écosystème</h5>
+                                <a href="#" class="btn-hover-color display-6 text-white">Agissez Maintenant</a>
+                                <h4 class="text-white mb-4">Protection Marine</h4>
+                                <p class="text-white mb-4">Préservation de la biodiversité marine tunisienne et protection des côtes méditerranéennes.</p>
                                 <div class="donation-btn d-flex align-items-center justify-content-start">
-                                    <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Donate !</a>
+                                    <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Faire un Don</a>
                                 </div>
                             </div>
                         </div>
@@ -297,19 +303,19 @@
                         <div class="donation-item">
                             <img src="img/donation-3.jpg" class="img-fluid w-100" alt="Image">
                             <div class="donation-content d-flex flex-column">
-                                <h5 class="text-uppercase text-primary mb-4">Recycling</h5>
-                                <a href="#" class="btn-hover-color display-6 text-white">Help Us More</a>
-                                <h4 class="text-white mb-4">Protect Environments</h4>
-                                <p class="text-white mb-4">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's</p>
+                                <h5 class="text-uppercase text-primary mb-4">Recyclage</h5>
+                                <a href="#" class="btn-hover-color display-6 text-white">Participez</a>
+                                <h4 class="text-white mb-4">Économie Circulaire</h4>
+                                <p class="text-white mb-4">Développement du recyclage et de l'économie circulaire pour réduire les déchets en Tunisie.</p>
                                 <div class="donation-btn d-flex align-items-center justify-content-start">
-                                    <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Donate !</a>
+                                    <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Faire un Don</a>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-12">
                         <div class="d-flex align-items-center justify-content-center">
-                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">All Donation</a>
+                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Toutes les Donations</a>
                         </div>
                     </div>
                 </div>
@@ -322,15 +328,15 @@
         <div class="container-fluid counter py-5" style="background: linear-gradient(rgba(0, 0, 0, .4), rgba(0, 0, 0, 0.4)), url(img/volunteers-bg.jpg) center center; background-size: cover;">
             <div class="container py-5">
                 <div class="text-center mx-auto pb-5" style="max-width: 800px;">
-                    <h5 class="text-uppercase text-primary">Achievements</h5>
-                    <p class="text-white mb-0">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley
+                    <h5 class="text-uppercase text-primary">Nos Réalisations</h5>
+                    <p class="text-white mb-0">Découvrez l'impact de TuniVert sur la protection de l'environnement tunisien. Chaque action compte pour préserver notre patrimoine naturel et construire un avenir durable.
                     </p>
                 </div>
                 <div class="row g-4">
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="counter-item text-center border p-5">
                             <i class="fas fa-thumbs-up fa-4x text-white"></i>
-                            <h3 class="text-white my-4">Beavers Saved</h3>
+                            <h3 class="text-white my-4">Arbres Plantés</h3>
                             <div class="counter-counting">
                                 <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">3600</span>
                                 <span class="h1 fw-bold text-primary">+</span>
@@ -340,17 +346,17 @@
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="counter-item text-center border p-5">
                             <i class="fas fa-file-invoice-dollar fa-4x text-white"></i>
-                            <h3 class="text-white my-4">Funds Collected</h3>
+                            <h3 class="text-white my-4">Fonds Collectés</h3>
                             <div class="counter-counting text-center border-white w-100" style="border-style: dotted; font-size: 30px;">
                                 <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">513</span>
-                                <span class="h1 fw-bold text-primary">$</span>
+                                <span class="h1 fw-bold text-primary">DT</span>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="counter-item text-center border p-5">
                             <i class="fas fa-user fa-4x text-white"></i>
-                            <h3 class="text-white my-4">Volunteer</h3>
+                            <h3 class="text-white my-4">Volontaires</h3>
                             <div class="counter-counting text-center border-white w-100" style="border-style: dotted; font-size: 30px;">
                                 <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">713</span>
                                 <span class="h1 fw-bold text-primary">+</span>
@@ -360,7 +366,7 @@
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="counter-item text-center border p-5">
                             <i class="fas fa-heart fa-4x text-white"></i>
-                            <h3 class="text-white my-4">Days of Help</h3>
+                            <h3 class="text-white my-4">Jours d'Action</h3>
                             <div class="counter-counting text-center border-white w-100" style="border-style: dotted; font-size: 30px;">
                                 <span class="text-primary fs-2 fw-bold" data-toggle="counter-up">487</span>
                                 <span class="h1 fw-bold text-primary">+</span>
@@ -369,7 +375,7 @@
                     </div>
                     <div class="col-12">
                         <div class="d-flex align-items-center justify-content-center">
-                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Join With Us</a>
+                            <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Rejoignez-nous</a>
                         </div>
                     </div>
                 </div>
@@ -382,9 +388,9 @@
         <div class="container-fluid causes py-5">
             <div class="container py-5">
                 <div class="text-center mx-auto pb-5" style="max-width: 800px;">
-                    <h5 class="text-uppercase text-primary">Recent Causes</h5>
-                    <h1 class="mb-4">The environment needs our protection</h1>
-                    <p class="mb-0">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley
+                    <h5 class="text-uppercase text-primary">Causes Récentes</h5>
+                    <h1 class="mb-4">L'environnement tunisien a besoin de notre protection</h1>
+                    <p class="mb-0">Découvrez nos projets en cours pour la protection de l'environnement en Tunisie. Votre soutien fait la différence pour préserver notre patrimoine naturel.
                     </p>
                 </div>
                 <div class="row g-4">
@@ -406,9 +412,9 @@
                                 </div>
                             </div>
                             <div class="causes-content p-4">
-                                <h4 class="mb-3">First environments activity of</h4>
-                                <p class="mb-4">Help today because tomorrow you may be the one who needs more helping!</p>
-                                <a class="btn-hover-bg btn btn-primary text-white py-2 px-3" href="#">Read More</a>
+                                <h4 class="mb-3">Protection des oasis tunisiennes</h4>
+                                <p class="mb-4">Aidez aujourd'hui car demain vous pourriez avoir besoin d'aide pour protéger notre environnement!</p>
+                                <a class="btn-hover-bg btn btn-primary text-white py-2 px-3" href="#">En Savoir Plus</a>
                             </div>
                         </div>
                     </div>
@@ -494,8 +500,8 @@
         <div class="container-fluid event py-5">
             <div class="container py-5">
                 <div class="text-center mx-auto mb-5" style="max-width: 800px;">
-                    <h5 class="text-uppercase text-primary">Upcoming Events</h5>
-                    <h1 class="mb-0">Help today because tomorrow you may be the one who needs more helping!</h1>
+                    <h5 class="text-uppercase text-primary">Événements à Venir</h5>
+                    <h1 class="mb-0">Participez à nos actions pour l'environnement tunisien!</h1>
                 </div>
                 <div class="event-carousel owl-carousel">
                     <div class="event-item">
@@ -555,8 +561,8 @@
         <div class="container-fluid blog py-5 mb-5">
             <div class="container py-5">
                 <div class="text-center mx-auto pb-5" style="max-width: 800px;">
-                    <h5 class="text-uppercase text-primary">Latest News</h5>
-                    <h1 class="mb-0">Help today because tomorrow you may be the one who needs more helping!
+                    <h5 class="text-uppercase text-primary">Actualités</h5>
+                    <h1 class="mb-0">Restez informés sur la protection de l'environnement en Tunisie
                     </h1>
                 </div>
                 <div class="row g-4">
@@ -657,9 +663,9 @@
         <!-- Gallery Start -->
         <div class="container-fluid gallery py-5 px-0">
             <div class="text-center mx-auto pb-5" style="max-width: 800px;">
-                <h5 class="text-uppercase text-primary">Our work</h5>
-                <h1 class="mb-4">We consider environment welfare</h1>
-                <p class="mb-0">Lorem ipsum dolor sit amet consectur adip sed eiusmod amet consectur adip sed eiusmod tempor ipsum dolor sit amet consectur adip sed eiusmod amet consectur adip sed eiusmod tempor.</p>
+                <h5 class="text-uppercase text-primary">Notre Travail</h5>
+                <h1 class="mb-4">Nous considérons le bien-être environnemental</h1>
+                <p class="mb-0">Découvrez nos actions concrètes pour la protection de l'environnement tunisien à travers notre galerie photo.</p>
             </div>
             <div class="row g-0">
                 <div class="col-lg-4">
@@ -778,16 +784,16 @@
                         </div>
                     </div>
                     <div class="col-lg-7">
-                        <h5 class="text-uppercase text-primary">Become a Volunteer?</h5>
-                        <h1 class="mb-4">Join your hand with us for a better life and beautiful future.</h1>
-                        <p class="mb-4">Lorem ipsum dolor sit amet consectur adip sed eiusmod amet consectur adip sed eiusmod tempor amet consectur adip sed eiusmod amet consectur adip sed eiusmod tempor amet consectur adip sed eiusmod amet consectur adip sed eiusmod tempor.
+                        <h5 class="text-uppercase text-primary">Devenir Volontaire?</h5>
+                        <h1 class="mb-4">Joignez vos mains aux nôtres pour une vie meilleure et un avenir plus vert.</h1>
+                        <p class="mb-4">Rejoignez TuniVert et participez à la protection de l'environnement tunisien. Ensemble, nous pouvons faire la différence pour préserver notre patrimoine naturel et construire un avenir durable.
                         </p>
-                        <p class="text-dark"><i class=" fa fa-check text-primary me-2"></i> We are friendly to each other.</p>
-                        <p class="text-dark"><i class=" fa fa-check text-primary me-2"></i> If you join with us,We will give you free training.</p>
-                        <p class="text-dark"><i class=" fa fa-check text-primary me-2"></i> Its an opportunity to help poor Environments.</p>
-                        <p class="text-dark"><i class=" fa fa-check text-primary me-2"></i> No goal requirements.</p>
-                        <p class="text-dark mb-5"><i class=" fa fa-check text-primary me-2"></i> Joining is tottaly free. We dont need any money from you.</p>
-                        <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Join With Us</a>
+                        <p class="text-dark"><i class=" fa fa-check text-primary me-2"></i> Nous sommes accueillants et bienveillants.</p>
+                        <p class="text-dark"><i class=" fa fa-check text-primary me-2"></i> Formation gratuite pour tous nos volontaires.</p>
+                        <p class="text-dark"><i class=" fa fa-check text-primary me-2"></i> Opportunité d'aider l'environnement tunisien.</p>
+                        <p class="text-dark"><i class=" fa fa-check text-primary me-2"></i> Aucune obligation ou exigence particulière.</p>
+                        <p class="text-dark mb-5"><i class=" fa fa-check text-primary me-2"></i> L'adhésion est totalement gratuite.</p>
+                        <a class="btn-hover-bg btn btn-primary text-white py-2 px-4" href="#">Rejoignez-nous</a>
                     </div>
                 </div>
             </div>
@@ -802,38 +808,38 @@
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="footer-item">
                             <h4 class="mb-4 text-white">Newsletter</h4>
-                            <p class="mb-4">Dolor amet sit justo amet elitr clita ipsum elitr est.Lorem ipsum dolor sit amet, consectetur adipiscing elit consectetur adipiscing elit.</p>
+                            <p class="mb-4">Restez informés de nos actions pour la protection de l'environnement tunisien. Recevez nos actualités et participez à nos initiatives.</p>
                             <div class="position-relative mx-auto">
-                                <input class="form-control border-0 bg-secondary w-100 py-3 ps-4 pe-5" type="text" placeholder="Enter your email">
-                                <button type="button" class="btn-hover-bg btn btn-primary position-absolute top-0 end-0 py-2 mt-2 me-2">SignUp</button>
+                                <input class="form-control border-0 bg-secondary w-100 py-3 ps-4 pe-5" type="text" placeholder="Votre adresse email">
+                                <button type="button" class="btn-hover-bg btn btn-primary position-absolute top-0 end-0 py-2 mt-2 me-2">S'inscrire</button>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="footer-item d-flex flex-column">
-                            <h4 class="mb-4 text-white">Our Services</h4>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Ocean Turtle</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> White Tiger</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Social Ecology</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Loneliness</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Beauty of Life</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Present for You</a>
+                            <h4 class="mb-4 text-white">Nos Services</h4>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Protection Marine</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Forêts Tunisiennes</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Écologie Sociale</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Sensibilisation</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Qualité de Vie</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Avenir Durable</a>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="footer-item d-flex flex-column">
-                            <h4 class="mb-4 text-white">Volunteer</h4>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Karen Dawson</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Jack Simmons</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Michael Linden</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Simon Green</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Natalie Channing</a>
-                            <a href=""><i class="fas fa-angle-right me-2"></i> Caroline Gerwig</a>
+                            <h4 class="mb-4 text-white">Volontaires</h4>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Amira Ben Ali</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Mohamed Trabelsi</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Leila Mansouri</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Ahmed Gharbi</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Fatma Jendoubi</a>
+                            <a href=""><i class="fas fa-angle-right me-2"></i> Karim Bouazizi</a>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-6 col-xl-3">
                         <div class="footer-item">
-                            <h4 class="mb-4 text-white">Our Gallery</h4>
+                            <h4 class="mb-4 text-white">Notre Galerie</h4>
                             <div class="row g-2">
                                 <div class="col-4">
                                     <div class="footer-gallery">
@@ -897,7 +903,7 @@
             <div class="container">
                 <div class="row g-4 align-items-center">
                     <div class="col-md-4 text-center text-md-start mb-md-0">
-                        <span class="text-body"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Your Site Name</a>, All right reserved.</span>
+                        <span class="text-body"><a href="#"><i class="fas fa-copyright text-light me-2"></i>TuniVert</a>, Tous droits réservés.</span>
                     </div>
                     <div class="col-md-4 text-center">
                         <div class="d-flex align-items-center justify-content-center">

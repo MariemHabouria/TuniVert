@@ -19,9 +19,13 @@ use App\Http\Controllers\AlerteForumController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\MetricsController;
-
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ChatbotEventController;
+use App\Http\Controllers\FormationChatController;
+use App\Http\Controllers\QuizController;
 // QR verification
-require __DIR__ . '/qr-verify.php';
+// Include test upload routes for debugging
+require __DIR__.'/test-upload.php';
 
 // Metrics for Prometheus
 Route::get('/metrics', [MetricsController::class, 'index'])->name('metrics');
@@ -96,7 +100,14 @@ Route::get('events/browse', function() {
 Route::get('events/{event}', [EventController::class, 'show'])->name('events.show');
 // Routes protégées
 Route::middleware('auth')->group(function () {
+    // Profile routes
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/deactivate', [ProfileController::class, 'deactivate'])->name('profile.deactivate');
+    Route::delete('/profile', [ProfileController::class, 'delete'])->name('profile.delete');
+    
 // event
 
 Route::post('events', [EventController::class, 'store'])->name('events.store');
@@ -225,28 +236,31 @@ Route::prefix('scores')->name('scores.')->middleware('auth')->group(function () 
 |--------------------------------------------------------------------------
 | Forums & Alertes - NOUVELLES FONCTIONNALITÉS
 |--------------------------------------------------------------------------
-*/Route::middleware('auth')->group(function () {
+*/
+
+Route::middleware('auth')->group(function () {
     // Alertes - création, édition, suppression
     Route::get('/alertes/create', [AlerteForumController::class, 'create'])->name('alertes.create');
     Route::post('/alertes', [AlerteForumController::class, 'store'])->name('alertes.store');
     Route::get('/alertes/{id}/edit', [AlerteForumController::class, 'edit'])->name('alertes.edit');
     Route::put('/alertes/{id}', [AlerteForumController::class, 'update'])->name('alertes.update');
-    Route::delete('/alertes/{id}', [AlerteForumController::class, 'destroy'])->name('alertes.destroy');});
+    Route::delete('/alertes/{id}', [AlerteForumController::class, 'destroy'])->name('alertes.destroy');
+    
     // Nouvelles routes pour les fonctionnalités avancées
     Route::post('/alertes/{id}/resoudre', [AlerteForumController::class, 'marquerResolue'])->name('alertes.marquer-resolue');
     Route::post('/alertes/{id}/commenter', [AlerteForumController::class, 'ajouterCommentaire'])->name('alertes.ajouter-commentaire');
     Route::post('/alertes/{id}/partager', [AlerteForumController::class, 'partager'])->name('alertes.partager');
     Route::get('/alertes/carte', [AlerteForumController::class, 'carte'])->name('alertes.carte');
     Route::get('/alertes/statistiques', [AlerteForumController::class, 'statistiques'])->name('alertes.statistiques');
+});
 
 Route::resource('forums', ForumController::class);
 Route::post('/forums/{id}/reply', [ForumController::class, 'reply'])->middleware('auth')->name('forums.reply');
 
-Route::resource('alertes', AlerteForumController::class)->middleware('auth')->except(['index','show']);
+// Public routes for alertes (index, show)
 Route::resource('alertes', AlerteForumController::class)->only(['index','show']);
-Route::middleware('auth')->group(function () {
-    // ... autres routes ...
 
+Route::middleware('auth')->group(function () {
     // Route pour supprimer un commentaire
     Route::delete('/commentaires/{id}', [AlerteForumController::class, 'destroyCommentaire'])->name('commentaires.destroy');
 });
@@ -272,13 +286,6 @@ Route::middleware('auth')->group(function () {
     // Système de réponses aux forums
     Route::post('/forums/{forum}/reponses', [ForumController::class, 'storeReponse'])->name('forums.reponses.store');
     Route::post('/forums/{forum}/reponses/{reponse}/solution', [ForumController::class, 'marquerSolution'])->name('forums.reponses.solution');
-    
-    // Alertes - création, édition, suppression
-    Route::get('/alertes/create', [AlerteForumController::class, 'create'])->name('alertes.create');
-    Route::post('/alertes', [AlerteForumController::class, 'store'])->name('alertes.store');
-    Route::get('/alertes/{id}/edit', [AlerteForumController::class, 'edit'])->name('alertes.edit');
-    Route::put('/alertes/{id}', [AlerteForumController::class, 'update'])->name('alertes.update');
-    Route::delete('/alertes/{id}', [AlerteForumController::class, 'destroy'])->name('alertes.destroy');
     
     // Notifications
     Route::prefix('notifications')->name('notifications.')->group(function () {
@@ -407,6 +414,8 @@ Route::prefix('associations')->name('associations.')->group(function () {
             Route::get('{id}/participants', [AdminController::class, 'challengesParticipations'])->name('participations');
             Route::get('all-scores', [AdminController::class, 'allScores'])->name('allScores');
             Route::get('scores/tous', [AdminController::class, 'allScores'])->name('all_scores');
+            Route::get('{id}/edit', [AdminController::class, 'challengesEdit'])->name('edit');
+            Route::put('{id}', [AdminController::class, 'challengesUpdate'])->name('update');
             Route::post('{id}/toggle', [AdminController::class, 'toggleChallenge'])->name('toggle');
             Route::post('participants/{id}/action', [AdminController::class, 'participantAction'])->name('participants.action');
         });
@@ -423,6 +432,7 @@ Route::prefix('associations')->name('associations.')->group(function () {
         Route::prefix('formations')->name('formations.')->group(function () {
             Route::get('/', [AdminController::class, 'formationsIndex'])->name('index');
             Route::get('/create', [AdminController::class, 'formationsCreate'])->name('create');
+            Route::post('/store', [AdminController::class, 'formationsStore'])->name('store');
             Route::get('/inscriptions', [AdminController::class, 'formationsInscriptions'])->name('inscriptions');
         });
 
@@ -443,6 +453,21 @@ Route::prefix('associations')->name('associations.')->group(function () {
             Route::post('/entries/{id}/send-receipt', [AdminController::class, 'donationsSendReceipt'])->name('entries.sendReceipt');
             Route::delete('/entries/{id}', [AdminController::class, 'donationsDestroy'])->name('entries.destroy');
         });
+    });
+
+    // ÉVÉNEMENTS ADMIN
+    Route::prefix('evenements')->name('evenements.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\EvenementsController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\EvenementsController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\EvenementsController::class, 'store'])->name('store');
+        Route::get('/{evenement}', [\App\Http\Controllers\Admin\EvenementsController::class, 'show'])->name('show');
+        Route::get('/{evenement}/edit', [\App\Http\Controllers\Admin\EvenementsController::class, 'edit'])->name('edit');
+        Route::put('/{evenement}', [\App\Http\Controllers\Admin\EvenementsController::class, 'update'])->name('update');
+        Route::delete('/{evenement}', [\App\Http\Controllers\Admin\EvenementsController::class, 'destroy'])->name('destroy');
+        
+        // AJAX endpoints for participants and comments
+        Route::get('/{evenement}/participants', [\App\Http\Controllers\Admin\EvenementsController::class, 'getParticipants'])->name('participants');
+        Route::get('/{evenement}/comments', [\App\Http\Controllers\Admin\EvenementsController::class, 'getComments'])->name('comments');
     });
 
 
@@ -484,6 +509,299 @@ if (config('services.testpay.enabled')) {
 Route::post('/webhooks/paymee', [DonationController::class, 'paymeeWebhook'])
         ->name('webhooks.paymee')
             ->middleware('api');
+
+// Test route for force badge creation (development only)
+Route::get('/force-badge', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    $user = auth()->user();
+    
+    // Create a test donation that will trigger badges
+    $don = \App\Models\Donation::create([
+        'utilisateur_id' => $user->id,
+        'is_anonymous' => false,
+        'evenement_id' => null,
+        'montant' => 100.00, // Should trigger bronze badge
+        'moyen_paiement' => 'test',
+        'transaction_id' => 'force_badge_' . time(),
+        'date_don' => now(),
+    ]);
+    
+    // Trigger gamification
+    $gamificationService = app(\App\Services\GamificationService::class);
+    $result = $gamificationService->onDonation($don);
+    
+    // Set badges in session
+    if (!empty($result['new_badges'])) {
+        session()->flash('new_badges', $result['new_badges']);
+        session()->flash('points_earned', $result['points']);
+    }
+    
+    return redirect('/donations/history')->with('status', 'Force badge test completed! Badges: ' . count($result['new_badges']));
+})->name('force.badge');
+
+// Test route for badge notification (development only)
+Route::get('/test-badge', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    // Simulate earning new badges
+    session()->flash('new_badges', [
+        [
+            'slug' => 'donor_bronze', 
+            'name' => 'Donateur Bronze', 
+            'icon' => '🥉', 
+            'description' => 'Vous avez atteint 50 TND de dons! Bravo pour votre générosité.'
+        ],
+        [
+            'slug' => 'protector_oceans', 
+            'name' => 'Protecteur des Océans', 
+            'icon' => '🌊', 
+            'description' => 'Vous avez soutenu la cause Écosystème avec plus de 100 TND!'
+        ]
+    ]);
+    
+    return redirect('/donations/history')->with('status', 'Badges de test ajoutés!');
+})->name('test.badge');
+
+// Test route for badge notification on events page
+Route::get('/test-badge-events', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    // Simulate earning new badges
+    session()->flash('new_badges', [
+        [
+            'slug' => 'donor_silver', 
+            'name' => 'Donateur Argent', 
+            'icon' => '🥈', 
+            'description' => 'Vous avez atteint 200 TND de dons! Votre engagement fait la différence.'
+        ]
+    ]);
+    
+    return redirect('/events')->with('status', 'Badge de test ajouté!');
+})->name('test.badge.events');
+
+// Force badge award and create real donation
+Route::get('/force-badge', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    try {
+        // Create a test donation to trigger real badge logic
+        $donation = \App\Models\Donation::create([
+            'utilisateur_id' => auth()->id(),
+            'is_anonymous' => false,
+            'evenement_id' => 1,
+            'montant' => 100.00, // This should trigger bronze badge
+            'moyen_paiement' => 'test_force',
+            'transaction_id' => 'force_' . time(),
+            'date_don' => now(),
+        ]);
+        
+        // Force badge evaluation
+        $service = app(\App\Services\GamificationService::class);
+        $result = $service->onDonation($donation);
+        
+        if (!empty($result['new_badges'])) {
+            session()->flash('new_badges', $result['new_badges']);
+            return redirect('/donations/history')->with('status', 'Force badge test completed! ' . count($result['new_badges']) . ' badges awarded.');
+        } else {
+            return redirect('/donations/history')->with('status', 'Force badge test completed but no badges awarded. Check logs.');
+        }
+        
+    } catch (\Exception $e) {
+        return redirect('/donations/history')->with('error', 'Error: ' . $e->getMessage());
+    }
+})->name('force.badge');
+
+// Test badge popup page
+Route::get('/test-badge-page', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    return view('test-badge');
+})->name('test.badge.page');
+
+// Simple badge test that always works
+Route::get('/test-badge-simple', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    // Always set badge session data for testing
+    session()->flash('new_badges', [
+        [
+            'slug' => 'test_badge', 
+            'name' => 'Badge de Test', 
+            'icon' => '🎯', 
+            'description' => 'Ce badge confirme que le système de notification fonctionne parfaitement!'
+        ]
+    ]);
+    
+    return redirect('/test-badge-page')->with('status', 'Badge de test défini! Le popup devrait apparaître.');
+})->name('test.badge.simple');
+
+// Test specifically for Protecteur des Océans badge
+Route::get('/test-protecteur-oceans', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    // Set Protecteur des Océans badge session data for testing
+    session()->flash('new_badges', [
+        [
+            'slug' => 'protector_oceans', 
+            'name' => 'Protecteur des Océans', 
+            'icon' => '🌊', 
+            'description' => 'A soutenu la cause Écosystème (≥100 TND)'
+        ]
+    ]);
+    
+    return redirect('/test-badge-page')->with('status', 'Badge Protecteur des Océans défini! Le popup devrait apparaître.');
+})->name('test.protector.oceans');
+
+// Test actual donation to event 2 to earn Protecteur des Océans
+Route::get('/test-earn-protecteur-oceans', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    $user = Auth::user();
+    
+    // Create a donation to event 2 (Écosystème) to trigger Protecteur des Océans badge
+    $don = new App\Models\Donation([
+        'utilisateur_id' => $user->id,  // Correct field name
+        'evenement_id' => 2, // Event 2 is Écosystème 
+        'montant' => 100, // 100 TND to meet threshold
+        'moyen_paiement' => 'test',
+        'transaction_id' => 'test_protector_' . time(),
+        'date_don' => now(),
+        'statut' => 'confirmé'
+    ]);
+    $don->save();
+    
+    try {
+        $gamificationService = app(\App\Services\GamificationService::class);
+        $result = $gamificationService->onDonation($don);
+        
+        \Log::info('Test Protecteur des Océans - Gamification result', [
+            'result' => $result,
+            'new_badges' => $result['new_badges'] ?? [],
+            'user_id' => $user->id,
+            'donation_id' => $don->id,
+            'event_id' => $don->evenement_id
+        ]);
+        
+        if (!empty($result['new_badges'])) {
+            session()->flash('new_badges', $result['new_badges']);
+            \Log::info('Session flash set for new_badges', [
+                'session_badges' => session('new_badges'),
+                'result_badges' => $result['new_badges']
+            ]);
+            return redirect('/test-badge-page')->with('status', 'Donation créée! Badge earned: ' . count($result['new_badges']) . ' badge(s)');
+        } else {
+            return redirect('/test-badge-page')->with('error', 'Aucun nouveau badge earned. Vous avez peut-être déjà ce badge.');
+        }
+    } catch (\Throwable $e) {
+        \Log::error('Test Protecteur des Océans error', ['error' => $e->getMessage()]);
+        return redirect('/test-badge-page')->with('error', 'Erreur: ' . $e->getMessage());
+    }
+})->name('test.earn.protector.oceans');
+
+// Reset protector_oceans badge for testing
+Route::get('/reset-protector-badge', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    $user = Auth::user();
+    
+    // Remove protector_oceans badge if it exists
+    $badge = DB::table('badges')->where('slug', 'protector_oceans')->first();
+    if ($badge) {
+        DB::table('user_badges')
+            ->where('user_id', $user->id)
+            ->where('badge_id', $badge->id)
+            ->delete();
+    }
+    
+    // Also remove test donations to event 2 to reset the threshold
+    DB::table('donations')
+        ->where('utilisateur_id', $user->id)
+        ->where('evenement_id', 2)
+        ->where('moyen_paiement', 'test')
+        ->delete();
+    
+    return redirect('/test-badge-page')->with('status', 'Badge Protecteur des Océans supprimé et donations de test event 2 supprimées!');
+})->name('test.reset.protector');
+
+// Check current user's badge status and event 2 donations
+Route::get('/check-protector-status', function () {
+    if (!auth()->check()) {
+        return redirect('/login');
+    }
+    
+    $user = Auth::user();
+    
+    // Check if user has protector_oceans badge
+    $badge = DB::table('badges')->where('slug', 'protector_oceans')->first();
+    $hasBadge = false;
+    if ($badge) {
+        $hasBadge = DB::table('user_badges')
+            ->where('user_id', $user->id)
+            ->where('badge_id', $badge->id)
+            ->exists();
+    }
+    
+    // Check total donations to event 2
+    $event2Total = DB::table('donations')
+        ->where('utilisateur_id', $user->id)
+        ->where('evenement_id', 2)
+        ->sum('montant');
+    
+    // Check all donations to event 2
+    $event2Donations = DB::table('donations')
+        ->where('utilisateur_id', $user->id)
+        ->where('evenement_id', 2)
+        ->orderBy('date_don', 'desc')
+        ->get();
+    
+    $statusHtml = "
+    <div style='padding: 20px; font-family: Arial; line-height: 1.6;'>
+        <h2>Statut Badge Protecteur des Océans - User ID: {$user->id}</h2>
+        <p><strong>Badge possédé:</strong> " . ($hasBadge ? '✅ OUI' : '❌ NON') . "</p>
+        <p><strong>Total donations Event 2:</strong> {$event2Total} TND</p>
+        <p><strong>Seuil requis:</strong> 100 TND</p>
+        <p><strong>Éligible:</strong> " . ($event2Total >= 100 ? '✅ OUI' : '❌ NON') . "</p>
+        
+        <h3>Donations Event 2 (dernières 10):</h3>
+        <table border='1' style='border-collapse: collapse; width: 100%;'>
+            <tr><th>Date</th><th>Montant</th><th>Méthode</th><th>Transaction ID</th><th>Statut</th></tr>";
+    
+    foreach ($event2Donations->take(10) as $don) {
+        $statusHtml .= "<tr>
+            <td>{$don->date_don}</td>
+            <td>{$don->montant} TND</td>
+            <td>{$don->moyen_paiement}</td>
+            <td>{$don->transaction_id}</td>
+            <td>{$don->statut}</td>
+        </tr>";
+    }
+    
+    $statusHtml .= "</table>
+        <br><a href='/test-badge-page' style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Retour aux tests</a>
+    </div>";
+    
+    return response($statusHtml);
+})->name('check.protector.status');
+
 // 404 fallback
 /*
 |--------------------------------------------------------------------------

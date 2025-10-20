@@ -22,6 +22,12 @@ class Challenge extends Model
         'slug',
     ];
 
+    protected $casts = [
+        'date_debut' => 'date',
+        'date_fin' => 'date',
+        'actif' => 'boolean',
+    ];
+
     // Relation avec l'organisateur
     public function organisateur()
     {

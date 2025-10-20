@@ -3,10 +3,16 @@
 
   <head>
     <meta charset="utf-8">
-    <title>My Donations - Tunivert</title>
+    <title>My Donations - TuniVert</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="{{ asset('favicon-16x16.svg') }}">
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="{{ asset('favicon-32x32.svg') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
 
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -342,6 +348,7 @@
     <!-- Spinner End -->
 
     @include('layouts.navbar')
+    @include('partials.badge-notification')
     <div style="height: 120px"></div>
 
     <!-- Header Start -->
@@ -456,6 +463,134 @@
       </div>
       @endisset
 
+      <!-- Progression sur Objectifs Section -->
+      @isset($donationSum)
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-chart-line text-primary me-2"></i>
+              Progression sur Objectifs
+            </h5>
+            <small class="text-muted">Objectifs de badges</small>
+          </div>
+          
+          @php
+            $currentTotal = (float)($donationSum ?? 0);
+            $currentEvent2 = (float)($event2Sum ?? 0);
+            
+            $objectives = [
+              [
+                'name' => 'Donateur Bronze',
+                'target' => 50,
+                'current' => $currentTotal,
+                'icon' => '🥉',
+                'color' => 'warning',
+                'description' => 'Atteindre 50 TND de dons au total'
+              ],
+              [
+                'name' => 'Donateur Argent', 
+                'target' => 200,
+                'current' => $currentTotal,
+                'icon' => '🥈',
+                'color' => 'secondary',
+                'description' => 'Atteindre 200 TND de dons au total'
+              ],
+              [
+                'name' => 'Donateur Or',
+                'target' => 500,
+                'current' => $currentTotal,
+                'icon' => '🥇',
+                'color' => 'warning',
+                'description' => 'Atteindre 500 TND de dons au total'
+              ],
+              [
+                'name' => 'Protecteur des Océans',
+                'target' => 100,
+                'current' => $currentEvent2,
+                'icon' => '🌊',
+                'color' => 'info',
+                'description' => 'Atteindre 100 TND de dons sur l\'événement Écosystème'
+              ]
+            ];
+          @endphp
+          
+          @foreach($objectives as $objective)
+            @php
+              $progress = min(100, ($objective['current'] / $objective['target']) * 100);
+              $remaining = max(0, $objective['target'] - $objective['current']);
+              $isCompleted = $objective['current'] >= $objective['target'];
+            @endphp
+            
+            <div class="mb-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center">
+                  <span style="font-size: 1.2rem;" class="me-2">{{ $objective['icon'] }}</span>
+                  <div>
+                    <h6 class="mb-0 {{ $isCompleted ? 'text-success' : '' }}">
+                      {{ $objective['name'] }}
+                      @if($isCompleted)
+                        <i class="fas fa-check-circle text-success ms-1"></i>
+                      @endif
+                    </h6>
+                    <small class="text-muted">{{ $objective['description'] }}</small>
+                  </div>
+                </div>
+                <div class="text-end">
+                  <div class="fw-bold {{ $isCompleted ? 'text-success' : 'text-primary' }}">
+                    {{ number_format($objective['current'], 0) }} / {{ number_format($objective['target'], 0) }} TND
+                  </div>
+                  @if(!$isCompleted && $remaining > 0)
+                    <small class="text-muted">{{ number_format($remaining, 0) }} TND restants</small>
+                  @else
+                    <small class="text-success"><i class="fas fa-trophy me-1"></i>Objectif atteint!</small>
+                  @endif
+                </div>
+              </div>
+              
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-{{ $objective['color'] }} {{ $isCompleted ? 'progress-bar-striped progress-bar-animated' : '' }}" 
+                     role="progressbar" 
+                     style="width: {{ $progress }}%;" 
+                     aria-valuenow="{{ $progress }}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                </div>
+              </div>
+              
+              @if($isCompleted)
+                <div class="mt-1">
+                  <small class="text-success">
+                    <i class="fas fa-star me-1"></i>
+                    Badge débloqué! Continuez vos dons pour découvrir d'autres récompenses.
+                  </small>
+                </div>
+              @endif
+            </div>
+          @endforeach
+          
+          <div class="mt-3 p-3 bg-light rounded">
+            <div class="row text-center">
+              <div class="col-md-6">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <i class="fas fa-coins text-warning me-2"></i>
+                  <strong>Total des dons</strong>
+                </div>
+                <h4 class="text-primary mb-0">{{ number_format($currentTotal, 2) }} TND</h4>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                  <i class="fas fa-water text-info me-2"></i>
+                  <strong>Dons Écosystème</strong>
+                </div>
+                <h4 class="text-info mb-0">{{ number_format($currentEvent2, 2) }} TND</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      @endisset
+
       <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
           <div class="d-flex flex-wrap gap-3 align-items-center justify-content-between">
@@ -553,8 +688,8 @@
     <a href="#" class="btn btn-primary btn-primary-outline-0 btn-md-square back-to-top"><i class="fa fa-arrow-up"></i></a>
 
     @if (session('new_badges'))
-    <!-- Badge Unlock Modal -->
-    <div class="modal fade" id="badgeModal" tabindex="-1" aria-labelledby="badgeModalLabel" aria-hidden="true">
+    <!-- Badge Unlock Modal (Only if global popup was not shown) -->
+    <div class="modal fade" id="badgeModal" tabindex="-1" aria-labelledby="badgeModalLabel" aria-hidden="true" style="display: none;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0">
           <div class="badge-modal-header">
@@ -616,9 +751,17 @@
     @if (session('new_badges'))
       <script>
         (function(){
+          // Only show modal if global badge notification is not present
+          var globalNotification = document.getElementById('badgeNotificationOverlay');
           var modalEl = document.getElementById('badgeModal');
-          if (modalEl) {
-            var m = new bootstrap.Modal(modalEl); m.show();
+          
+          if (!globalNotification && modalEl) {
+            var m = new bootstrap.Modal(modalEl); 
+            m.show();
+          } else if (globalNotification) {
+            // Global notification is showing, hide the modal and let global handle it
+            console.log('Global badge notification is active, skipping history modal');
+            return;
           }
           
           // Enhanced confetti celebration

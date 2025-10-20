@@ -7,10 +7,10 @@
         </div>
         <div>
             <a class="navbar-brand brand-logo" href="{{ route('admin.dashboard') }}">
-                <img src="{{ asset('admin/images/logo.svg') }}" alt="logo" />
+                <img src="{{ asset('admin/images/tunivert-logo.svg') }}" alt="TuniVert" style="height: 40px;" />
             </a>
             <a class="navbar-brand brand-logo-mini" href="{{ route('admin.dashboard') }}">
-                <img src="{{ asset('admin/images/logo-mini.svg') }}" alt="logo" />
+                <img src="{{ asset('admin/images/tunivert-logo-mini.svg') }}" alt="TuniVert" style="height: 32px;" />
             </a>
         </div>
     </div>

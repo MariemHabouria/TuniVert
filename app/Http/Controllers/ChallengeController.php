@@ -8,6 +8,7 @@ use App\Models\ScoreChallenge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 class ChallengeController extends Controller
 {
@@ -62,7 +63,12 @@ class ChallengeController extends Controller
 public function soumettrePreuve(Request $request, $challengeId)
 {
     $request->validate([
-        'preuve' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:5120',
+        'preuve' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:10240', // 10MB
+    ], [
+        'preuve.required' => 'Veuillez sélectionner un fichier.',
+        'preuve.file' => 'Le fichier sélectionné n\'est pas valide.',
+        'preuve.mimes' => 'Seuls les fichiers JPG, JPEG, PNG, PDF, DOC et DOCX sont acceptés.',
+        'preuve.max' => 'Le fichier ne doit pas dépasser 10 MB.',
     ]);
 
     $participant = ParticipantChallenge::where('challenge_id', $challengeId)
@@ -80,8 +86,26 @@ public function soumettrePreuve(Request $request, $challengeId)
             'statut' => 'en_cours', // temporaire avant évaluation IA
         ]);
 
+        // Construire le chemin complet vers le fichier
+        $fullFilePath = storage_path('app/public/' . $filePath);
+        
+        // Vérifier que le fichier existe et n'est pas un dossier
+        if (!file_exists($fullFilePath)) {
+            return redirect()->back()->with('error', 'Le fichier uploadé est introuvable.');
+        }
+        
+        if (is_dir($fullFilePath)) {
+            return redirect()->back()->with('error', 'Erreur: le chemin pointe vers un dossier au lieu d\'un fichier.');
+        }
+
         // Évaluer la preuve avec HuggingFace
-        $scorePourcentage = $this->evaluateProof(storage_path('app/public/' . $filePath));
+        try {
+            $scorePourcentage = $this->evaluateProof($fullFilePath);
+        } catch (\Exception $e) {
+            // Si l'évaluation IA échoue, on accepte la preuve par défaut
+            \Log::error('Erreur évaluation IA: ' . $e->getMessage());
+            $scorePourcentage = 75; // Score par défaut accepté
+        }
 
         // Mettre à jour le statut selon IA
         $participant->update([
@@ -115,25 +139,60 @@ return redirect()->back()->with('success',
  */
 private function evaluateProof($filePath)
 {
-    $hfToken = env('HUGGINGFACE_API_KEY');
+    try {
+        // Vérifications supplémentaires
+        if (!file_exists($filePath)) {
+            throw new \Exception("Fichier non trouvé: $filePath");
+        }
+        
+        if (is_dir($filePath)) {
+            throw new \Exception("Le chemin pointe vers un dossier: $filePath");
+        }
+        
+        // Vérifier que le fichier n'est pas vide
+        if (filesize($filePath) == 0) {
+            throw new \Exception("Le fichier est vide: $filePath");
+        }
 
-    // Lire le fichier en base64
-    $fileContent = base64_encode(file_get_contents($filePath));
+        $hfToken = env('HUGGINGFACE_API_KEY');
+        
+        // Si pas de token HuggingFace, retourner un score par défaut
+        if (empty($hfToken)) {
+            \Log::info('Pas de token HuggingFace configuré, score par défaut appliqué');
+            return 75; // Score par défaut acceptable
+        }
 
-    // Appel API HuggingFace (exemple avec modèle image: vit-base-patch16-224)
-    $response = Http::withHeaders([
-        'Authorization' => "Bearer $hfToken",
-    ])->post('https://api-inference.huggingface.co/models/google/vit-base-patch16-224', [
-        'inputs' => $fileContent
-    ]);
+        // Lire le fichier en base64
+        $fileContent = base64_encode(file_get_contents($filePath));
 
-    $result = $response->json();
+        // Appel API HuggingFace (exemple avec modèle image: vit-base-patch16-224)
+        $response = Http::timeout(30)->withHeaders([
+            'Authorization' => "Bearer $hfToken",
+        ])->post('https://api-inference.huggingface.co/models/google/vit-base-patch16-224', [
+            'inputs' => $fileContent
+        ]);
 
-    // Vérifie que la réponse contient bien un score
-    if (isset($result[0]['score'])) {
-        $score = floatval($result[0]['score']); // score entre 0 et 1
-        $pourcentage = round($score * 100, 2); // convertir en pourcentage
-        return $pourcentage; // retourne le pourcentage exact
+        if (!$response->successful()) {
+            \Log::warning('Échec API HuggingFace: ' . $response->status());
+            return 75; // Score par défaut si API échoue
+        }
+
+        $result = $response->json();
+
+        // Vérifie que la réponse contient bien un score
+        if (isset($result[0]['score'])) {
+            $score = floatval($result[0]['score']); // score entre 0 et 1
+            $pourcentage = round($score * 100, 2); // convertir en pourcentage
+            return $pourcentage; // retourne le pourcentage exact
+        }
+        
+        // Si pas de score dans la réponse, retourner score par défaut
+        \Log::info('Pas de score dans la réponse HuggingFace, score par défaut appliqué');
+        return 75;
+        
+    } catch (\Exception $e) {
+        \Log::error('Erreur dans evaluateProof: ' . $e->getMessage());
+        throw $e; // Re-lancer l'exception pour gestion au niveau supérieur
     }
 
     return 0; // si erreur

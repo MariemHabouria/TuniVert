@@ -7,7 +7,23 @@
     <div class="col-12">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title mb-4">Gestion des Challenges</h4>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="card-title">🏆 Gestion des Challenges</h4>
+                    @if(Route::has('admin.challenges.create'))
+                        <a href="{{ route('admin.challenges.create') }}" class="btn btn-primary">
+                            <i class="mdi mdi-plus"></i> Nouveau Challenge
+                        </a>
+                    @endif
+                </div>
+
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                @endif
 
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
@@ -39,11 +55,26 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.challenges.participations', $challenge->id) }}" class="btn btn-sm btn-info">Participants</a>
+                                        <a href="{{ route('admin.challenges.participations', $challenge->id) }}" 
+                                           class="btn btn-sm btn-info" 
+                                           title="Voir les participants">
+                                            <i class="mdi mdi-account-group"></i> Participants
+                                        </a>
 
-                                        <form action="{{ route('admin.challenges.toggle', $challenge->id) }}" method="POST" style="display:inline-block;">
+                                        <a href="{{ route('admin.challenges.edit', $challenge->id) }}" 
+                                           class="btn btn-sm btn-warning" 
+                                           title="Modifier le challenge">
+                                            <i class="mdi mdi-pencil"></i> Modifier
+                                        </a>
+
+                                        <form action="{{ route('admin.challenges.toggle', $challenge->id) }}" 
+                                              method="POST" 
+                                              style="display:inline-block;">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm btn-{{ $challenge->actif ? 'warning' : 'success' }}">
+                                            <button type="submit" 
+                                                    class="btn btn-sm btn-{{ $challenge->actif ? 'warning' : 'success' }}"
+                                                    title="{{ $challenge->actif ? 'Désactiver' : 'Activer' }} le challenge">
+                                                <i class="mdi mdi-{{ $challenge->actif ? 'pause' : 'play' }}"></i>
                                                 {{ $challenge->actif ? 'Bloquer' : 'Débloquer' }}
                                             </button>
                                         </form>

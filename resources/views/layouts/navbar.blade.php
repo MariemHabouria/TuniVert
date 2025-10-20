@@ -2,7 +2,7 @@
 <style>
     /* Compact, single-line navbar that visually pairs with the topbar */
     .topbar {
-        background: #212529; /* consistent dark topbar across pages */
+        background: #212529 !important; /* consistent dark topbar across pages */
         padding: 6px 0; /* match spacing across pages */
         font-size: .95rem;
         border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -17,36 +17,103 @@
     }
     .topbar .btn-square:hover{ background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); }
     .tunivert-nav { 
-        background: #ffffff; 
-        border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        background: #1a5f3f !important; /* Dark green to match TuniVert palette */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         transition: box-shadow .2s ease;
     }
-    .tunivert-nav.scrolled { box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08); }
-    .tunivert-nav .navbar-brand h1 { font-size: 2rem; margin: 0; letter-spacing: .3px; }
-    .tunivert-nav #navbarCollapse { display: flex; align-items: center; }
+    .tunivert-nav.scrolled { box-shadow: 0 6px 24px rgba(26, 95, 63, 0.3); }
+    .tunivert-nav .navbar-brand h1 { 
+        font-size: 2rem; 
+        margin: 0; 
+        letter-spacing: .3px; 
+        color: #ffffff !important; /* White text for better contrast */
+    }
+    .tunivert-nav #navbarCollapse { 
+        display: flex; 
+        align-items: center; 
+        background: #1a5f3f !important; /* Match navbar background */
+    }
     .tunivert-nav .navbar-nav { gap: .25rem; }
     .tunivert-nav .nav-link { 
         padding: 16px 12px; 
-        color: #1f2937; 
+        color: #ffffff !important; /* White text for dark green background */
         font-weight: 500; 
         position: relative; 
         transition: color .15s ease;
     }
-    .tunivert-nav .nav-link:hover, .tunivert-nav .nav-link.active { color: #0d6efd; }
+    .tunivert-nav .nav-link:hover, .tunivert-nav .nav-link.active { 
+        color: #90EE90 !important; /* Light green on hover/active */
+    }
     .tunivert-nav .nav-link::after { 
         content: ""; position: absolute; left: 10px; right: 10px; bottom: 8px; height: 2px; 
         background: transparent; transition: background .15s ease;
     }
-    .tunivert-nav .nav-link:hover::after, .tunivert-nav .nav-link.active::after { background: #0d6efd; }
-    .tunivert-nav .dropdown-menu { 
-        border-radius: 10px; border: 1px solid rgba(15, 23, 42, 0.06); 
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
-        overflow: hidden;
+    .tunivert-nav .nav-link:hover::after, .tunivert-nav .nav-link.active::after { 
+        background: #90EE90; /* Light green underline */
     }
-    .tunivert-nav .dropdown-item { padding: .6rem .9rem; }
-    .tunivert-nav .dropdown-item.active, .tunivert-nav .dropdown-item:active { background: #0d6efd; }
-    .tunivert-nav .btn.btn-outline-primary.btn-sm { padding: .4rem .7rem; border-radius: 8px; }
-    .tunivert-nav .btn.btn-primary.btn-sm { padding: .45rem .8rem; border-radius: 8px; }
+    .tunivert-nav .dropdown-menu { 
+        border-radius: 10px; border: 1px solid rgba(26, 95, 63, 0.2); 
+        box-shadow: 0 10px 30px rgba(26, 95, 63, 0.25);
+        overflow: hidden;
+        background: #ffffff !important;
+    }
+    .tunivert-nav .dropdown-item { 
+        padding: .6rem .9rem; 
+        background: transparent !important;
+        color: #1f2937 !important;
+    }
+    .tunivert-nav .dropdown-item:hover { 
+        background: #e8f5e8 !important; /* Light green background on hover */
+        color: #1a5f3f !important; /* Dark green text on hover */
+    }
+    .tunivert-nav .dropdown-item.active, .tunivert-nav .dropdown-item:active { 
+        background: #1a5f3f !important; /* Dark green background for active */
+        color: #ffffff !important;
+    }
+    .tunivert-nav .btn.btn-outline-primary.btn-sm { 
+        padding: .4rem .7rem; 
+        border-radius: 8px; 
+        border-color: #90EE90;
+        color: #90EE90;
+    }
+    .tunivert-nav .btn.btn-outline-primary.btn-sm:hover { 
+        background-color: #90EE90;
+        border-color: #90EE90;
+        color: #1a5f3f;
+    }
+    .tunivert-nav .btn.btn-primary.btn-sm { 
+        padding: .45rem .8rem; 
+        border-radius: 8px; 
+        background-color: #90EE90;
+        border-color: #90EE90;
+        color: #1a5f3f;
+    }
+    .tunivert-nav .btn.btn-primary.btn-sm:hover { 
+        background-color: #7dd87d;
+        border-color: #7dd87d;
+    }
+    
+    /* Badge Indicators */
+    .badge-indicator {
+        animation: badgePulse 2s ease-in-out infinite;
+        filter: drop-shadow(0 0 4px rgba(0,0,0,0.3));
+    }
+    
+    .badge-count-indicator {
+        animation: badgeGlow 2s ease-in-out infinite alternate;
+        box-shadow: 0 0 8px rgba(255,193,7,0.6);
+    }
+    
+    @keyframes badgePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    @keyframes badgeGlow {
+        0% { box-shadow: 0 0 5px rgba(255,193,7,0.4); }
+        100% { box-shadow: 0 0 12px rgba(255,193,7,0.8); }
+    }
+    
     @media (min-width: 1200px) {
         .tunivert-nav .navbar-nav { justify-content: center; }
     }
@@ -79,16 +146,17 @@
         </div>
 
         <!-- Navbar -->
-    <nav class="navbar navbar-light bg-light navbar-expand-xl py-0 tunivert-nav" id="tunivertNavbar">
+    <nav class="navbar navbar-dark navbar-expand-xl py-0 tunivert-nav" id="tunivertNavbar">
             <div class="container-fluid">
-                <a href="{{ route('home') }}" class="navbar-brand ms-2">
-                    <h1 class="text-primary display-5 mb-0">Tunivert</h1>
+                <a href="{{ route('home') }}" class="navbar-brand ms-2 d-flex align-items-center">
+                    <img src="{{ asset('img/tunivert-logo-mini.svg') }}" alt="TuniVert" height="40" class="me-2">
+                    <h1 class="text-white display-6 mb-0" style="font-size: 1.8rem;">TuniVert</h1>
                 </a>
                 <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                    <span class="fa fa-bars text-primary"></span>
+                    <span class="fa fa-bars text-white"></span>
                 </button>
 
-                <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
+                <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav mx-auto flex-grow-1 justify-content-center">
                     <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a>
                     <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
@@ -145,8 +213,10 @@
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">
                             <a href="{{ route('formations.index') }}" class="dropdown-item">Catalogue</a>
                             @auth
-                                <a href="{{ route('formations.create') }}" class="dropdown-item {{ request()->routeIs('formations.create') ? 'active' : '' }}">Créer une formation</a>
-                                <a href="{{ route('formations.dashboard') }}" class="dropdown-item {{ request()->routeIs('formations.dashboard') ? 'active' : '' }}">Mes formations</a>
+                                @if(Auth::user()->role === 'association')
+                                    <a href="{{ route('formations.create') }}" class="dropdown-item {{ request()->routeIs('formations.create') ? 'active' : '' }}">Créer une formation</a>
+                                    <a href="{{ route('formations.dashboard') }}" class="dropdown-item {{ request()->routeIs('formations.dashboard') ? 'active' : '' }}">Mes formations</a>
+                                @endif
                             @endauth
                         </div>
                     </div>
@@ -235,26 +305,28 @@
                                     </div>
                                 </li>
                                 
-                                @forelse(Auth::user()->unreadNotifications->take(5) as $notification)
-                                    <li>
-                                        <a class="dropdown-item d-flex align-items-center py-2" 
-                                           href="{{ $notification->data['url'] ?? '#' }}"
-                                           onclick="markNotificationAsRead('{{ $notification->id }}')">
-                                            <div class="me-3 fs-6">
-                                                {!! $notification->data['icon'] ?? '🔔' !!}
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <small class="d-block text-dark">{{ $notification->data['message'] ?? 'Nouvelle notification' }}</small>
-                                                <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider my-1"></li>
-                                @empty
+                                @if(Auth::user()->unreadNotifications->count() > 0)
+                                    @foreach(Auth::user()->unreadNotifications->take(5) as $notification)
+                                        <li>
+                                            <a class="dropdown-item d-flex align-items-center py-2" 
+                                               href="{{ $notification->data['url'] ?? '#' }}"
+                                               onclick="markNotificationAsRead('{{ $notification->id }}')">
+                                                <div class="me-3 fs-6">
+                                                    {!! $notification->data['icon'] ?? '🔔' !!}
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <small class="d-block text-dark">{{ $notification->data['message'] ?? 'Nouvelle notification' }}</small>
+                                                    <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                    @endforeach
+                                @else
                                     <li class="px-3 py-2 text-center">
                                         <small class="text-muted">Aucune notification</small>
                                     </li>
-                                @endforelse
+                                @endif
                                 
                                 @if($notificationCount > 5)
                                     <li class="text-center">
@@ -282,10 +354,30 @@
                         <div class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button"
                                data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
-                                <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
-                                      style="width:38px;height:38px;">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                </span>
+                                <div class="position-relative">
+                                    <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                                          style="width:38px;height:38px;">
+                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                    </span>
+                                    
+                                    <!-- Badge Indicator -->
+                                    @if(isset($userLatestBadge) && $userLatestBadge)
+                                        <span class="position-absolute top-0 start-100 translate-middle badge-indicator"
+                                              style="font-size: 0.8rem; margin-left: -6px; margin-top: -2px; z-index: 10;"
+                                              title="Dernier badge: {{ $userLatestBadge->name ?? 'Badge' }}">
+                                            {{ $userLatestBadge->icon ?? '🏅' }}
+                                        </span>
+                                    @endif
+                                    
+                                    <!-- Badge Count Indicator (if more than one badge) -->
+                                    @if(isset($userBadgeCount) && $userBadgeCount > 1)
+                                        <span class="position-absolute top-0 start-100 translate-middle badge bg-warning text-dark rounded-pill badge-count-indicator"
+                                              style="font-size: 0.7rem; margin-left: 8px; margin-top: 8px; min-width: 18px; height: 18px; line-height: 1; padding: 2px 4px;"
+                                              title="{{ $userBadgeCount }} badges gagnés">
+                                            {{ $userBadgeCount }}
+                                        </span>
+                                    @endif
+                                </div>
                                 @if(Auth::user()->role === 'association')
                                     <small class="text-muted d-block" style="font-size: 0.7rem;">Association</small>
                                 @endif
@@ -297,6 +389,27 @@
                                     <div class="small text-muted">{{ Auth::user()->email }}</div>
                                     @if(Auth::user()->role === 'association')
                                         <span class="badge bg-primary mt-1">Association</span>
+                                    @endif
+                                    
+                                    <!-- Badge Summary -->
+                                    @if(isset($userBadgeCount) && $userBadgeCount > 0)
+                                        <div class="mt-2 p-2 bg-light rounded-2">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="small text-muted">Badges gagnés</div>
+                                                <span class="badge bg-warning text-dark">{{ $userBadgeCount }}</span>
+                                            </div>
+                                            @if(isset($userLatestBadge) && $userLatestBadge)
+                                                <div class="mt-1 d-flex align-items-center gap-2">
+                                                    <span style="font-size: 0.9rem;">{{ $userLatestBadge->icon }}</span>
+                                                    <div class="small">
+                                                        <div class="fw-semibold">{{ $userLatestBadge->name }}</div>
+                                                        <div class="text-muted" style="font-size: 0.75rem;">
+                                                            Obtenu {{ \Carbon\Carbon::parse($userLatestBadge->awarded_at)->diffForHumans() }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
                                     @endif
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
@@ -326,6 +439,12 @@
                                 </li>
 
                                 @if(Auth::user()->role === 'association')
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('formations.create') }}">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                        Créer une formation
+                                    </a>
+                                </li>
                                 <li>
                                     <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
                                         <i class="fas fa-plus"></i>

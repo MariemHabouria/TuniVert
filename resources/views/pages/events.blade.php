@@ -3,10 +3,16 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Environs - Environmental & Nature Website Template</title>
+        <title>Events - TuniVert</title>
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta content="" name="keywords">
         <meta content="" name="description">
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+        <link rel="icon" type="image/svg+xml" sizes="16x16" href="{{ asset('favicon-16x16.svg') }}">
+        <link rel="icon" type="image/svg+xml" sizes="32x32" href="{{ asset('favicon-32x32.svg') }}">
+        <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
 
         <!-- Google Web Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,64 +42,15 @@
 
 
         <!-- Navbar start -->
-        <div class="container-fluid fixed-top px-0">
-            <div class="container px-0">
-                <div class="topbar">
-                    <div class="row align-items-center justify-content-center">
-                        <div class="col-md-8">
-                            <div class="topbar-info d-flex flex-wrap">
-                                <a href="#" class="text-light me-4"><i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn</a>
-                                <a href="#" class="text-light"><i class="fas fa-phone-alt text-white me-2"></i>+01234567890</a>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="topbar-icon d-flex align-items-center justify-content-end">
-                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
-                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
-                                <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
-                                <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <nav class="navbar navbar-light bg-light navbar-expand-xl">
-                    <a href="index.html" class="navbar-brand ms-3">
-                        <h1 class="text-primary display-5">Tunivert</h1>
-                    </a>
-                    <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                        <span class="fa fa-bars text-primary"></span>
-                    </button>
-                    <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
-                        <div class="navbar-nav ms-auto">
-                            <a href="index.html" class="nav-item nav-link">Home</a>
-                            <a href="about.html" class="nav-item nav-link">About</a>
-                            <a href="service.html" class="nav-item nav-link">Services</a>
-                            <a href="causes.html" class="nav-item nav-link">Causes</a>
-                            <a href="events.html" class="nav-item nav-link active">Events</a>
-                            <div class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
-                                <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                                    <a href="blog.html" class="dropdown-item">Blog</a>
-                                    <a href="gallery.html" class="dropdown-item">Gallery</a>
-                                    <a href="volunteer.html" class="dropdown-item">Volunteers</a>
-                                    <a href="donation.html" class="dropdown-item">Donation</a>
-                                    <a href="404.html" class="dropdown-item">404 Error</a>
-                                </div>
-                            </div>
-                            <a href="contact.html" class="nav-item nav-link">Contact</a>
-                        </div>
-                        <div class="d-flex align-items-center flex-nowrap pt-xl-0" style="margin-left: 15px;">
         @include('layouts.navbar')
+        <!-- space for fixed navbar -->
         <div style="height: 112px"></div>
-                <ol class="breadcrumb justify-content-center mb-0">
-                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                    <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                    <li class="breadcrumb-item active text-white">Events</li>
-                </ol>    
-            </div>
-        </div>
-        <!-- Header End -->
+        <!-- Navbar End -->
+
+        <!-- Header Start -->
+        <div class="container-fluid bg-breadcrumb">
+            <div class="container text-center py-5" style="max-width: 900px;">
+                <h3 class="text-white display-3 mb-4">Events</h3>
 
         <!-- Events Start -->
         <div class="container-fluid event py-5">

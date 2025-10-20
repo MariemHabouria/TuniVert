@@ -140,12 +140,7 @@ class QuizController extends Controller
         $apiKey = config('services.openai.key') ?? env('OPENAI_API_KEY');
         $model  = config('services.openai.model', env('OPENAI_MODEL', 'gpt-4o-mini'));
 
-        $context = trim(implode("\n", array_filter([
-            "Titre: ".($formation->titre ?? ''),
-            "Type: ".($formation->type ?? ''),
-            "Description: ".($formation->description ?? ''),
-            "Objectifs (si connus): ".(method_exists($formation,'objectifs') ? implode(', ', (array)$formation->objectifs) : ''),
-        ])));
+        $context = $this->buildFormationContext($formation);
 
         $system = "Tu es un générateur de quiz en français. 
 Retourne STRICTEMENT un JSON valide (pas de texte avant/après).
@@ -200,5 +195,38 @@ Format attendu:
                 ]]
             ];
         }
+    }
+
+    /**
+     * Construit un contexte riche pour la formation
+     */
+    private function buildFormationContext(Formation $formation): string
+    {
+        $context = [];
+        
+        if ($formation->titre) {
+            $context[] = "TITRE: " . $formation->titre;
+        }
+        
+        if ($formation->type) {
+            $context[] = "TYPE: " . $formation->type;
+        }
+        
+        if ($formation->description) {
+            $context[] = "DESCRIPTION: " . $formation->description;
+        }
+
+        // Ajouter des informations sur les ressources disponibles
+        if ($formation->ressources && $formation->ressources->count() > 0) {
+            $ressources = $formation->ressources->pluck('titre')->join(', ');
+            $context[] = "RESSOURCES DISPONIBLES: " . $ressources;
+        }
+
+        // Ajouter la catégorie si disponible
+        if (isset($formation->categorie)) {
+            $context[] = "CATÉGORIE: " . $formation->categorie;
+        }
+
+        return implode("\n", $context) ?: "Formation générale";
     }
 }

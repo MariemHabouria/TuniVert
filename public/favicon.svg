@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Plant icon optimized for favicon -->
+  <g>
+    <!-- Left leaf -->
+    <path d="M16 12 C8 4, 2 8, 10 18 C12 15, 14 13, 16 12 Z" fill="#4CAF50"/>
+    <!-- Right leaf -->
+    <path d="M16 12 C24 4, 30 8, 22 18 C20 15, 18 13, 16 12 Z" fill="#4CAF50"/>
+    
+    <!-- Inner leaf details -->
+    <path d="M16 12 C10 6, 6 9, 12 16" fill="none" stroke="#66BB6A" stroke-width="1"/>
+    <path d="M16 12 C22 6, 26 9, 20 16" fill="none" stroke="#66BB6A" stroke-width="1"/>
+    
+    <!-- Main stem -->
+    <path d="M16 12 L16 26" stroke="#4CAF50" stroke-width="2" fill="none"/>
+    
+    <!-- Ground/base -->
+    <ellipse cx="16" cy="26" rx="8" ry="2" fill="#4CAF50"/>
+  </g>
+</svg>

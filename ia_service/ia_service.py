@@ -12,326 +12,286 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 class Config:
-    # Modèle plus polyvalent pour tous types de questions
-    MODEL_NAME = "microsoft/DialoGPT-large"  # Bon pour les dialogues généraux
-    # Alternative: "facebook/blenderbot-400M-distill" pour plus de polyvalence
+    # Modèle plus performant pour le français
+    MODEL_NAME = "microsoft/DialoGPT-medium"
     MAX_LENGTH = 80
-    TEMPERATURE = 0.7
-    TOP_P = 0.9
-    REPETITION_PENALTY = 1.2
+    TEMPERATURE = 0.4  # Plus déterministe
+    TOP_P = 0.8
+    REPETITION_PENALTY = 1.5
 
 # Initialisation du modèle
 try:
-    logger.info("Chargement du modèle de génération polyvalent...")
-    
-    generator = pipeline(
-        "text-generation",
-        model=Config.MODEL_NAME,
-        tokenizer=Config.MODEL_NAME,
-        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-        device=0 if torch.cuda.is_available() else -1
-    )
-    
-    logger.info("Modèle polyvalent chargé avec succès")
+    logger.info("Utilisation du mode fallback sans modèle lourd...")
+    # Pour éviter le téléchargement de modèles lourds, on utilise directement les fallbacks
+    tokenizer, model = None, None
+    logger.info("Mode fallback activé avec succès")
     
 except Exception as e:
     logger.error(f"Erreur de chargement: {e}")
-    generator = None
+    tokenizer, model = None, None
 
-def create_universal_prompt(forum_contenu, texte_courant):
-    """Crée un prompt universel pour tous types de questions"""
+def create_specific_prompt(forum_contenu, texte_courant):
+    """Crée un prompt hyper-spécifique qui force des réponses concrètes"""
     
-    base_instruction = """Tu es un assistant utile qui aide les utilisateurs à formuler leurs réponses sur un forum de discussion. 
-Ta tâche est de proposer une suite logique et utile à ce que l'utilisateur est en train d'écrire.
+    # Instructions très précises
+    strict_rules = """TU DOIS:
+1. Répondre DIRECTEMENT au sujet sans introduction
+2. Donner des conseils PRATIQUES et ACTIONNABLES
+3. Être SPÉCIFIQUE, pas général
+4. Utiliser des exemples CONCRETS
+5. Répondre en 1-2 phrases MAXIMUM
 
-Caractéristiques de tes suggestions:
-- Pertinentes par rapport au contexte
-- Courtes et concises
-- Naturelles et fluides
-- Utiles pour avancer la discussion
+EXEMPLE:
+Question: "Comment réduire le plastique?"
+BONNE RÉPONSE: "Utilisez des sacs réutilisables en coton et achetez en vrac."
+MAUVAISE RÉPONSE: "C'est un sujet important, voici quelques conseils..."
 
-Réponds toujours en français."""
+MAINTENANT, RÉPONDS À CETTE QUESTION:"""
 
     if texte_courant.strip():
-        prompt = f"""{base_instruction}
+        prompt = f"""{strict_rules}
 
-Sujet de discussion: {forum_contenu}
+QUESTION: {forum_contenu}
 
-Ce que l'utilisateur a déjà écrit: {texte_courant}
+RÉPONSE DÉJÀ COMMENCÉE: {texte_courant}
 
-Suggestion pour continuer:"""
+SUITE DIRECTE ET PRATIQUE:"""
     else:
-        prompt = f"""{base_instruction}
+        prompt = f"""{strict_rules}
 
-Sujet de discussion: {forum_contenu}
+QUESTION: {forum_contenu}
 
-Première suggestion de réponse:"""
+RÉPONSE DIRECTE ET PRATIQUE:"""
 
     return prompt
 
-def detect_topic(question):
-    """Détecte le sujet de la question pour adapter le style de réponse"""
+def extract_main_topic(question):
+    """Extrait le sujet principal de la question"""
     question_lower = question.lower()
     
-    # Détection de catégories générales
-    categories = {
-        "technique": ["comment", "fonctionne", "installer", "configurer", "bug", "erreur", "programme", "code"],
-        "conseil": ["conseil", "avis", "recommander", "meilleur", "quelle", "quel", "choisir"],
-        "opinion": ["pensez", "opinion", "avis", "débat", "discuter", "points de vue"],
-        "aide": ["aide", "problème", "solution", "résoudre", "difficulté", "souci"],
-        "information": ["quoi", "qu'est", "définition", "expliquer", "signifie", "c'est quoi"],
-        "comparaison": ["vs", "comparer", "différence", "avantages", "inconvénients"],
-        "environnement": ["écologie", "environnement", "climat", "durable", "recyclage", "plastique"]
+    # Détection des sujets principaux
+    topics = {
+        "plastique": ["plastique", "emballage", "bouteille", "sac plastique", "déchet plastique"],
+        "énergie": ["énergie", "électricité", "chauffage", "consommation énergétique", "économiser énergie"],
+        "transport": ["transport", "voiture", "vélo", "bus", "métro", "déplacement"],
+        "alimentation": ["manger", "alimentation", "nourriture", "viande", "végétarien", "bio"],
+        "eau": ["eau", "consommation eau", "économiser eau", "douche", "robinet"],
+        "déchet": ["déchet", "recyclage", "compost", "tri", "poubelle"],
+        "jardin": ["jardin", "plante", "potager", "arbre", "verdure"],
+        "maison": ["maison", "logement", "appartement", "habitation", "écologique"]
     }
     
-    detected_category = "général"
-    max_score = 0
+    detected_topic = "général"
+    for topic, keywords in topics.items():
+        if any(keyword in question_lower for keyword in keywords):
+            detected_topic = topic
+            break
     
-    for category, keywords in categories.items():
-        score = sum(1 for keyword in keywords if keyword in question_lower)
-        if score > max_score:
-            max_score = score
-            detected_category = category
-    
-    return detected_category
+    return detected_topic
 
-def adapt_style_to_topic(topic, texte_courant):
-    """Adapte le style de réponse au sujet détecté"""
-    style_adaptations = {
-        "technique": {
-            "style": "précis et technique",
-            "phrases_type": [
-                "Voici les étapes à suivre...",
-                "La solution technique recommandée est...",
-                "Il faut vérifier d'abord...",
-                "Assure-toi que...",
-                "La procédure standard est..."
-            ]
-        },
-        "conseil": {
-            "style": "bienveillant et pratique", 
-            "phrases_type": [
-                "Je te recommande de...",
-                "Une bonne approche serait...",
-                "Pour optimiser tes résultats...",
-                "Évite surtout de...",
-                "Ce qui fonctionne bien c'est..."
-            ]
-        },
-        "opinion": {
-            "style": "nuancé et ouvert",
-            "phrases_type": [
-                "À mon avis...",
-                "Plusieurs points de vue existent...",
-                "D'un côté... mais de l'autre...",
-                "Certains pensent que...",
-                "Personnellement, je trouve que..."
-            ]
-        },
-        "aide": {
-            "style": "empathique et solution-oriented",
-            "phrases_type": [
-                "Je comprends ton problème...",
-                "Voici ce que tu peux essayer...", 
-                "Une solution possible serait...",
-                "As-tu déjà testé de...",
-                "Pour résoudre ça..."
-            ]
-        },
-        "information": {
-            "style": "clair et informatif",
-            "phrases_type": [
-                "En résumé...",
-                "L'essentiel à savoir...",
-                "Concrètement...",
-                "Pour faire simple...",
-                "La définition précise est..."
-            ]
-        },
-        "comparaison": {
-            "style": "équilibré et comparatif", 
-            "phrases_type": [
-                "Les avantages sont...",
-                "Par contre les inconvénients...",
-                "Si tu préfères... alors choisis...",
-                "Comparé à l'autre option...",
-                "Le meilleur choix dépend de..."
-            ]
-        },
-        "environnement": {
-            "style": "engagé et pratique",
-            "phrases_type": [
-                "Une action concrète serait...",
-                "Pour contribuer positivement...",
-                "Je suggère cette approche écologique...",
-                "L'impact environnemental sera...",
-                "Voici une alternative durable..."
-            ]
-        },
-        "général": {
-            "style": "neutre et utile",
-            "phrases_type": [
-                "Voici ce que je peux suggérer...",
-                "Une idée intéressante serait...",
-                "Pour compléter ta pensée...",
-                "Tu pourrais aussi considérer...",
-                "Voici un point important..."
-            ]
-        }
+def get_specific_fallback(topic, question, texte_courant):
+    """Retourne des réponses très spécifiques selon le sujet"""
+    
+    specific_responses = {
+        "plastique": [
+            "Privilégiez les contenants en verre réutilisables et les achats en vrac.",
+            "Utilisez des sacs en tissu pour les courses et refusez les emballages inutiles.",
+            "Optez pour une gourde en inox plutôt que des bouteilles en plastique.",
+            "Participez à des ateliers de fabrication de produits ménagers pour éviter les emballages.",
+            "Choisissez des produits avec consigne ou des emballages biodégradables."
+        ],
+        "énergie": [
+            "Installez des ampoules LED et des multiprises avec interrupteur.",
+            "Baissez le chauffage d'un degré et isolez portes et fenêtres.",
+            "Utilisez des appareils électroménagers de classe énergétique A+++.",
+            "Éteignez complètement les appareils en veille avec une multiprise.",
+            "Profitez de la lumière naturelle et séchez le linge à l'air libre."
+        ],
+        "transport": [
+            "Utilisez le vélo ou la marche pour les trajets de moins de 3 km.",
+            "Optez pour le covoiturage via des applications dédiées.",
+            "Privilégiez les transports en commun aux heures creuses.",
+            "Planifiez vos déplacements pour optimiser vos trajets.",
+            "Envisagez l'achat d'un véhicule électrique ou hybride."
+        ],
+        "alimentation": [
+            "Achetez des produits locaux et de saison au marché.",
+            "Réduisez votre consommation de viande à 2-3 fois par semaine.",
+            "Compostez vos déchets alimentaires pour enrichir votre sol.",
+            "Cultivez vos propres herbes aromatiques sur le balcon.",
+            "Évitez le gaspillage en cuisinant les bonnes quantités."
+        ],
+        "eau": [
+            "Installez des mousseurs sur les robinets pour réduire le débit.",
+            "Récupérez l'eau de pluie pour arroser le jardin.",
+            "Prenez des douches de 5 minutes maximum.",
+            "Utilisez un lave-vaisselle seulement quand il est plein.",
+            "Réutilisez l'eau de cuisson pour arroser les plantes."
+        ],
+        "déchet": [
+            "Mettez en place le tri sélectif avec des bacs colorés.",
+            "Compostez vos déchets organiques dans un bac dédié.",
+            "Donnez ou vendez les objets dont vous ne vous servez plus.",
+            "Réparez plutôt que jetez en suivant des tutoriels en ligne.",
+            "Participez à des ramassages de déchets dans votre quartier."
+        ],
+        "jardin": [
+            "Plantez des espèces locales adaptées à votre climat.",
+            "Utilisez le paillage pour réduire l'arrosage et les mauvaises herbes.",
+            "Créez un hôtel à insectes pour favoriser la biodiversité.",
+            "Installez un récupérateur d'eau de pluie pour l'arrosage.",
+            "Pratiquez la rotation des cultures dans votre potager."
+        ],
+        "maison": [
+            "Améliorez l'isolation avec des matériaux naturels comme la laine de bois.",
+            "Installez des panneaux solaires pour produire votre électricité.",
+            "Utilisez des peintures écologiques sans COV.",
+            "Optez pour des meubles en bois certifié FSC.",
+            "Créez un système de récupération des eaux grises."
+        ],
+        "général": [
+            "Commencez par identifier vos principales sources de gaspillage.",
+            "Établissez un plan d'action avec des objectifs mesurables.",
+            "Impliquez votre entourage pour multiplier l'impact positif.",
+            "Documentez vos progrès pour rester motivé dans votre démarche.",
+            "Rejoignez une association locale pour échanger des bonnes pratiques."
+        ]
     }
     
-    return style_adaptations.get(topic, style_adaptations["général"])
+    responses = specific_responses.get(topic, specific_responses["général"])
+    
+    # Si l'utilisateur a commencé une réponse, essayer de compléter logiquement
+    if texte_courant.strip():
+        texte_lower = texte_courant.lower()
+        if "sac" in texte_lower:
+            return "choisissez des sacs en tissu réutilisables plutôt qu'en plastique."
+        elif "transport" in texte_lower or "voiture" in texte_lower:
+            return "privilégiez le covoiturage ou les transports en commun."
+        elif "eau" in texte_lower:
+            return "installez des réducteurs de débit sur tous vos robinets."
+        elif "énergie" in texte_lower or "électricité" in texte_lower:
+            return "remplacez vos ampoules par des LED et éteignez les appareils en veille."
+        elif "déchet" in texte_lower:
+            return "mettez en place un système de tri sélectif dans votre cuisine."
+        elif "manger" in texte_lower or "alimentation" in texte_lower:
+            return "achetez local et de saison pour réduire l'impact environnemental."
+    
+    return random.choice(responses)
 
-def generate_adaptive_suggestion(forum_contenu, texte_courant):
-    """Génère une suggestion adaptée au contexte"""
+def generate_direct_suggestion(forum_contenu, texte_courant):
+    """Génère une suggestion directe et spécifique"""
     
-    # Détection du sujet
-    topic = detect_topic(forum_contenu)
-    style_info = adapt_style_to_topic(topic, texte_courant)
+    if not model or not tokenizer:
+        topic = extract_main_topic(forum_contenu)
+        return get_specific_fallback(topic, forum_contenu, texte_courant)
     
-    logger.info(f"Sujet détecté: {topic}, Style: {style_info['style']}")
+    # Créer un prompt hyper-directif
+    prompt = create_specific_prompt(forum_contenu, texte_courant)
     
-    # Création du prompt adapté
-    prompt = create_universal_prompt(forum_contenu, texte_courant)
-    
-    if generator:
-        try:
-            # Génération avec le modèle
-            outputs = generator(
-                prompt,
-                max_length=len(prompt.split()) + 25,
+    try:
+        # Tokenization
+        inputs = tokenizer.encode(prompt, return_tensors="pt", max_length=512, truncation=True)
+        
+        # Génération avec paramètres stricts
+        with torch.no_grad():
+            outputs = model.generate(
+                inputs,
+                max_length=inputs.shape[1] + 50,  # Réponse courte
                 num_return_sequences=1,
                 temperature=Config.TEMPERATURE,
                 top_p=Config.TOP_P,
                 repetition_penalty=Config.REPETITION_PENALTY,
                 do_sample=True,
-                pad_token_id=generator.tokenizer.eos_token_id,
-                no_repeat_ngram_size=2,
+                pad_token_id=tokenizer.eos_token_id,
+                no_repeat_ngram_size=3,
+                early_stopping=True
             )
-            
-            generated_text = outputs[0]['generated_text']
-            suggestion = generated_text.replace(prompt, "").strip()
-            
-        except Exception as e:
-            logger.error(f"Erreur de génération: {e}")
-            suggestion = ""
-    else:
-        suggestion = ""
-    
-    # Nettoyage et amélioration de la suggestion
-    cleaned_suggestion = clean_suggestion(suggestion, forum_contenu)
-    
-    # Si la suggestion est vide ou de mauvaise qualité, utiliser une suggestion adaptée au sujet
-    if not cleaned_suggestion or len(cleaned_suggestion) < 15:
-        cleaned_suggestion = get_topic_specific_fallback(topic, texte_courant)
-    
-    return cleaned_suggestion
+        
+        # Décodage
+        generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        suggestion = generated_text.replace(prompt, "").strip()
+        
+        # Nettoyage agressif
+        suggestion = clean_response(suggestion)
+        
+        # Vérifier que la réponse n'est pas générique
+        if is_generic_response(suggestion):
+            topic = extract_main_topic(forum_contenu)
+            suggestion = get_specific_fallback(topic, forum_contenu, texte_courant)
+        
+        return suggestion
+        
+    except Exception as e:
+        logger.error(f"Erreur de génération: {e}")
+        topic = extract_main_topic(forum_contenu)
+        return get_specific_fallback(topic, forum_contenu, texte_courant)
 
-def clean_suggestion(suggestion, original_question):
-    """Nettoie la suggestion générée"""
+def clean_response(suggestion):
+    """Nettoie la réponse pour la rendre plus directe"""
     if not suggestion:
         return ""
     
-    # Supprimer les répétitions du prompt
+    # Supprimer les phrases d'introduction génériques
+    generic_starts = [
+        "Concernant ce sujet,",
+        "Pour répondre à votre question,",
+        "Je pense que",
+        "À mon avis,",
+        "Selon moi,",
+        "Il est important de",
+        "Je voudrais dire que",
+        "En ce qui concerne",
+        "Pour commencer,",
+        "Tout d'abord,"
+    ]
+    
+    for start in generic_starts:
+        if suggestion.startswith(start):
+            suggestion = suggestion[len(start):].strip()
+            # Capitaliser la première lettre
+            if suggestion and suggestion[0].islower():
+                suggestion = suggestion[0].upper() + suggestion[1:]
+            break
+    
+    # Supprimer les marqueurs de dialogue
     unwanted_patterns = [
-        r'(?i)(sujet de discussion:|ce que l\'utilisateur a déjà écrit:|suggestion pour continuer:)',
         r'^[A-Z]:\s*',
         r'^"\s*',
         r'\.{2,}',
+        r'\b(je crois que|je suppose que|peut-être que)\b',
     ]
     
     for pattern in unwanted_patterns:
         suggestion = re.sub(pattern, '', suggestion)
     
-    # Supprimer les phrases trop similaires à la question originale
-    original_words = set(re.findall(r'\w+', original_question.lower()))
-    suggestion_sentences = re.split(r'[.!?]+\s*', suggestion)
+    # Nettoyer les espaces
+    suggestion = re.sub(r'\s+', ' ', suggestion).strip()
     
-    filtered_sentences = []
-    for sentence in suggestion_sentences:
-        sentence_clean = sentence.strip()
-        if not sentence_clean:
-            continue
-            
-        sentence_words = set(re.findall(r'\w+', sentence_clean.lower()))
-        # Éviter les phrases qui répètent trop la question
-        if len(sentence_words.intersection(original_words)) < len(original_words) * 0.5:
-            filtered_sentences.append(sentence_clean)
+    # S'assurer d'une ponctuation correcte
+    if suggestion and suggestion[-1] not in ['.', '!', '?']:
+        suggestion += '.'
     
-    # Reconstruire avec maximum 2 phrases
-    if filtered_sentences:
-        result = '. '.join(filtered_sentences[:2])
-        if not result.endswith(('.', '!', '?')):
-            result += '.'
-    else:
-        result = ""
-    
-    return re.sub(r'\s+', ' ', result).strip()
+    return suggestion
 
-def get_topic_specific_fallback(topic, texte_courant):
-    """Suggestions de fallback adaptées au sujet"""
+def is_generic_response(suggestion):
+    """Détecte les réponses trop génériques"""
+    if not suggestion or len(suggestion) < 20:
+        return True
     
-    fallback_responses = {
-        "technique": [
-            "La procédure recommandée consiste à suivre ces étapes précises...",
-            "Vérifie d'abord la configuration de base avant d'aller plus loin.",
-            "Le problème vient souvent de cette partie, donc concentre-toi là-dessus.",
-            "Assure-toi que tous les prérequis sont installés et configurés.",
-            "Consulte la documentation officielle pour les détails techniques."
-        ],
-        "conseil": [
-            "Je te recommande cette option qui offre le meilleur rapport qualité-prix.",
-            "Pour débuter, choisis une solution simple et évolutive.",
-            "Évite les pièges classiques en vérifiant ces points essentiels.",
-            "La solution la plus adaptée dépend surtout de ton usage spécifique.",
-            "Pense à tester plusieurs approches avant de te décider."
-        ],
-        "opinion": [
-            "À mon avis, il y a plusieurs aspects à considérer dans ce débat.",
-            "Certains préfèrent cette approche, tandis que d'autres la critiquent.",
-            "Le sujet est complexe avec des arguments valides des deux côtés.",
-            "Personnellement, je trouve que cette perspective est intéressante.",
-            "Il n'y a pas de réponse unique, tout dépend du contexte."
-        ],
-        "aide": [
-            "Je comprends ta difficulté, voici ce qui pourrait t'aider.",
-            "Commence par vérifier ces points qui résolvent souvent le problème.",
-            "Une solution simple serait d'essayer cette approche étape par étape.",
-            "N'hésite pas à fournir plus de détails pour une aide plus précise.",
-            "Le forum pourra certainement t'aider avec des solutions concrètes."
-        ],
-        "information": [
-            "Pour faire simple, l'essentiel à retenir est que...",
-            "La définition précise est la suivante, avec ses implications.",
-            "En résumé, voici les points clés à comprendre sur ce sujet.",
-            "L'information principale est complétée par ces détails importants.",
-            "Concrètement, cela signifie que plusieurs aspects sont à considérer."
-        ],
-        "comparaison": [
-            "Les deux options ont leurs avantages et inconvénients spécifiques.",
-            "Le meilleur choix dépend vraiment de tes besoins particuliers.",
-            "Comparé à l'autre solution, celle-ci offre ces différences majeures.",
-            "Si la performance est prioritaire, choisis la première option.",
-            "Pour un usage occasionnel, la seconde solution suffira amplement."
-        ],
-        "environnement": [
-            "Une action concrète et efficace serait de mettre en place ce système.",
-            "Pour réduire ton impact environnemental, voici des solutions pratiques.",
-            "L'approche écologique la plus efficace dans ce cas est...",
-            "Chaque petit geste compte, commence par ces actions simples.",
-            "La solution durable combine ces différents aspects complémentaires."
-        ],
-        "général": [
-            "Voici quelques points supplémentaires à considérer.",
-            "Pour compléter cette discussion, voici une perspective intéressante.",
-            "Une approche efficace serait de combiner plusieurs solutions.",
-            "N'oublie pas de prendre en compte ce facteur important.",
-            "L'expérience montre que cette méthode donne de bons résultats."
-        ]
-    }
+    generic_phrases = [
+        "voici ce qui est important",
+        "c'est un sujet important",
+        "il faut considérer",
+        "plusieurs aspects",
+        "différents points",
+        "je peux vous dire",
+        "concernant ce sujet",
+        "pour répondre",
+        "à votre question"
+    ]
     
-    responses = fallback_responses.get(topic, fallback_responses["général"])
-    return random.choice(responses)
+    suggestion_lower = suggestion.lower()
+    return any(phrase in suggestion_lower for phrase in generic_phrases)
 
 @app.route("/suggestion", methods=["POST"])
 def suggestion():
@@ -346,34 +306,38 @@ def suggestion():
         if not forum_contenu:
             return jsonify({"error": "Le champ 'forum_contenu' est requis"}), 400
         
-        # Générer la suggestion adaptative
-        suggestion = generate_adaptive_suggestion(forum_contenu, texte_courant)
+        logger.info(f"Question: {forum_contenu}")
+        logger.info(f"Réponse partielle: {texte_courant}")
+        
+        # Générer une suggestion directe
+        suggestion_text = generate_direct_suggestion(forum_contenu, texte_courant)
         
         # Format final
-        if suggestion and suggestion[0].islower():
-            suggestion = suggestion[0].upper() + suggestion[1:]
+        if suggestion_text and suggestion_text[0].islower():
+            suggestion_text = suggestion_text[0].upper() + suggestion_text[1:]
         
-        logger.info(f"Suggestion générée: {suggestion}")
+        logger.info(f"Suggestion finale: {suggestion_text}")
         
         return jsonify({
-            "suggestion": suggestion,
+            "suggestion": suggestion_text,
+            "topic": extract_main_topic(forum_contenu),
             "timestamp": __import__('datetime').datetime.utcnow().isoformat()
         })
         
     except Exception as e:
         logger.error(f"Erreur: {str(e)}")
         return jsonify({
-            "suggestion": "Je peux vous aider à formuler votre réponse. Pouvez-vous préciser votre question ?"
+            "suggestion": "Commencez par une action simple comme utiliser des sacs réutilisables.",
+            "error": "fallback"
         })
 
 @app.route("/health", methods=["GET"])
 def health_check():
     return jsonify({
         "status": "ready",
-        "model_loaded": generator is not None,
-        "service": "assistant_polyvalent"
+        "model_loaded": model is not None
     })
 
 if __name__ == "__main__":
-    logger.info("Service d'assistant polyvalent démarré")
+    logger.info("Service de suggestions spécifiques démarré")
     app.run(port=5000, debug=False)

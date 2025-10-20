@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 100" width="280" height="100">
+  <!-- Plant icon - more detailed version matching the provided logo -->
+  <g transform="translate(20, 15)">
+    <!-- Left leaf -->
+    <path d="M30 25 C10 8, -5 18, 12 38 C18 32, 24 28, 30 25 Z" fill="#4CAF50" stroke="#2E7D32" stroke-width="1"/>
+    <!-- Right leaf -->
+    <path d="M30 25 C50 8, 65 18, 48 38 C42 32, 36 28, 30 25 Z" fill="#4CAF50" stroke="#2E7D32" stroke-width="1"/>
+    
+    <!-- Inner leaf details -->
+    <path d="M30 25 C15 12, 8 20, 18 32" fill="none" stroke="#66BB6A" stroke-width="2"/>
+    <path d="M30 25 C45 12, 52 20, 42 32" fill="none" stroke="#66BB6A" stroke-width="2"/>
+    
+    <!-- Main stem -->
+    <path d="M30 25 L30 55" stroke="#4CAF50" stroke-width="4" fill="none"/>
+    
+    <!-- Ground/base -->
+    <ellipse cx="30" cy="55" rx="20" ry="4" fill="#4CAF50"/>
+  </g>
+  
+  <!-- TuniVert text -->
+  <text x="90" y="45" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#4CAF50">Tuni</text>
+  <text x="90" y="75" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#4CAF50">Vert</text>
+</svg>

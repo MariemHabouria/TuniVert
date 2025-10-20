@@ -35,8 +35,8 @@ class AlerteForum extends Model
     // Relation avec l'utilisateur créateur
     public function user()
     {
-        // Utilisez 'user_id' ou 'utilisateur_id' selon votre table
-        return $this->belongsTo(User::class, 'user_id'); 
+        // Utilisez 'utilisateur_id' selon la migration
+        return $this->belongsTo(User::class, 'utilisateur_id');
     }
 
     // Relation avec l'utilisateur qui a résolu l'alerte

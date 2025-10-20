@@ -3,7 +3,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>@yield('title', 'Star Admin')</title>
+    <title>@yield('title', 'TuniVert Admin')</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="{{ asset('favicon-16x16.svg') }}">
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="{{ asset('favicon-32x32.svg') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
     
     <!-- plugins:css -->
     <link rel="stylesheet" href="{{ asset('admin/vendors/feather/feather.css') }}">
@@ -21,8 +27,6 @@
     <!-- inject:css -->
     <link rel="stylesheet" href="{{ asset('admin/css/style.css') }}">
     <!-- endinject -->
-    
-    <link rel="shortcut icon" href="{{ asset('admin/images/favicon.png') }}" />
     
     @yield('styles')
 </head>

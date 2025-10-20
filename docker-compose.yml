@@ -26,6 +26,7 @@ services:
       - DB_PASSWORD=tunivert123
       - REDIS_HOST=redis
       - DONATION_AI_URL=http://donation-ai:8085
+      - FORUM_AI_URL=http://forum-ai:5000/suggestion
 
   # Nginx Web Server
   nginx:
@@ -89,6 +90,22 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     command: sh -c "pip install -r requirements.txt && python -m uvicorn donation_ai_service:app --host 0.0.0.0 --port 8085 --reload"
+
+  # Python Forum AI Service
+  forum-ai:
+    image: python:3.11-slim
+    container_name: tunivert_forum_ai
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./ia_service:/app
+    working_dir: /app
+    networks:
+      - tunivert-network
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: sh -c "pip install flask && python simple_ai_service.py"
 
   # Node.js for frontend build
   node:

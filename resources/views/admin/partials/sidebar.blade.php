@@ -44,9 +44,6 @@
                     <li class="nav-item {{ request()->is('admin/evenements/create') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.evenements.create') }}">Créer un événement</a>
                     </li>
-                    <li class="nav-item {{ request()->is('admin/evenements/categories') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.evenements.categories') }}">Catégories</a>
-                    </li>
                 </ul>
             </div>
         </li>

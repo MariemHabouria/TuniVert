@@ -1,0 +1,23 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="plantGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4ade80;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#16a34a;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    
+    <!-- Plant icon -->
+    <g transform="translate(8, 6)">
+        <!-- Stem -->
+        <rect x="11" y="18" width="2" height="10" fill="#16a34a"/>
+        
+        <!-- Leaves -->
+        <path d="M12 18 Q8 14 6 10 Q8 12 12 14" fill="url(#plantGradient)"/>
+        <path d="M12 16 Q16 12 18 8 Q16 10 12 12" fill="url(#plantGradient)"/>
+        <path d="M12 14 Q8 10 6 6 Q8 8 12 10" fill="url(#plantGradient)"/>
+        <path d="M12 12 Q16 8 18 4 Q16 6 12 8" fill="url(#plantGradient)"/>
+        
+        <!-- Central bud -->
+        <circle cx="12" cy="8" r="1.5" fill="#22c55e"/>
+    </g>
+</svg>

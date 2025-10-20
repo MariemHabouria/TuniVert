@@ -11,7 +11,7 @@ class RessourceFormation extends Model
 
     protected $table = 'ressources_formations';
 
-    protected $fillable = ['formation_id','titre','type','url'];
+    protected $fillable = ['formation_id','titre','type','url','path'];
 
     public function formation()
     {
@@ -19,7 +19,14 @@ class RessourceFormation extends Model
     }
 
 public function urlPublic(): ?string {
-    return $this->path ? \Illuminate\Support\Facades\Storage::url($this->path) : ($this->url ?: null);
+    // If we have a stored path, generate URL from it (most reliable)
+    if ($this->path) {
+        // For your setup, we'll use a relative URL that works with your current port
+        return '/storage/' . $this->path;
+    }
+    
+    // Otherwise, use the stored URL (for external links or legacy data)
+    return $this->url ?: null;
 }
 
 }

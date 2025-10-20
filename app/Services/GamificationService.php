@@ -34,7 +34,26 @@ class GamificationService
         // Keep donation badges in sync after each donation
         $sync = $this->syncDonationBadges($user);
         $newBadges = $sync['awarded'] ?? [];
-        $this->updateChallenges($user, $donation);
+        
+        // Debug logging
+        \Log::info('GamificationService::onDonation', [
+            'user_id' => $user->id,
+            'donation_amount' => $donation->montant,
+            'points_awarded' => $points,
+            'new_badges_count' => count($newBadges),
+            'new_badges' => $newBadges
+        ]);
+        
+        try {
+            $this->updateChallenges($user, $donation);
+        } catch (\Throwable $e) {
+            \Log::error('Challenge update failed in onDonation', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'donation_id' => $donation->id
+            ]);
+        }
+        
         return ['points' => $points, 'new_badges' => $newBadges];
     }
 
@@ -119,6 +138,13 @@ class GamificationService
             ->where('evenement_id', 2)
             ->first();
 
+        // Debug logging
+        \Log::info('syncDonationBadges totals', [
+            'user_id' => $user->id,
+            'total_amount' => $totals->total_amount ?? 0,
+            'event2_amount' => $event2->total_amount ?? 0
+        ]);
+
         $rules = [
             'donor_bronze' => fn() => ($totals->total_amount ?? 0) >= 50,
             'donor_silver' => fn() => ($totals->total_amount ?? 0) >= 200,
@@ -132,10 +158,19 @@ class GamificationService
         $ownedIds = DB::table('user_badges')->where('user_id', $user->id)->pluck('badge_id');
         $ownedSlugs = DB::table('badges')->whereIn('id', $ownedIds)->whereIn('slug', $this->donationBadgeSlugs)->pluck('slug')->all();
 
+        \Log::info('syncDonationBadges state', [
+            'owned_slugs' => $ownedSlugs,
+            'badge_map_keys' => array_keys($badgeMap->toArray())
+        ]);
+
         $shouldHave = [];
         foreach ($rules as $slug => $ok) {
-            if ($ok()) $shouldHave[] = $slug;
+            $result = $ok();
+            \Log::info("Badge rule $slug", ['should_have' => $result]);
+            if ($result) $shouldHave[] = $slug;
         }
+
+        \Log::info('syncDonationBadges shouldHave', ['should_have' => $shouldHave]);
 
         $toAdd = array_values(array_diff($shouldHave, $ownedSlugs));
         $toRemove = array_values(array_diff($ownedSlugs, $shouldHave));

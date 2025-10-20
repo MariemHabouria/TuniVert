@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>@yield('title', 'Tunivert')</title>
+  <title>@yield('title', 'TuniVert')</title>
+
+  {{-- Favicon --}}
+  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+  <link rel="icon" type="image/svg+xml" sizes="16x16" href="{{ asset('favicon-16x16.svg') }}">
+  <link rel="icon" type="image/svg+xml" sizes="32x32" href="{{ asset('favicon-32x32.svg') }}">
+  <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
 
   {{-- Polices et icônes --}}
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,6 +30,9 @@
 <body>
 
 @include('layouts.navbar')
+
+{{-- Badge Unlock Notification --}}
+@include('partials.badge-notification')
 
 {{-- Espace pour navbar fixe (aligné avec les autres pages) --}}
 <div style="height:112px"></div>

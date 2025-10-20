@@ -10,7 +10,10 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'matricule',   'is_blocked'];
+    protected $fillable = [
+        'name', 'email', 'password', 'role', 'matricule', 'is_blocked',
+        'phone', 'bio', 'avatar', 'matricule_fiscale', 'adresse', 'is_active', 'points'
+    ];
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
@@ -26,7 +29,8 @@ class User extends Authenticatable
     public function isAdmin(): bool { return $this->role === 'admin'; }
 
     public function formationsOrganisees() { return $this->hasMany(\App\Models\Formation::class, 'organisateur_id'); }
-    public function formationsInscrites() { return $this->belongsToMany(\App\Models\Formation::class, 'formation_user')->withPivot('inscrit_at'); }
+    public function formations() { return $this->belongsToMany(\App\Models\Formation::class, 'formation_user')->withPivot('inscrit_at')->withTimestamps(); }
+    public function formationsInscrites() { return $this->belongsToMany(\App\Models\Formation::class, 'formation_user')->withPivot('inscrit_at')->withTimestamps(); }
     public function challengesOrganises() { return $this->hasMany(\App\Models\Challenge::class, 'organisateur_id'); }
     public function participations() { return $this->hasMany(\App\Models\ParticipantChallenge::class, 'utilisateur_id'); }
     public function scoresChallenges() { return $this->hasManyThrough(\App\Models\ScoreChallenge::class, \App\Models\ParticipantChallenge::class, 'utilisateur_id', 'participant_challenge_id', 'id', 'id'); }

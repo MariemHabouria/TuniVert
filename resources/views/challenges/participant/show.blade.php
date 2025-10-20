@@ -266,7 +266,7 @@
                     <label for="preuve" class="form-label fw-semibold">Ajouter votre preuve :</label>
                     <input type="file" name="preuve" id="preuve" class="form-control" required 
                            accept="image/*,.pdf,.doc,.docx">
-                    <div class="form-text">Formats acceptés: images, PDF, Word (max: 5MB)</div>
+                    <div class="form-text">Formats acceptés: Images (JPG, PNG), PDF, Word | Taille max: 10 MB</div>
                     @error('preuve')
                         <div class="text-danger small">{{ $message }}</div>
                     @enderror
@@ -394,7 +394,34 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fileInput) {
         fileInput.addEventListener('change', function() {
             if (this.files.length > 0) {
-                console.log('Fichier sélectionné:', this.files[0].name);
+                const file = this.files[0];
+                const fileSize = (file.size / 1024 / 1024).toFixed(2); // Size in MB
+                const maxSize = 10; // Max size in MB
+                
+                console.log('Fichier sélectionné:', file.name, `(${fileSize} MB)`);
+                
+                // Check file size
+                if (file.size > maxSize * 1024 * 1024) {
+                    alert(`Le fichier est trop volumineux (${fileSize} MB). Taille maximale autorisée: ${maxSize} MB.`);
+                    this.value = ''; // Clear the input
+                    return;
+                }
+                
+                // Show file info
+                let infoDiv = document.getElementById('file-info');
+                if (!infoDiv) {
+                    infoDiv = document.createElement('div');
+                    infoDiv.id = 'file-info';
+                    infoDiv.className = 'mt-2 p-2 bg-light rounded';
+                    this.parentNode.appendChild(infoDiv);
+                }
+                
+                infoDiv.innerHTML = `
+                    <small class="text-success">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Fichier sélectionné: <strong>${file.name}</strong> (${fileSize} MB)
+                    </small>
+                `;
             }
         });
     }

@@ -3,10 +3,16 @@
 
     <head>
         <meta charset="utf-8">
-        <title>Environs - Environmental & Nature Website Template</title>
+        <title>Donation - TuniVert</title>
         <meta content="width=device-width, initial-scale=1.0" name="viewport">
         <meta content="" name="keywords">
         <meta content="" name="description">
+
+        <!-- Favicon -->
+        <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+        <link rel="icon" type="image/svg+xml" sizes="16x16" href="{{ asset('favicon-16x16.svg') }}">
+        <link rel="icon" type="image/svg+xml" sizes="32x32" href="{{ asset('favicon-32x32.svg') }}">
+        <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
 
         <!-- Google Web Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -185,7 +191,7 @@
                                                         <div class="row g-0 align-items-center">
                                                             <div class="col-md-4">
                                                                 @php
-                                                                    $imgUrl = $eventEntity->image ? \Illuminate\Support\Facades\Storage::url($eventEntity->image) : asset('img/default-event.jpg');
+                                                                    $imgUrl = $eventEntity->image ? asset($eventEntity->image) : asset('img/default-event.jpg');
                                                                 @endphp
                                                                 <img src="{{ $imgUrl }}" class="img-fluid rounded-start" alt="{{ $eventEntity->title }}">
                                                             </div>

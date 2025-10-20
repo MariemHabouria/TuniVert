@@ -44,178 +44,10 @@
 
 
     <!-- Navbar start -->
-<div class="container-fluid fixed-top px-0">
-    <div class="container px-0">
-        <!-- Topbar -->
-        <div class="topbar">
-            <div class="row align-items-center justify-content-center">
-                <div class="col-md-8">
-                    <div class="topbar-info d-flex flex-wrap">
-                        <a href="mailto:Tunivert@gmail.tn" class="text-light me-4">
-                            <i class="fas fa-envelope text-white me-2"></i>Tunivert@gmail.tn
-                        </a>
-                        <a href="tel:+21612345678" class="text-light">
-                            <i class="fas fa-phone-alt text-white me-2"></i>+216 12 345 678
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="topbar-icon d-flex align-items-center justify-content-end">
-                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="btn-square text-white me-2"><i class="fab fa-pinterest"></i></a>
-                        <a href="#" class="btn-square text-white me-0"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
+@include('layouts.navbar')
 
         <!-- Navbar -->
-        <nav class="navbar navbar-light bg-light navbar-expand-xl">
-            <a href="{{ route('home') }}" class="navbar-brand ms-3">
-                <h1 class="text-primary display-5">Tunivert</h1>
-            </a>
-            <button class="navbar-toggler py-2 px-3 me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                <span class="fa fa-bars text-primary"></span>
-            </button>
-
-            <div class="collapse navbar-collapse bg-light" id="navbarCollapse">
-                <div class="navbar-nav ms-auto">
-                    <a href="{{ route('home') }}" class="nav-item nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Accueil</a>
-                    <a href="{{ route('about') }}" class="nav-item nav-link {{ request()->routeIs('about') ? 'active' : '' }}">À propos</a>
-                        <a href="{{ route('events.index') }}" class="nav-item nav-link {{ request()->routeIs('events.index') ? 'active' : '' }}">Événements</a>
-                    <a href="{{ route('service') }}" class="nav-item nav-link {{ request()->routeIs('service') ? 'active' : '' }}">Formations</a>
-                    <a href="{{ route('donations.create') }}" class="nav-item nav-link {{ request()->routeIs('donations.create') ? 'active' : '' }}">Donations</a>
-<!-- ✅ Forums -->
-<a href="{{ route('forums.index') }}" class="nav-item nav-link {{ request()->is('forums*') ? 'active' : '' }}">Forums</a>
-
-<!-- ✅ Alertes -->
-<a href="{{ route('alertes.index') }}" class="nav-item nav-link {{ request()->is('alertes*') ? 'active' : '' }}">Alertes</a>
-                    <a href="{{ route('contact') }}" class="nav-item nav-link {{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a>
-
-                    <!-- Challenge Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle {{ request()->is('challenges*') ? 'active' : '' }}" data-bs-toggle="dropdown">
-                            Challenges
-                        </a>
-                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                            @auth
-                                @if(Auth::user()->role === 'association')
-                                    <a href="{{ route('challenges.create') }}" class="dropdown-item {{ request()->routeIs('challenges.create') ? 'active' : '' }}">
-                                        <i class="fas fa-plus me-2"></i>Créer un Challenge
-                                    </a>
-                                    <a href="{{ route('challenges.crud') }}" class="dropdown-item {{ request()->routeIs('challenges.crud') ? 'active' : '' }}">
-                                        <i class="fas fa-cog me-2"></i>Gérer mes Challenges
-                                    </a>
-                                    <div class="dropdown-divider"></div>
-                                    <a href="{{ route('scores.classement', ['challenge' => 'current']) }}" class="dropdown-item">
-                                        <i class="fas fa-chart-bar me-2"></i>Statistiques
-                                    </a>
-                                @else
-                                    <a href="{{ route('challenges.index') }}" class="dropdown-item">
-                                        <i class="fas fa-trophy me-2"></i>Voir les Challenges
-                                    </a>
-                                    <a href="{{ route('challenges.profil') }}" class="dropdown-item">
-                                        <i class="fas fa-user-check me-2"></i>Mes Participations
-                                    </a>
-                                @endif
-                            @else
-                                <a href="{{ route('challenges.index') }}" class="dropdown-item">
-                                    <i class="fas fa-trophy me-2"></i>Voir les Challenges
-                                </a>
-                            @endauth
-                        </div>
-                    </div>
-
-                    <!-- Formation Dropdown -->
-                    <div class="nav-item dropdown">
-                        <a href="#" class="nav-link dropdown-toggle {{ request()->is('formations*') ? 'active' : '' }}" data-bs-toggle="dropdown">
-                            Formations
-                        </a>
-                        <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                            <a href="{{ route('formations.index') }}" class="dropdown-item">Catalogue</a>
-                            @auth
-                                @if(Auth::user()->role === 'association')
-                                    <a href="{{ route('formations.create') }}" class="dropdown-item {{ request()->routeIs('formations.create') ? 'active' : '' }}">Créer une formation</a>
-                                    <a href="{{ route('formations.dashboard') }}" class="dropdown-item {{ request()->routeIs('formations.dashboard') ? 'active' : '' }}">Mes formations</a>
-                                @endif
-                            @endauth
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Auth pour guest -->
-                <div class="d-flex align-items-center flex-nowrap pt-xl-0 ms-3">
-                    @guest
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary btn-sm me-2">Connexion</a>
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Inscription</a>
-                    @endguest
-
-                    @auth
-                        <div class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle p-0" href="#" id="userMenu" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false" title="Mon compte">
-                                <span class="avatar bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
-                                      style="width:38px;height:38px;">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                </span>
-                                @if(Auth::user()->role === 'association')
-                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Association</small>
-                                @endif
-                            </a>
-
-                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu" style="min-width: 240px;">
-                                <li class="px-3 py-2">
-                                    <div class="fw-semibold">{{ Auth::user()->name }}</div>
-                                    <div class="small text-muted">{{ Auth::user()->email }}</div>
-                                    @if(Auth::user()->role === 'association')
-                                        <span class="badge bg-primary mt-1">Association</span>
-                                    @endif
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile') }}">
-                                        <i class="fas fa-user"></i>
-                                        Profil
-                                    </a>
-                                </li>
-
-                                @if(Auth::user()->role === 'association')
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.create') }}">
-                                        <i class="fas fa-plus"></i>
-                                        Créer un Challenge
-                                    </a>
-                                </li>
-                                @else
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('challenges.profil') }}">
-                                        <i class="fas fa-trophy"></i>
-                                        Mes Participations
-                                    </a>
-                                </li>
-                                @endif
-
-                                <li>
-                                    <form action="{{ route('logout') }}" method="POST" class="d-inline w-100">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2 w-100">
-                                            <i class="fas fa-sign-out-alt"></i>
-                                            Se déconnecter
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    @endauth
-                </div>
-            </div>
-        </nav>
-    </div>
-</div>
-<!-- Navbar End -->
+       
 
 <!-- Header Start -->
 <div class="container-fluid bg-breadcrumb">
@@ -276,6 +108,7 @@
       .ev-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .35rem .6rem; border-radius: 999px; font-size: .8rem; font-weight: 600; color: #fff; backdrop-filter: blur(6px); background: rgba(0,0,0,.35); }
       .ev-pill--date { background: rgba(13,110,253,.8); }
       .ev-pill--cat  { background: rgba(25,135,84,.85); }
+      .ev-pill--recommended { background: linear-gradient(45deg, #ffd700, #ff8c00); color: #000; animation: sparkle 2s ease-in-out infinite; }
 
       .ev-body { display: flex; flex-direction: column; padding: 1.1rem 1.2rem 1.2rem; gap: .6rem; }
       .ev-title { color: var(--ev-text); font-weight: 700; font-size: 1.15rem; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -297,18 +130,510 @@
 
       @media (max-width: 991.98px) { .ev-title { font-size: 1.05rem; } .ev-meta, .ev-stats { grid-template-columns: 1fr; } }
       @media (max-width: 575.98px) { .ev-body { padding: 1rem; } }
+      
+      @keyframes sparkle {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+      }
+
+      /* Styles existants pour la section générale */
+      .ev-img {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16/10;
+        background: var(--ev-soft);
+        overflow: hidden;
+        cursor: pointer;
+      }
+      
+      .ev-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform .45s ease, filter 0.3s ease;
+      }
+      
+      .ev-card:hover .ev-img img {
+        transform: scale(1.04);
+        filter: brightness(1.1);
+      }
+      
+      .recommended-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      
+      .recommended-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease, filter 0.3s ease;
+      }
+      
+      .recommended-card:hover .recommended-image img {
+        transform: scale(1.1);
+        filter: brightness(1.1);
+      }
+      
+      /* Image zoom indicator */
+      .image-zoom-indicator {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      
+      .ev-img:hover .image-zoom-indicator,
+      .recommended-image:hover .image-zoom-indicator {
+        opacity: 1;
+      }
+      .recommended-section {
+        position: relative;
+        background: linear-gradient(135deg, #1a5f3f 0%, #2d8a57 100%);
+        border-radius: 24px;
+        padding: 40px 30px;
+        margin: 60px 0;
+        box-shadow: 0 20px 60px rgba(26, 95, 63, 0.3);
+        overflow: hidden;
+      }
+      
+      .recommended-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="1" fill="white" opacity="0.1"/></svg>') repeat;
+        pointer-events: none;
+      }
+      
+      .recommended-header {
+        position: relative;
+        z-index: 2;
+      }
+      
+      .recommended-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 12px 24px;
+        border-radius: 50px;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      
+      .recommended-badge i {
+        color: #ffd700;
+        animation: pulse 2s infinite;
+      }
+      
+      .recommended-title {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+      
+      .recommended-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-bottom: 0;
+      }
+      
+      .recommended-container {
+        position: relative;
+        z-index: 2;
+      }
+      
+      .recommended-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin-top: 30px;
+      }
+      
+      .recommended-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      
+      .recommended-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(26, 95, 63, 0.25);
+      }
+      
+      .recommended-card.featured {
+        grid-column: span 1;
+        border: 2px solid #90EE90;
+        box-shadow: 0 15px 40px rgba(144, 238, 144, 0.3);
+      }
+      
+      .recommended-image {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+      }
+      
+      .recommended-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+      }
+      
+      .recommended-card:hover .recommended-image img {
+        transform: scale(1.1);
+      }
+      
+      .recommended-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(26, 95, 63, 0.3) 0%, rgba(45, 138, 87, 0.3) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      
+      .recommended-card:hover .recommended-overlay {
+        opacity: 1;
+      }
+      
+      .recommended-badges {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        right: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      
+      .recommended-star {
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #333;
+        padding: 8px 12px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        animation: sparkle-star 3s infinite;
+      }
+      
+      .featured-badge {
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+      }
+      
+      .recommended-category {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        color: #333;
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      
+      .recommended-content {
+        padding: 25px;
+      }
+      
+      .recommended-date {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #1a5f3f;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+      
+      .recommended-event-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+        line-height: 1.3;
+      }
+      
+      .recommended-location {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 15px;
+      }
+      
+      .recommended-description {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+      
+      .recommended-stats {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 25px;
+        padding: 15px;
+        background: rgba(26, 95, 63, 0.05);
+        border-radius: 12px;
+      }
+      
+      .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #666;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      
+      .recommended-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #1a5f3f, #2d8a57);
+        color: white;
+        padding: 12px 25px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(26, 95, 63, 0.3);
+      }
+      
+      .recommended-btn:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(26, 95, 63, 0.4);
+      }
+      
+      /* Séparateur visuel */
+      .section-divider {
+        display: flex;
+        align-items: center;
+        margin: 60px 0;
+        gap: 20px;
+      }
+      
+      .divider-line {
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #ddd, transparent);
+      }
+      
+      .divider-icon {
+        background: linear-gradient(135deg, #1a5f3f, #2d8a57);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        box-shadow: 0 4px 15px rgba(26, 95, 63, 0.3);
+      }
+      
+      /* Animations */
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+      
+      @keyframes sparkle-star {
+        0%, 100% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+        50% { box-shadow: 0 6px 25px rgba(255, 215, 0, 0.6); }
+      }
+      
+      /* Responsive */
+      @media (max-width: 768px) {
+        .recommended-section {
+          padding: 30px 20px;
+          margin: 40px 0;
+        }
+        
+        .recommended-title {
+          font-size: 2rem;
+        }
+        
+        .recommended-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        
+        .recommended-stats {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
     </style>
 
     <div class="text-center mx-auto mb-5 ev-head">
-      <h5 class="ev-subtitle text-primary mb-2">Événements à venir</h5>
-      <h1 class="mb-0 display-6">Rejoignez nos actions pour un avenir durable</h1>
+      <h5 class="ev-subtitle text-primary mb-2">Événements Recommandés</h5>
+      <h1 class="mb-0 display-6">Découvrez les événements personnalisés pour vous</h1>
+    </div>
+
+    @if($recommendedEvents->count() > 0)
+      <!-- Section Recommandations - Design Spécial -->
+      <div class="recommended-section mb-5">
+        <div class="recommended-header">
+          <div class="text-center mx-auto mb-4">
+            <div class="recommended-badge">
+              <i class="fas fa-crown"></i>
+              <span>Recommandé pour vous</span>
+            </div>
+            <h2 class="recommended-title">Événements Personnalisés</h2>
+            <p class="recommended-subtitle">Sélectionnés spécialement selon vos préférences</p>
+          </div>
+        </div>
+        
+        <div class="recommended-container">
+          <div class="recommended-grid">
+            @foreach ($recommendedEvents as $index => $event)
+              @php
+                $img = $event->image ? asset($event->image) : asset('img/default-event.jpg');
+                $dateHuman = \Carbon\Carbon::parse($event->date);
+
+                // Calcul du sentiment global
+                $comments = $event->comments;
+                $sentimentCounts = ['positif'=>0,'neutre'=>0,'negatif'=>0];
+                foreach($comments as $comment){
+                    if($comment->sentiment && isset($sentimentCounts[$comment->sentiment])){
+                        $sentimentCounts[$comment->sentiment]++;
+                    }
+                }
+                $dominantSentiment = null;
+                $dominantEmoji = '❓';
+                $dominantLabel = 'Analyse en attente';
+                if(array_sum($sentimentCounts) > 0){
+                    $dominantSentiment = array_keys($sentimentCounts, max($sentimentCounts))[0];
+                    $dominantEmoji = match($dominantSentiment){
+                        'positif' => '😊',
+                        'neutre'  => '😐',
+                        'negatif' => '😞',
+                    };
+                    $dominantLabel = ucfirst($dominantSentiment);
+                }
+              @endphp
+
+              <article class="recommended-card {{ $index === 0 ? 'featured' : '' }}" itemscope itemtype="https://schema.org/Event">
+                <div class="recommended-image" data-lightbox="recommended-{{ $event->id }}" data-title="{{ $event->title }}">
+                  <img src="{{ $img }}" alt="{{ $event->title }}" loading="lazy" itemprop="image">
+                  <div class="recommended-overlay"></div>
+                  <div class="image-zoom-indicator">
+                    <i class="fas fa-search-plus"></i> Voir
+                  </div>
+                  <div class="recommended-badges">
+                    <span class="recommended-star"><i class="fas fa-star"></i></span>
+                    @if($index === 0)
+                      <span class="featured-badge">Top Recommandé</span>
+                    @endif
+                  </div>
+                  <div class="recommended-category">{{ $event->category }}</div>
+                </div>
+
+                <div class="recommended-content">
+                  <div class="recommended-date">
+                    <i class="fas fa-calendar-alt"></i>
+                    <time itemprop="startDate" datetime="{{ $dateHuman->toDateString() }}">
+                      {{ $dateHuman->translatedFormat('d M Y') }}
+                    </time>
+                  </div>
+                  
+                  <h3 class="recommended-event-title" itemprop="name">{{ $event->title }}</h3>
+                  
+                  <div class="recommended-location">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span itemprop="location">{{ $event->location }}</span>
+                  </div>
+                  
+                  <p class="recommended-description" itemprop="description">
+                    {{ Str::limit($event->details, 100) }}
+                  </p>
+                  
+                  <div class="recommended-stats">
+                    <div class="stat-item">
+                      <i class="fas fa-users"></i>
+                      <span>{{ $event->participants->count() }}</span>
+                    </div>
+                    <div class="stat-item">
+                      <i class="fas fa-comments"></i>
+                      <span>{{ $event->comments->count() }}</span>
+                    </div>
+                    <div class="stat-item">
+                      <span>{{ $dominantEmoji }}</span>
+                      <span>{{ $dominantLabel }}</span>
+                    </div>
+                  </div>
+                  
+                  <a href="{{ route('events.show', $event) }}" class="recommended-btn">
+                    <i class="fas fa-arrow-right"></i>
+                    Découvrir
+                  </a>
+                </div>
+              </article>
+            @endforeach
+          </div>
+        </div>
+      </div>
+
+      <!-- Séparateur visuel -->
+      <div class="section-divider">
+        <div class="divider-line"></div>
+        <div class="divider-icon">
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="divider-line"></div>
+      </div>
+    @endif
+
+    <!-- Section des tous les événements -->
+    <div class="text-center mx-auto mb-5">
+      <h5 class="ev-subtitle text-primary mb-2">Tous les Événements</h5>
     </div>
 
     @if($events->count() > 0)
-      <div class="event-carousel owl-carousel" aria-label="Liste d'événements à venir">
+      <div class="event-carousel owl-carousel" aria-label="Liste de tous les événements">
         @foreach ($events as $event)
           @php
-            $img = $event->image ? Storage::url($event->image) : asset('img/default-event.jpg');
+            $img = $event->image ? asset($event->image) : asset('img/default-event.jpg');
             $dateHuman = \Carbon\Carbon::parse($event->date);
 
             // Calcul du sentiment global
@@ -334,9 +659,12 @@
           @endphp
 
           <article class="ev-card" itemscope itemtype="https://schema.org/Event">
-            <div class="ev-img">
+            <div class="ev-img" data-lightbox="event-{{ $event->id }}" data-title="{{ $event->title }}">
               <img src="{{ $img }}" alt="Illustration de l'événement {{ $event->title }}" loading="lazy" itemprop="image">
               <div class="ev-overlay"></div>
+              <div class="image-zoom-indicator">
+                <i class="fas fa-search-plus"></i> Voir
+              </div>
               <div class="ev-badges">
                 <span class="ev-pill ev-pill--date"><i class="fas fa-calendar-alt"></i>
                   <time itemprop="startDate" datetime="{{ $dateHuman->toDateString() }}">

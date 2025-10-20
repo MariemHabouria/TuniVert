@@ -36,16 +36,30 @@ class DatabaseSeeder extends Seeder
             User::factory($target - $current)->create();
         }
 
-        // ✅ Appelle tous les seeders nécessaires
+        // ✅ Appelle tous les seeders nécessaires dans l'ordre correct
         $this->call([
-            ChallengeSeeder::class,
-            DonationSeeder::class,
+            // 0. Données essentielles du système
+            EssentialDataSeeder::class,
+            
+            // 1. Seeders de base (utilisateurs, badges, etc.)
+            UserSeeder::class,
             GamificationSeeder::class,
-            DemoDataSeeder::class,
-
-            // 👉 Ajoute tes seeders ici
+            BadgeTestSeeder::class,
+            
+            // 2. Contenu principal
+            ChallengeSeeder::class,
+            AttractiveEventsSeeder::class,
+            DonationSeeder::class,
+            StatistiquesDonationsSeeder::class,
+            
+            // 3. Forum et communauté
             ForumSeeder::class,
             AlerteForumSeeder::class,
+            
+            // 4. Données de démonstration
+            DemoDataSeeder::class,
         ]);
+
+        $this->command->info('🎉 Toutes les données ont été seedées avec succès!');
     }
 }

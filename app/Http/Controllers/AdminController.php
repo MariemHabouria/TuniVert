@@ -4,10 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use App\Models\Challenge;
 use App\Models\Forum;
 use App\Models\AlerteForum;
 use App\Models\User;
+use App\Models\Event;
+use App\Models\Participant;
+use App\Models\Comment;
 use Illuminate\Support\Facades\Mail;
 use App\Models\ScoreChallenge; // <- IMPORT DU MODELE
 
@@ -298,7 +303,64 @@ public function utilisateursDestroy($id)
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        return view('admin.evenements.index');
+        try {
+            // Statistics
+            $totalEvents = Event::count();
+            $eventsThisMonth = Event::whereMonth('date', now()->month)
+                                   ->whereYear('date', now()->year)
+                                   ->count();
+            $totalParticipants = Participant::count();
+            $totalComments = Comment::count();
+            
+            // Events with participants and comments count
+            $events = Event::withCount(['participants', 'comments'])
+                           ->with(['organizer', 'participants.user', 'comments.user'])
+                           ->orderBy('date', 'desc')
+                           ->paginate(10);
+
+            // Recent activity
+            $recentComments = Comment::with(['user', 'event'])
+                                    ->orderBy('created_at', 'desc')
+                                    ->limit(5)
+                                    ->get();
+
+            // Events by category
+            $eventsByCategory = Event::selectRaw('category, COUNT(*) as count')
+                                    ->groupBy('category')
+                                    ->get();
+
+            // Monthly participants trend
+            $monthlyParticipants = Participant::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                                             ->whereYear('created_at', now()->year)
+                                             ->groupBy('month')
+                                             ->orderBy('month')
+                                             ->get();
+
+            // Top events by participants
+            $topEvents = Event::withCount('participants')
+                             ->orderBy('participants_count', 'desc')
+                             ->limit(5)
+                             ->get();
+
+            return view('admin.evenements.index', compact(
+                'events',
+                'totalEvents',
+                'eventsThisMonth', 
+                'totalParticipants',
+                'totalComments',
+                'recentComments',
+                'eventsByCategory',
+                'monthlyParticipants',
+                'topEvents'
+            ));
+            
+        } catch (\Exception $e) {
+            Log::error('Error in evenementsIndex: ' . $e->getMessage());
+            
+            // Fallback with basic data
+            $events = Event::orderBy('date', 'desc')->paginate(10);
+            return view('admin.evenements.index', compact('events'));
+        }
     }
 
     public function evenementsCreate()
@@ -446,6 +508,48 @@ public function toggleChallenge($id)
 
     return redirect()->back()->with('success', 'Le statut du challenge a été mis à jour.');
 }
+
+public function challengesEdit($id)
+{
+    $check = $this->checkAdmin();
+    if ($check !== true) return $check;
+
+    $challenge = Challenge::findOrFail($id);
+    return view('admin.challenges.edit', compact('challenge'));
+}
+
+public function challengesUpdate(Request $request, $id)
+{
+    $check = $this->checkAdmin();
+    if ($check !== true) return $check;
+
+    $request->validate([
+        'titre' => 'required|string|max:255',
+        'description' => 'required|string',
+        'date_debut' => 'required|date',
+        'date_fin' => 'required|date|after:date_debut',
+        'categorie' => 'nullable|string',
+        'difficulte' => 'nullable|in:facile,moyen,difficile',
+        'objectif' => 'nullable|integer|min:1',
+        'actif' => 'boolean'
+    ]);
+
+    $challenge = Challenge::findOrFail($id);
+    $challenge->update([
+        'titre' => $request->titre,
+        'description' => $request->description,
+        'date_debut' => $request->date_debut,
+        'date_fin' => $request->date_fin,
+        'categorie' => $request->categorie,
+        'difficulte' => $request->difficulte,
+        'objectif' => $request->objectif,
+        'actif' => $request->has('actif')
+    ]);
+
+    return redirect()->route('admin.challenges.index')
+                   ->with('success', 'Challenge mis à jour avec succès.');
+}
+
 public function participantAction(Request $request, $participantId)
 {
     $this->checkAdmin();
@@ -473,14 +577,85 @@ public function participantAction(Request $request, $participantId)
      *     FORUMS
      * ==============================*/
     public function forumsIndex()
-{
-    $this->checkAdmin();
+    {
+        $this->checkAdmin();
 
-    // Utiliser paginate() au lieu de all()
-    $forums = Forum::orderBy('created_at', 'desc')->paginate(10);
+        // Statistics
+        $totalForums = Forum::count();
+        $forumsThisMonth = Forum::whereMonth('created_at', now()->month)
+                               ->whereYear('created_at', now()->year)
+                               ->count();
+        $activeForums = Forum::where('created_at', '>=', now()->subDays(7))->count();
+        $totalReplies = class_exists('App\Models\ReponseForum') ? 
+                       \App\Models\ReponseForum::count() : 0;
 
-    return view('admin.forums.index', compact('forums'));
-}
+        // Forums with pagination and relationships
+        $forums = Forum::with(['utilisateur'])
+                       ->withCount(['reponses' => function($query) {
+                           if (class_exists('App\Models\ReponseForum')) {
+                               return $query;
+                           }
+                           return $query->whereRaw('1=0'); // Empty result if model doesn't exist
+                       }])
+                       ->orderBy('created_at', 'desc')
+                       ->paginate(10);
+
+        // Recent activity
+        $recentForums = Forum::with('utilisateur')
+                            ->orderBy('created_at', 'desc')
+                            ->limit(5)
+                            ->get();
+
+        // Most popular forums by views
+        $popularForums = Forum::orderBy('nb_vues', 'desc')
+                             ->limit(5)
+                             ->get();
+
+        // Forums by category/topic - Using tags or create simple categories
+        try {
+            // Try to use tags column if it exists, otherwise create simple categories
+            $forumsByTopic = Forum::selectRaw('
+                CASE 
+                    WHEN tags LIKE "%transport%" THEN "Transport"
+                    WHEN tags LIKE "%energie%" OR tags LIKE "%énergie%" THEN "Énergie"
+                    WHEN tags LIKE "%dechet%" OR tags LIKE "%déchet%" THEN "Déchets"
+                    WHEN tags LIKE "%eau%" THEN "Eau"
+                    WHEN tags LIKE "%environnement%" THEN "Environnement"
+                    WHEN tags LIKE "%pollution%" THEN "Pollution"
+                    ELSE "Général"
+                END as topic, 
+                COUNT(*) as count
+            ')
+            ->groupBy(DB::raw('
+                CASE 
+                    WHEN tags LIKE "%transport%" THEN "Transport"
+                    WHEN tags LIKE "%energie%" OR tags LIKE "%énergie%" THEN "Énergie"
+                    WHEN tags LIKE "%dechet%" OR tags LIKE "%déchet%" THEN "Déchets"
+                    WHEN tags LIKE "%eau%" THEN "Eau"
+                    WHEN tags LIKE "%environnement%" THEN "Environnement"
+                    WHEN tags LIKE "%pollution%" THEN "Pollution"
+                    ELSE "Général"
+                END
+            '))
+            ->get();
+        } catch (\Exception $e) {
+            // Fallback if tags column doesn't exist or query fails
+            $forumsByTopic = collect([
+                (object)['topic' => 'Général', 'count' => $totalForums],
+            ]);
+        }
+
+        return view('admin.forums.index', compact(
+            'forums', 
+            'totalForums', 
+            'forumsThisMonth', 
+            'activeForums', 
+            'totalReplies',
+            'recentForums',
+            'popularForums',
+            'forumsByTopic'
+        ));
+    }
 
     public function forumsCategories()
     {
@@ -502,22 +677,101 @@ public function alertesIndex()
     $check = $this->checkAdmin();
     if ($check !== true) return $check;
 
-    $alertes = AlerteForum::with('user')
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
+    // Statistics
+    $totalAlertes = AlerteForum::count();
+    $alertesThisMonth = AlerteForum::whereMonth('created_at', now()->month)
+                                  ->whereYear('created_at', now()->year)
+                                  ->count();
+    $alertesHaute = AlerteForum::where('gravite', 'haute')->count();
+    $alertesMoyenne = AlerteForum::where('gravite', 'moyenne')->count();
+    $alertesBasse = AlerteForum::where('gravite', 'basse')->count();
+    
+    // Recent alerts
+    $recentAlertes = AlerteForum::with('user')
+                               ->orderBy('created_at', 'desc')
+                               ->limit(5)
+                               ->get();
 
-    // ✅ Vue à l’intérieur du sous-dossier "alertes"
-    return view('admin.alertes.index', compact('alertes'));
+    // Alerts by severity
+    $alertesBySeverity = AlerteForum::selectRaw('gravite, COUNT(*) as count')
+                                   ->groupBy('gravite')
+                                   ->get();
+
+    // Alerts by location (zone_geographique field)
+    $alertesByLocation = AlerteForum::selectRaw('zone_geographique, COUNT(*) as count')
+                                   ->whereNotNull('zone_geographique')
+                                   ->groupBy('zone_geographique')
+                                   ->limit(10)
+                                   ->get();
+
+    // Monthly trend
+    $monthlyTrend = AlerteForum::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+                              ->whereYear('created_at', now()->year)
+                              ->groupBy('month')
+                              ->orderBy('month')
+                              ->get();
+
+    $alertes = AlerteForum::with('user')
+                          ->orderBy('created_at', 'desc')
+                          ->paginate(10);
+
+    return view('admin.alertes.index', compact(
+        'alertes', 
+        'totalAlertes', 
+        'alertesThisMonth', 
+        'alertesHaute', 
+        'alertesMoyenne', 
+        'alertesBasse',
+        'recentAlertes',
+        'alertesBySeverity',
+        'alertesByLocation',
+        'monthlyTrend'
+    ));
 }
     /* ==============================
      *     FORMATIONS
      * ==============================*/
-    public function formationsIndex()
+    public function formationsIndex(Request $request)
     {
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        return view('admin.formations.index');
+        $query = \App\Models\Formation::with(['organisateur', 'inscrits']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('titre', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%")
+                  ->orWhere('categorie', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Category filter
+        if ($request->filled('categorie')) {
+            $query->where('categorie', $request->categorie);
+        }
+
+        // Status filter
+        if ($request->filled('statut')) {
+            $query->where('statut', $request->statut);
+        }
+
+        $formations = $query->orderBy('created_at', 'desc')->paginate(12);
+
+        // Get statistics
+        $stats = [
+            'total' => \App\Models\Formation::count(),
+            'active' => \App\Models\Formation::where('statut', 'actif')->count(),
+            'draft' => \App\Models\Formation::where('statut', 'brouillon')->count(),
+            'total_inscriptions' => \Illuminate\Support\Facades\DB::table('formation_user')->count(),
+        ];
+
+        // Get categories for filter
+        $categories = \App\Models\Formation::distinct('categorie')->pluck('categorie')->filter();
+
+        return view('admin.formations.index', compact('formations', 'stats', 'categories'));
     }
 
     public function formationsCreate()
@@ -525,15 +779,102 @@ public function alertesIndex()
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        return view('admin.formations.create');
+        // Get unique categories for the dropdown
+        $categories = \App\Models\Formation::distinct('categorie')->pluck('categorie')->filter();
+        
+        // Get potential organizers (associations and admins)
+        $organisateurs = \App\Models\User::where(function($query) {
+            $query->where('role', 'association')
+                  ->orWhere('role', 'admin');
+        })->orderBy('name')->get();
+
+        return view('admin.formations.create', compact('categories', 'organisateurs'));
     }
 
-    public function formationsInscriptions()
+    public function formationsStore(Request $request)
     {
         $check = $this->checkAdmin();
         if ($check !== true) return $check;
 
-        return view('admin.formations.inscriptions');
+        $request->validate([
+            'titre' => 'required|string|max:255',
+            'description' => 'required|string',
+            'categorie' => 'required|string|max:100',
+            'type' => 'required|in:presentiel,ligne,hybride',
+            'capacite' => 'nullable|integer|min:1',
+            'organisateur_id' => 'required|exists:users,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'lien_visio' => 'nullable|url',
+            'statut' => 'required|in:actif,inactif,brouillon'
+        ]);
+
+        $data = $request->only([
+            'titre', 'description', 'categorie', 'type', 
+            'capacite', 'organisateur_id', 'lien_visio', 'statut'
+        ]);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('img/formations'), $imageName);
+            $data['image'] = 'img/formations/' . $imageName;
+        }
+
+        \App\Models\Formation::create($data);
+
+        return redirect()->route('admin.formations.index')
+            ->with('success', 'Formation créée avec succès !');
+    }
+
+    public function formationsInscriptions(Request $request)
+    {
+        $check = $this->checkAdmin();
+        if ($check !== true) return $check;
+
+        $query = \Illuminate\Support\Facades\DB::table('formation_user')
+            ->join('formations', 'formation_user.formation_id', '=', 'formations.id')
+            ->join('users', 'formation_user.user_id', '=', 'users.id')
+            ->select(
+                'formation_user.*',
+                'formations.titre as formation_title',
+                'formations.categorie',
+                'users.name as user_name',
+                'users.email as user_email'
+            );
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('formations.titre', 'LIKE', "%{$search}%")
+                  ->orWhere('users.name', 'LIKE', "%{$search}%")
+                  ->orWhere('users.email', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Formation filter
+        if ($request->filled('formation_id')) {
+            $query->where('formations.id', $request->formation_id);
+        }
+
+        $inscriptions = $query->orderBy('formation_user.created_at', 'desc')->paginate(15);
+
+        // Get statistics
+        $stats = [
+            'total_inscriptions' => \Illuminate\Support\Facades\DB::table('formation_user')->count(),
+            'inscriptions_mois' => \Illuminate\Support\Facades\DB::table('formation_user')
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count(),
+            'formations_actives' => \App\Models\Formation::where('statut', 'actif')->count(),
+            'utilisateurs_uniques' => \Illuminate\Support\Facades\DB::table('formation_user')->distinct('user_id')->count('user_id'),
+        ];
+
+        // Get formations for filter
+        $formations = \App\Models\Formation::orderBy('titre')->pluck('titre', 'id');
+
+        return view('admin.formations.inscriptions', compact('inscriptions', 'stats', 'formations'));
     }
 
     /* ==============================

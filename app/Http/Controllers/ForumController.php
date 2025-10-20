@@ -273,15 +273,20 @@ public function suggestionIA(Request $request, $forumId)
     $client = new \GuzzleHttp\Client();
 
     try {
-        $response = $client->post('http://127.0.0.1:5000/suggestion', [
+        // Use Docker service URL if running in Docker, otherwise localhost
+        $aiUrl = env('FORUM_AI_URL', 'http://forum-ai:5000/suggestion');
+        
+        $response = $client->post($aiUrl, [
             'json' => [
                 'forum_contenu' => $forum->contenu,
                 'texte_courant' => $request->texte_courant,
-            ]
+            ],
+            'timeout' => 10
         ]);
 
         $suggestion = json_decode($response->getBody()->getContents(), true)['suggestion'] ?? '';
     } catch (\Exception $e) {
+        \Log::error('Forum AI Error: ' . $e->getMessage());
         $suggestion = '';
     }
 

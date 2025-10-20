@@ -7,6 +7,12 @@
     <meta content="" name="keywords">
     <meta content="" name="description">
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="{{ asset('favicon-16x16.svg') }}">
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="{{ asset('favicon-32x32.svg') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.svg') }}">
+
     <!-- Google Web Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,6 +65,9 @@
 
     {{-- Navbar incluse --}}
     @include('layouts.navbar')
+    
+    {{-- Badge Unlock Notification --}}
+    @include('partials.badge-notification')
 
     {{-- Contenu spécifique --}}
     <main>
