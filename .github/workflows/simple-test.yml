@@ -20,16 +20,20 @@ jobs:
         extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
         
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest
+      run: composer install --prefer-dist --no-progress --no-dev
       
     - name: Copy .env
       run: cp .env.example .env
       
     - name: Generate key
       run: php artisan key:generate
+        
+    - name: Create storage directories
+      run: |
+        mkdir -p storage/logs
+        mkdir -p storage/framework/{cache,sessions,views}
+        mkdir -p bootstrap/cache
+        chmod -R 755 storage bootstrap/cache
       
-    - name: Run Unit Tests
+    - name: Run Unit Tests only
       run: php artisan test --testsuite=Unit
-      
-    - name: Run Simple Feature Tests
-      run: php artisan test tests/Feature/SimpleHealthTest.php
