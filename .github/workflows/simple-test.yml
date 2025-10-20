@@ -20,7 +20,7 @@ jobs:
         extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
         
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-dev
+      run: composer install --prefer-dist --no-progress
       
     - name: Copy .env
       run: cp .env.example .env
@@ -36,4 +36,4 @@ jobs:
         chmod -R 755 storage bootstrap/cache
       
     - name: Run Unit Tests only
-      run: php artisan test --testsuite=Unit
+      run: php artisan test --testsuite=Unit || vendor/bin/phpunit --testsuite=Unit

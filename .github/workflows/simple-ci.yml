@@ -20,7 +20,7 @@ jobs:
         extensions: mbstring, dom, fileinfo, mysql, sqlite
         
     - name: Install Composer dependencies
-      run: composer install --prefer-dist --no-progress --no-dev
+      run: composer install --prefer-dist --no-progress
       
     - name: Copy .env
       run: cp .env.example .env
@@ -40,4 +40,4 @@ jobs:
       run: chmod -R 755 storage bootstrap/cache
       
     - name: Execute tests with artisan
-      run: php artisan test tests/Unit/ExampleTest.php
+      run: php artisan test tests/Unit/ExampleTest.php || vendor/bin/phpunit tests/Unit/ExampleTest.php
