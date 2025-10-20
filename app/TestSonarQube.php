@@ -1,4 +1,7 @@
 <?php
+
+namespace App;
+
 // This is a test file to demonstrate SonarQube analysis
 // It contains various code quality issues on purpose
 

@@ -25,7 +25,7 @@ use App\Http\Controllers\FormationChatController;
 use App\Http\Controllers\QuizController;
 // QR verification
 // Include test upload routes for debugging
-require __DIR__.'/test-upload.php';
+// require __DIR__.'/test-upload.php'; // Commented out - file doesn't exist in production
 
 // Metrics for Prometheus
 Route::get('/metrics', [MetricsController::class, 'index'])->name('metrics');
